@@ -87,6 +87,12 @@ The API test command enforces coverage:
 pnpm --filter @auditrail/api test
 ```
 
+## Deploying
+
+For Coolify deployment, the repo now includes a root `Dockerfile` that starts the API container and runs migrations on boot.
+
+See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1) for the required env vars and Coolify setup.
+
 ## API Examples
 
 Health:

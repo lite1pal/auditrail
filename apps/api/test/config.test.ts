@@ -28,4 +28,15 @@ describe("api config", () => {
   it("rejects missing service URLs", () => {
     expect(() => loadConfig({})).toThrow();
   });
+
+  it("falls back to PORT when API_PORT is not set", () => {
+    expect(
+      loadConfig({
+        PORT: "4010",
+        API_KEY_PEPPER: "test-api-key-pepper",
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+        REDIS_URL: "redis://localhost:6379"
+      }).API_PORT
+    ).toBe(4010);
+  });
 });

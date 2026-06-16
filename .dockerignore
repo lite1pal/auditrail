@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.git
+.gitignore
+.next
+.pnpm-store
+coverage
+dist
+node_modules
+apps/web/.next
+apps/web/node_modules
+apps/api/coverage
+apps/api/node_modules
+packages/config/node_modules
+packages/db/node_modules
+packages/domain/node_modules
+packages/testkit/node_modules
