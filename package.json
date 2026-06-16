@@ -1,0 +1,21 @@
+{
+  "name": "auditrail",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter @auditrail/api --filter web dev",
+    "dev:api": "pnpm --filter @auditrail/api dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "verify": "pnpm typecheck && pnpm test",
+    "infra:up": "docker compose up -d postgres redis",
+    "infra:down": "docker compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.6.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}
