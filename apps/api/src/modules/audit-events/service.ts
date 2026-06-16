@@ -4,6 +4,8 @@ import type {
   AuditEventListFilters,
   AuditEventRecord,
   AuditEventRepo,
+  AuditEventSummary,
+  AuditEventSummaryFilters,
   AuditEventTenant
 } from "./repo.js";
 
@@ -16,6 +18,10 @@ export interface AuditEventService {
     tenant: AuditEventTenant,
     filters: AuditEventListFilters
   ): Promise<AuditEventRecord[]>;
+  summarize(
+    tenant: AuditEventTenant,
+    filters: AuditEventSummaryFilters
+  ): Promise<AuditEventSummary>;
 }
 
 export function createAuditEventService(repo: AuditEventRepo): AuditEventService {
@@ -25,6 +31,9 @@ export function createAuditEventService(repo: AuditEventRepo): AuditEventService
     },
     list(tenant, filters) {
       return repo.list(tenant, filters);
+    },
+    summarize(tenant, filters) {
+      return repo.summarize(tenant, filters);
     }
   };
 }

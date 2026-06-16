@@ -1,11 +1,23 @@
 import { auditEvents } from "@auditrail/db/schema";
 import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
-import { and, desc, eq, gte, inArray, lt, lte, or } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  lt,
+  lte,
+  or,
+  sql
+} from "drizzle-orm";
 
 import type {
   AuditEventListFilters,
   AuditEventRecord,
   AuditEventRepo,
+  AuditEventSummaryFilters,
   AuditEventTenant
 } from "./repo.js";
 import type { AppDatabase } from "../../plugins/database.js";
@@ -97,6 +109,36 @@ export function createPostgresAuditEventRepo(db: AppDatabase): AuditEventRepo {
         metadata: record.metadata as Record<string, unknown>,
         createdAt: record.createdAt.toISOString()
       }));
+    },
+    async summarize(tenant: AuditEventTenant, filters: AuditEventSummaryFilters) {
+      const whereClause = and(
+        eq(auditEvents.organizationId, tenant.organizationId),
+        eq(auditEvents.projectId, tenant.projectId),
+        filters.from ? gte(auditEvents.createdAt, new Date(filters.from)) : undefined,
+        filters.to ? lte(auditEvents.createdAt, new Date(filters.to)) : undefined
+      );
+      const countExpression = sql<number>`cast(count(*) as int)`;
+      const [totalRow] = await db
+        .select({
+          count: countExpression
+        })
+        .from(auditEvents)
+        .where(whereClause);
+      const topEventTypes = await db
+        .select({
+          event: auditEvents.eventType,
+          count: countExpression
+        })
+        .from(auditEvents)
+        .where(whereClause)
+        .groupBy(auditEvents.eventType)
+        .orderBy(desc(countExpression), auditEvents.eventType)
+        .limit(filters.top);
+
+      return {
+        totalEvents: totalRow?.count ?? 0,
+        topEventTypes
+      };
     }
   };
 }

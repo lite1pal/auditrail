@@ -90,6 +90,8 @@ Query:
 - `from`: optional inclusive ISO datetime lower bound
 - `to`: optional inclusive ISO datetime upper bound
 
+Single-value and multi-value filters can be combined. Internally they are merged into one exact-match filter set.
+
 Response:
 
 ```json
@@ -123,3 +125,43 @@ Errors:
 Results are sorted by `createdAt DESC`.
 
 When `hasMore` is `true`, pass `pageInfo.nextCursor` back as `cursor` to fetch the next page.
+
+Cursor ordering is stable on:
+
+- `createdAt DESC`
+- `id DESC` as a tie-breaker
+
+## `GET /v1/events/stats`
+
+Returns a small dashboard-oriented summary for the authenticated project.
+
+Query:
+
+- `top`: optional integer from `1` to `20`, default `5`
+- `from`: optional inclusive ISO datetime lower bound
+- `to`: optional inclusive ISO datetime upper bound
+
+Response:
+
+```json
+{
+  "totalEvents": 4,
+  "topEventTypes": [
+    {
+      "event": "user.deleted",
+      "count": 2
+    },
+    {
+      "event": "role.changed",
+      "count": 1
+    }
+  ]
+}
+```
+
+Errors:
+
+- `400 invalid_event_query`
+- `401 missing_api_key`
+- `401 invalid_api_key`
+- `429 Too Many Requests`

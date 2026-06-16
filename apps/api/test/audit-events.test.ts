@@ -428,6 +428,58 @@ describe("audit event routes", () => {
     await app.close();
   });
 
+  it("merges single-value and multi-value filters without duplicates", async () => {
+    const app = await buildEventRouteTestApp([
+      "2026-06-16T12:00:00.000Z",
+      "2026-06-16T12:01:00.000Z",
+      "2026-06-16T12:02:00.000Z"
+    ]);
+
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.deleted",
+        actor: "admin_123"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "role.changed",
+        actor: "service_456"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "invoice.refunded",
+        actor: "admin_123"
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/events?event=user.deleted&events=user.deleted,role.changed&actors=admin_123,service_456"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      events: [
+        {
+          event: "role.changed"
+        },
+        {
+          event: "user.deleted"
+        }
+      ]
+    });
+
+    await app.close();
+  });
+
   it("rejects invalid date params", async () => {
     const app = buildApp({
       useRateLimit: false
@@ -436,6 +488,22 @@ describe("audit event routes", () => {
     const response = await app.inject({
       method: "GET",
       url: "/v1/events?from=not-a-date"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: "invalid_event_query"
+    });
+
+    await app.close();
+  });
+
+  it("rejects invalid stats query params", async () => {
+    const app = await buildEventRouteTestApp([]);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/events/stats?from=2026-06-16T13:00:00.000Z&to=2026-06-16T12:00:00.000Z"
     });
 
     expect(response.statusCode).toBe(400);
@@ -543,6 +611,161 @@ describe("audit event routes", () => {
     expect(response.json()).toEqual({
       error: "missing_api_key"
     });
+
+    await app.close();
+  });
+
+  it("returns project event summary stats", async () => {
+    const app = await buildEventRouteTestApp([
+      "2026-06-16T12:00:00.000Z",
+      "2026-06-16T12:01:00.000Z",
+      "2026-06-16T12:02:00.000Z",
+      "2026-06-16T12:03:00.000Z"
+    ]);
+
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.deleted"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.deleted"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "role.changed"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.created"
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/events/stats?top=2"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      totalEvents: 4,
+      topEventTypes: [
+        {
+          event: "user.deleted",
+          count: 2
+        },
+        {
+          event: "role.changed",
+          count: 1
+        }
+      ]
+    });
+
+    await app.close();
+  });
+
+  it("filters event summary stats by date range", async () => {
+    const app = await buildEventRouteTestApp([
+      "2026-06-16T12:00:00.000Z",
+      "2026-06-16T12:05:00.000Z",
+      "2026-06-16T12:10:00.000Z"
+    ]);
+
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.created"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.deleted"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "role.changed"
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/events/stats?from=2026-06-16T12:04:00.000Z&to=2026-06-16T12:06:00.000Z"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      totalEvents: 1,
+      topEventTypes: [
+        {
+          event: "user.deleted",
+          count: 1
+        }
+      ]
+    });
+
+    await app.close();
+  });
+
+  it("uses a stable id tie-breaker when timestamps match", async () => {
+    const app = await buildEventRouteTestApp([
+      "2026-06-16T12:00:00.000Z",
+      "2026-06-16T12:00:00.000Z",
+      "2026-06-16T12:00:00.000Z"
+    ]);
+
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.created"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "user.deleted"
+      }
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/events",
+      payload: {
+        event: "role.changed"
+      }
+    });
+
+    const firstPage = await app.inject({
+      method: "GET",
+      url: "/v1/events?limit=2"
+    });
+    const firstPageBody = firstPage.json();
+    const secondPage = await app.inject({
+      method: "GET",
+      url: `/v1/events?limit=2&cursor=${firstPageBody.pageInfo.nextCursor}`
+    });
+
+    expect(firstPage.statusCode).toBe(200);
+    expect(secondPage.statusCode).toBe(200);
+    expect(firstPageBody.events).toHaveLength(2);
+    expect(secondPage.json().events).toHaveLength(1);
 
     await app.close();
   });

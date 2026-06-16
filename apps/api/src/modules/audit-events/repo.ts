@@ -27,6 +27,20 @@ export interface AuditEventListFilters {
   to?: string;
 }
 
+export interface AuditEventSummaryFilters {
+  from?: string;
+  to?: string;
+  top: number;
+}
+
+export interface AuditEventSummary {
+  totalEvents: number;
+  topEventTypes: Array<{
+    event: string;
+    count: number;
+  }>;
+}
+
 export interface InMemoryAuditEventRepoOptions {
   now?: () => string;
 }
@@ -40,6 +54,10 @@ export interface AuditEventRepo {
     tenant: AuditEventTenant,
     filters: AuditEventListFilters
   ): Promise<AuditEventRecord[]>;
+  summarize(
+    tenant: AuditEventTenant,
+    filters: AuditEventSummaryFilters
+  ): Promise<AuditEventSummary>;
 }
 
 export function createInMemoryAuditEventRepo(
@@ -65,41 +83,7 @@ export function createInMemoryAuditEventRepo(
     },
     async list(_tenant, filters) {
       return [...events]
-        .filter((event) => {
-          if (
-            filters.eventTypes &&
-            filters.eventTypes.length > 0 &&
-            !filters.eventTypes.includes(event.eventType)
-          ) {
-            return false;
-          }
-
-          if (
-            filters.actorIds &&
-            filters.actorIds.length > 0 &&
-            !filters.actorIds.includes(event.actorId ?? "")
-          ) {
-            return false;
-          }
-
-          if (
-            filters.targetIds &&
-            filters.targetIds.length > 0 &&
-            !filters.targetIds.includes(event.targetId ?? "")
-          ) {
-            return false;
-          }
-
-          if (filters.from && event.createdAt < filters.from) {
-            return false;
-          }
-
-          if (filters.to && event.createdAt > filters.to) {
-            return false;
-          }
-
-          return true;
-        })
+        .filter((event) => matchesEventFilters(event, filters))
         .sort(compareAuditEventsDesc)
         .filter((event) => {
           if (!filters.cursor) {
@@ -119,6 +103,33 @@ export function createInMemoryAuditEventRepo(
           return event.id < cursor.id;
         })
         .slice(0, filters.limit);
+    },
+    async summarize(_tenant, filters) {
+      const filteredEvents = events.filter((event) =>
+        matchesEventFilters(event, filters)
+      );
+      const eventCounts = new Map<string, number>();
+
+      for (const event of filteredEvents) {
+        eventCounts.set(event.eventType, (eventCounts.get(event.eventType) ?? 0) + 1);
+      }
+
+      return {
+        totalEvents: filteredEvents.length,
+        topEventTypes: [...eventCounts.entries()]
+          .map(([event, count]) => ({
+            event,
+            count
+          }))
+          .sort((left, right) => {
+            if (left.count === right.count) {
+              return left.event.localeCompare(right.event);
+            }
+
+            return right.count - left.count;
+          })
+          .slice(0, filters.top)
+      };
     }
   };
 }
@@ -129,4 +140,49 @@ function compareAuditEventsDesc(left: AuditEventRecord, right: AuditEventRecord)
   }
 
   return right.createdAt.localeCompare(left.createdAt);
+}
+
+function matchesEventFilters(
+  event: AuditEventRecord,
+  filters: {
+    eventTypes?: string[];
+    actorIds?: string[];
+    targetIds?: string[];
+    from?: string;
+    to?: string;
+  }
+) {
+  if (
+    filters.eventTypes &&
+    filters.eventTypes.length > 0 &&
+    !filters.eventTypes.includes(event.eventType)
+  ) {
+    return false;
+  }
+
+  if (
+    filters.actorIds &&
+    filters.actorIds.length > 0 &&
+    !filters.actorIds.includes(event.actorId ?? "")
+  ) {
+    return false;
+  }
+
+  if (
+    filters.targetIds &&
+    filters.targetIds.length > 0 &&
+    !filters.targetIds.includes(event.targetId ?? "")
+  ) {
+    return false;
+  }
+
+  if (filters.from && event.createdAt < filters.from) {
+    return false;
+  }
+
+  if (filters.to && event.createdAt > filters.to) {
+    return false;
+  }
+
+  return true;
 }

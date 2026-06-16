@@ -21,7 +21,9 @@ export const authPlugin = fp(async (app) => {
   app.decorateRequest("apiKeyPrincipal");
 
   app.addHook("preHandler", async (request, reply) => {
-    if (request.routeOptions.url !== "/v1/events") {
+    const routeUrl = request.routeOptions.url;
+
+    if (!routeUrl || !routeUrl.startsWith("/v1/events")) {
       return;
     }
 

@@ -35,11 +35,23 @@ The API test command must enforce at least 95% coverage for:
 
 Use Fastify `app.inject()` for route tests unless the behavior specifically requires a real network socket.
 
+Test code must not rely on shared global environment mutation when the same behavior can be injected directly. Prefer explicit app, plugin, service, or repo options over `process.env` stubbing for unit tests, because Vitest runs files concurrently.
+
+When changing Fastify plugin registration, keep TypeScript overload behavior in mind: do not pass `undefined` as plugin options. Register the plugin without an options object unless options actually exist.
+
 ## Environment Rule
 
 API environment variables must be validated before build and start.
 
 Service URLs must be explicit. Defaults are acceptable only for non-secret process settings such as host, port, and `NODE_ENV`.
+
+Environment file loading precedence is:
+
+1. repository `.env`
+2. app-local `.env`
+3. real process environment
+
+Real process environment must win so test and deployment overrides remain deterministic.
 
 ## Command Handoff Format
 

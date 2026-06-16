@@ -28,6 +28,22 @@ The API enforces at least 95% coverage for:
 
 Coverage is focused on API behavior and route/runtime code. Infrastructure adapters that require external services are excluded from the fast unit coverage gate and should receive explicit integration tests when they become critical.
 
+## Test Isolation
+
+Do not couple unit tests through shared `process.env` mutation when the same configuration can be passed as an explicit option.
+
+Preferred order for test control:
+
+1. inject service or repo doubles
+2. pass explicit app or plugin options
+3. use env overrides only when the code path itself is specifically about env loading
+
+This keeps parallel Vitest execution deterministic.
+
+## Type Safety Rule
+
+When registering Fastify plugins, do not pass `undefined` as the options argument. If a plugin has optional options, branch at the call site and register without the second argument when no options are present.
+
 ## Environment Validation
 
 The API validates env before build and start.
@@ -56,4 +72,3 @@ Every API route must include tests for:
 - relevant rate-limit behavior if route-specific behavior differs from default
 
 Use `app.inject()` for route tests unless a real network socket is required.
-

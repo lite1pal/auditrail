@@ -112,6 +112,20 @@ curl -i 'http://localhost:4000/v1/events?limit=2&events=user.deleted,role.change
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
+Continue to the next page:
+
+```bash
+curl -i 'http://localhost:4000/v1/events?limit=2&cursor=<nextCursor>' \
+  -H 'authorization: Bearer atl_local_dev_key'
+```
+
+Get summary stats:
+
+```bash
+curl -i 'http://localhost:4000/v1/events/stats?top=5&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
+  -H 'authorization: Bearer atl_local_dev_key'
+```
+
 ## Project Rules
 
 Read `AGENTS.md` before making changes. The important constraints are:
@@ -122,3 +136,4 @@ Read `AGENTS.md` before making changes. The important constraints are:
 - API source coverage must stay at or above 95%
 - env is validated before API build/start
 - shared packages must stay narrow
+- tests must prefer injected options over shared env mutation

@@ -42,6 +42,26 @@ const listEventsQuerySchema = z.object({
   }
 );
 
+const summarizeEventsQuerySchema = z
+  .object({
+    top: z.coerce.number().int().min(1).max(20).default(5),
+    from: z.string().datetime({ offset: true }).optional(),
+    to: z.string().datetime({ offset: true }).optional()
+  })
+  .refine(
+    (query) => {
+      if (!query.from || !query.to) {
+        return true;
+      }
+
+      return query.from <= query.to;
+    },
+    {
+      error: "from_must_be_before_or_equal_to_to",
+      path: ["from"]
+    }
+  );
+
 export async function registerEventRoutes(
   app: FastifyInstance,
   options: EventRoutesOptions = {}
@@ -146,6 +166,34 @@ export async function registerEventRoutes(
       if (error instanceof Error && error.message === "invalid cursor") {
         return reply.code(400).send({
           error: "invalid_event_query"
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/events/stats", async (request, reply) => {
+    try {
+      const principal = request.apiKeyPrincipal ?? {
+        organizationId: "00000000-0000-0000-0000-000000000000",
+        projectId: "00000000-0000-0000-0000-000000000000"
+      };
+      const query = summarizeEventsQuerySchema.parse(request.query);
+      const summary = await service.summarize(
+        {
+          organizationId: principal.organizationId,
+          projectId: principal.projectId
+        },
+        query
+      );
+
+      return reply.send(summary);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return reply.code(400).send({
+          error: "invalid_event_query",
+          issues: error.issues
         });
       }
 
