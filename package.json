@@ -10,10 +10,14 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "verify": "pnpm typecheck && pnpm test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx scripts/seed-demo.ts",
     "infra:up": "docker compose up -d postgres redis",
     "infra:down": "docker compose down"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.8",
     "turbo": "^2.6.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"

@@ -9,6 +9,7 @@ export function createTestEnv(
     NODE_ENV: "test",
     API_HOST: "127.0.0.1",
     API_PORT: "4000",
+    API_KEY_PEPPER: "test-api-key-pepper",
     DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
     REDIS_URL: "redis://localhost:6379",
     ...overrides

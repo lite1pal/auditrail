@@ -7,6 +7,7 @@ describe("api config", () => {
     expect(
       loadConfig({
         API_PORT: "4001",
+        API_KEY_PEPPER: "test-api-key-pepper",
         DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
         REDIS_URL: "redis://localhost:6379"
       })
@@ -14,6 +15,7 @@ describe("api config", () => {
       NODE_ENV: "development",
       API_HOST: "0.0.0.0",
       API_PORT: 4001,
+      API_KEY_PEPPER: "test-api-key-pepper",
       DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
       REDIS_URL: "redis://localhost:6379"
     });

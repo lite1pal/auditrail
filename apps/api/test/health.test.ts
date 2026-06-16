@@ -3,6 +3,16 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
 
 describe("health route", () => {
+  it("can register infrastructure plugins for runtime mode", async () => {
+    const app = buildApp({
+      useInfrastructure: true
+    });
+
+    expect(app).toBeDefined();
+
+    await app.close();
+  });
+
   it("returns ok", async () => {
     const app = buildApp();
 

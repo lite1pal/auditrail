@@ -47,6 +47,7 @@ Shared packages should stay narrow:
 
 - `packages/config`: environment and config parsing helpers only
 - `packages/domain`: pure schemas, types, and business helpers only
+- `packages/db`: database schema, database client, migrations, and query helpers only
 - `packages/testkit`: test helpers only
 
 Do not put framework, database, queue, or filesystem access into `packages/domain`.
