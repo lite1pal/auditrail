@@ -1,13 +1,15 @@
 import { auditEvents } from "@auditrail/db/schema";
 import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, lte, or } from "drizzle-orm";
 
 import type {
+  AuditEventListFilters,
   AuditEventRecord,
   AuditEventRepo,
   AuditEventTenant
 } from "./repo.js";
 import type { AppDatabase } from "../../plugins/database.js";
+import { decodeAuditEventCursor } from "./cursor.js";
 
 export function createPostgresAuditEventRepo(db: AppDatabase): AuditEventRepo {
   return {
@@ -27,7 +29,8 @@ export function createPostgresAuditEventRepo(db: AppDatabase): AuditEventRepo {
           eventType: auditEvents.eventType,
           actorId: auditEvents.actorId,
           targetId: auditEvents.targetId,
-          metadata: auditEvents.metadata
+          metadata: auditEvents.metadata,
+          createdAt: auditEvents.createdAt
         });
 
       return {
@@ -35,34 +38,64 @@ export function createPostgresAuditEventRepo(db: AppDatabase): AuditEventRepo {
         eventType: record.eventType,
         actorId: record.actorId ?? undefined,
         targetId: record.targetId ?? undefined,
-        metadata: record.metadata as Record<string, unknown>
+        metadata: record.metadata as Record<string, unknown>,
+        createdAt: record.createdAt.toISOString()
       } satisfies AuditEventRecord;
     },
-    async listRecent(tenant: AuditEventTenant, limit: number) {
+    async list(tenant: AuditEventTenant, filters: AuditEventListFilters) {
+      const cursor = filters.cursor
+        ? decodeAuditEventCursor(filters.cursor)
+        : undefined;
       const records = await db
         .select({
           id: auditEvents.id,
           eventType: auditEvents.eventType,
           actorId: auditEvents.actorId,
           targetId: auditEvents.targetId,
-          metadata: auditEvents.metadata
+          metadata: auditEvents.metadata,
+          createdAt: auditEvents.createdAt
         })
         .from(auditEvents)
         .where(
           and(
             eq(auditEvents.organizationId, tenant.organizationId),
-            eq(auditEvents.projectId, tenant.projectId)
+            eq(auditEvents.projectId, tenant.projectId),
+            filters.eventTypes && filters.eventTypes.length > 0
+              ? inArray(auditEvents.eventType, filters.eventTypes)
+              : undefined,
+            filters.actorIds && filters.actorIds.length > 0
+              ? inArray(auditEvents.actorId, filters.actorIds)
+              : undefined,
+            filters.targetIds && filters.targetIds.length > 0
+              ? inArray(auditEvents.targetId, filters.targetIds)
+              : undefined,
+            filters.from
+              ? gte(auditEvents.createdAt, new Date(filters.from))
+              : undefined,
+            filters.to
+              ? lte(auditEvents.createdAt, new Date(filters.to))
+              : undefined,
+            cursor
+              ? or(
+                  lt(auditEvents.createdAt, new Date(cursor.createdAt)),
+                  and(
+                    eq(auditEvents.createdAt, new Date(cursor.createdAt)),
+                    lt(auditEvents.id, cursor.id)
+                  )
+                )
+              : undefined
           )
         )
-        .orderBy(desc(auditEvents.createdAt))
-        .limit(limit);
+        .orderBy(desc(auditEvents.createdAt), desc(auditEvents.id))
+        .limit(filters.limit);
 
       return records.map((record) => ({
         id: record.id,
         eventType: record.eventType,
         actorId: record.actorId ?? undefined,
         targetId: record.targetId ?? undefined,
-        metadata: record.metadata as Record<string, unknown>
+        metadata: record.metadata as Record<string, unknown>,
+        createdAt: record.createdAt.toISOString()
       }));
     }
   };

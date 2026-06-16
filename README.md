@@ -98,6 +98,20 @@ curl -i 'http://localhost:4000/v1/events?limit=25' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
+Filter events:
+
+```bash
+curl -i 'http://localhost:4000/v1/events?event=user.deleted&actor=admin_123&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
+  -H 'authorization: Bearer atl_local_dev_key'
+```
+
+Paginate and use multi-value filters:
+
+```bash
+curl -i 'http://localhost:4000/v1/events?limit=2&events=user.deleted,role.changed&actors=admin_123,service_456' \
+  -H 'authorization: Bearer atl_local_dev_key'
+```
+
 ## Project Rules
 
 Read `AGENTS.md` before making changes. The important constraints are:
@@ -108,4 +122,3 @@ Read `AGENTS.md` before making changes. The important constraints are:
 - API source coverage must stay at or above 95%
 - env is validated before API build/start
 - shared packages must stay narrow
-

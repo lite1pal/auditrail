@@ -1,6 +1,7 @@
 import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
 
 import type {
+  AuditEventListFilters,
   AuditEventRecord,
   AuditEventRepo,
   AuditEventTenant
@@ -11,9 +12,9 @@ export interface AuditEventService {
     tenant: AuditEventTenant,
     input: IngestAuditEventInput
   ): Promise<AuditEventRecord>;
-  listRecent(
+  list(
     tenant: AuditEventTenant,
-    limit: number
+    filters: AuditEventListFilters
   ): Promise<AuditEventRecord[]>;
 }
 
@@ -22,8 +23,8 @@ export function createAuditEventService(repo: AuditEventRepo): AuditEventService
     ingest(tenant, input) {
       return repo.append(tenant, input);
     },
-    listRecent(tenant, limit) {
-      return repo.listRecent(tenant, limit);
+    list(tenant, filters) {
+      return repo.list(tenant, filters);
     }
   };
 }

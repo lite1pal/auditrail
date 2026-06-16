@@ -17,7 +17,7 @@ export function loadEnvFiles(
   relativeFiles: string[],
   baseEnv: EnvSource = process.env
 ): NodeJS.ProcessEnv {
-  const env = { ...baseEnv };
+  const env: NodeJS.ProcessEnv = {};
 
   for (const relativeFile of relativeFiles) {
     const file = resolve(cwd, relativeFile);
@@ -29,7 +29,10 @@ export function loadEnvFiles(
     Object.assign(env, parseEnvFile(readFileSync(file, "utf8")));
   }
 
-  return env;
+  return {
+    ...env,
+    ...baseEnv
+  };
 }
 
 export function parseEnvFile(source: string): Record<string, string> {

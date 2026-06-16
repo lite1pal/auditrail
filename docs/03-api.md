@@ -80,6 +80,15 @@ Lists recent audit events for the authenticated project.
 Query:
 
 - `limit`: optional integer from `1` to `100`, default `25`
+- `cursor`: optional opaque cursor returned by a previous response
+- `event`: optional exact event type
+- `actor`: optional exact actor id
+- `target`: optional exact target id
+- `events`: optional comma-separated exact event types
+- `actors`: optional comma-separated exact actor ids
+- `targets`: optional comma-separated exact target ids
+- `from`: optional inclusive ISO datetime lower bound
+- `to`: optional inclusive ISO datetime upper bound
 
 Response:
 
@@ -91,11 +100,16 @@ Response:
       "event": "user.deleted",
       "actor": "admin_123",
       "target": "user_456",
+      "createdAt": "2026-06-16T12:05:00.000Z",
       "metadata": {
         "reason": "GDPR request"
       }
     }
-  ]
+  ],
+  "pageInfo": {
+    "hasMore": true,
+    "nextCursor": "opaque-cursor"
+  }
 }
 ```
 
@@ -106,3 +120,6 @@ Errors:
 - `401 invalid_api_key`
 - `429 Too Many Requests`
 
+Results are sorted by `createdAt DESC`.
+
+When `hasMore` is `true`, pass `pageInfo.nextCursor` back as `cursor` to fetch the next page.

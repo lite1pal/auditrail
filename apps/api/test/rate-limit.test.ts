@@ -1,23 +1,15 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { buildApp } from "../src/app.js";
 
 describe("rate limiting", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it("limits API routes by default", async () => {
-    vi.stubEnv("RATE_LIMIT_MAX", "1");
-    vi.stubEnv("RATE_LIMIT_WINDOW", "1 minute");
-    vi.stubEnv("API_KEY_PEPPER", "test-api-key-pepper");
-    vi.stubEnv(
-      "DATABASE_URL",
-      "postgres://auditrail:auditrail@localhost:5433/auditrail"
-    );
-    vi.stubEnv("REDIS_URL", "redis://localhost:6379");
-
-    const app = buildApp();
+    const app = buildApp({
+      rateLimit: {
+        max: 1,
+        timeWindow: "1 minute"
+      }
+    });
 
     await app.inject({
       method: "GET",
@@ -34,16 +26,12 @@ describe("rate limiting", () => {
   });
 
   it("does not rate limit health checks", async () => {
-    vi.stubEnv("RATE_LIMIT_MAX", "1");
-    vi.stubEnv("RATE_LIMIT_WINDOW", "1 minute");
-    vi.stubEnv("API_KEY_PEPPER", "test-api-key-pepper");
-    vi.stubEnv(
-      "DATABASE_URL",
-      "postgres://auditrail:auditrail@localhost:5433/auditrail"
-    );
-    vi.stubEnv("REDIS_URL", "redis://localhost:6379");
-
-    const app = buildApp();
+    const app = buildApp({
+      rateLimit: {
+        max: 1,
+        timeWindow: "1 minute"
+      }
+    });
 
     await app.inject({
       method: "GET",

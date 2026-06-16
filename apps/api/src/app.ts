@@ -6,9 +6,15 @@ import { authPlugin } from "./plugins/auth.js";
 import { databasePlugin } from "./plugins/database.js";
 import { rateLimitPlugin } from "./plugins/rate-limit.js";
 
+export interface RateLimitOptions {
+  max?: number;
+  timeWindow?: string;
+}
+
 export interface BuildAppOptions {
   useInfrastructure?: boolean;
   useRateLimit?: boolean;
+  rateLimit?: RateLimitOptions;
 }
 
 export function buildApp(options: BuildAppOptions = {}) {
@@ -20,7 +26,11 @@ export function buildApp(options: BuildAppOptions = {}) {
     origin: true
   });
   if (options.useRateLimit ?? true) {
-    app.register(rateLimitPlugin);
+    if (options.rateLimit) {
+      app.register(rateLimitPlugin, options.rateLimit);
+    } else {
+      app.register(rateLimitPlugin);
+    }
   }
 
   app.get("/health", async () => {
