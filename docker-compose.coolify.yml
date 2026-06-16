@@ -1,0 +1,54 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      PORT: 4000
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_WINDOW: 1 minute
+      DATABASE_URL: postgres://auditrail:auditrail@postgres:5432/auditrail
+      REDIS_URL: redis://redis:6379
+      API_KEY_PEPPER: ${API_KEY_PEPPER}
+    ports:
+      - "4000:4000"
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auditrail
+      POSTGRES_USER: auditrail
+      POSTGRES_PASSWORD: auditrail
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auditrail -d auditrail"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:

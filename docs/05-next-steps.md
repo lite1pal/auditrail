@@ -46,6 +46,13 @@ The next API-only extension should prefer one of:
    - event hash
    - verification endpoint or job
 
+1. Harden container runtime:
+   - run compiled JavaScript instead of `tsx` source
+   - reduce image size
+   - remove dev dependencies from runtime
+   - clean up workspace package builds and exports first
+   - keep the Coolify stack shape unchanged while doing this; only harden the `api` image/runtime
+
 ## Not Yet
 
 Do not add these before the dashboard and queue slice are working:

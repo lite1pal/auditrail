@@ -89,9 +89,12 @@ pnpm --filter @auditrail/api test
 
 ## Deploying
 
-For Coolify deployment, the repo now includes a root `Dockerfile` that starts the API container and runs migrations on boot.
+For Coolify deployment, the repo now includes:
 
-See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1) for the required env vars and Coolify setup.
+- a root `Dockerfile` for the API container
+- `docker-compose.coolify.yml` for a single Coolify stack containing `api`, `postgres`, and `redis`
+
+See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1) for the required env vars and the stack setup.
 
 ## API Examples
 
