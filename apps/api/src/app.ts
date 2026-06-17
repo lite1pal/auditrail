@@ -272,7 +272,7 @@ export function buildApp(options: BuildAppOptions = {}) {
   return app;
 }
 
-function createRuntimeMagicLinkSender(
+export function createRuntimeMagicLinkSender(
   app: ReturnType<typeof Fastify>,
   config: ReturnType<typeof loadConfig>
 ): MagicLinkSender {
@@ -298,7 +298,10 @@ function createRuntimeMagicLinkSender(
   };
 }
 
-function requireRuntimeConfig(value: string | undefined, name: string): string {
+export function requireRuntimeConfig(
+  value: string | undefined,
+  name: string
+): string {
   if (!value) {
     throw new Error(`missing_runtime_config:${name}`);
   }

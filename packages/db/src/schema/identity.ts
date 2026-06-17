@@ -189,7 +189,12 @@ export const organizationInvitations = pgTable(
       table.organizationId
     ),
     index("organization_invitations_email_idx").on(table.email),
-    index("organization_invitations_token_hash_idx").on(table.tokenHash)
+    index("organization_invitations_token_hash_idx").on(table.tokenHash),
+    uniqueIndex("organization_invitations_pending_org_email_unique")
+      .on(table.organizationId, table.email)
+      .where(
+        sql`${table.acceptedAt} is null and ${table.revokedAt} is null`
+      )
   ]
 );
 

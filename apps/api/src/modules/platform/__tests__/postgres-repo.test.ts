@@ -234,6 +234,20 @@ describe("createPostgresPlatformRepo", () => {
       revokedAt: undefined,
       role: "member"
     });
+    await expect(
+      repo.findPendingInvitationForEmail({
+        email: "user@example.com",
+        organizationId: "org-1"
+      })
+    ).resolves.toEqual({
+      acceptedAt: undefined,
+      email: "user@example.com",
+      expiresAt: "2026-01-01T00:00:00.000Z",
+      id: "invitation-1",
+      organizationId: "org-1",
+      revokedAt: undefined,
+      role: "member"
+    });
     await repo.acceptInvitation({
       acceptedAt: "2026-01-01T00:00:00.000Z",
       invitationId: "invitation-1"
@@ -244,6 +258,20 @@ describe("createPostgresPlatformRepo", () => {
     });
 
     expect(db.updates).toHaveLength(2);
+  });
+
+  it("returns undefined for missing pending invitations", async () => {
+    const db = createFakeDb([], {
+      invitationRows: []
+    });
+    const repo = createPostgresPlatformRepo(db);
+
+    await expect(
+      repo.findPendingInvitationForEmail({
+        email: "missing@example.com",
+        organizationId: "org-1"
+      })
+    ).resolves.toBeUndefined();
   });
 
   it("returns undefined when membership belongs to another user", async () => {
@@ -280,8 +308,9 @@ function createFakeDb(
   const contextRows = [...(selectResults.contextRows ?? [])];
   const invitationRows = [...(selectResults.invitationRows ?? [])];
   const selectQueue = [
+    selectResults.invitationRows ? { kind: "limit", rows: invitationRows } : undefined,
     selectResults.invitationRows
-      ? { kind: "limit", rows: invitationRows }
+      ? { kind: "limit", rows: [...invitationRows] }
       : undefined,
     selectResults.membershipRows
       ? { kind: "limit", rows: selectResults.membershipRows }

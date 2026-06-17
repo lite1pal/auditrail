@@ -161,3 +161,7 @@ service now returns an existing membership instead of creating a duplicate, the
 database migration adds a unique organization/user membership index after
 removing duplicates, and `/me` context loading defensively deduplicates stale
 duplicate rows.
+
+Hardened database behavior for invitations and exports. Pending invitations are
+now unique per organization/email, invitation acceptance verifies the signed-in
+user email, and export listing/worker pickup uses deterministic ordering.

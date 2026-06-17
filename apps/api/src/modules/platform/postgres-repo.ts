@@ -4,7 +4,7 @@ import {
   organizations,
   projects
 } from "@auditrail/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
 import type { UserContextRepo, UserMembershipContext } from "./context.js";
@@ -83,6 +83,22 @@ export function createPostgresPlatformRepo(
         .select()
         .from(organizationInvitations)
         .where(eq(organizationInvitations.tokenHash, tokenHash))
+        .limit(1);
+
+      return record ? toInvitation(record) : undefined;
+    },
+    async findPendingInvitationForEmail(input) {
+      const [record] = await db
+        .select()
+        .from(organizationInvitations)
+        .where(
+          and(
+            eq(organizationInvitations.organizationId, input.organizationId),
+            eq(organizationInvitations.email, input.email),
+            isNull(organizationInvitations.acceptedAt),
+            isNull(organizationInvitations.revokedAt)
+          )
+        )
         .limit(1);
 
       return record ? toInvitation(record) : undefined;

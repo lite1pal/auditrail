@@ -1,5 +1,5 @@
 import { exportJobs } from "@auditrail/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
 import type { ExportJob, ExportJobRepo } from "./service.js";
@@ -44,7 +44,8 @@ export function createPostgresExportJobRepo(db: AppDatabase): ExportJobRepo {
             eq(exportJobs.organizationId, input.organizationId),
             eq(exportJobs.projectId, input.projectId)
           )
-        );
+        )
+        .orderBy(desc(exportJobs.createdAt));
 
       return records.map(toExportJob);
     },
@@ -80,6 +81,7 @@ export function createPostgresExportJobRepo(db: AppDatabase): ExportJobRepo {
         .select()
         .from(exportJobs)
         .where(eq(exportJobs.status, "pending"))
+        .orderBy(asc(exportJobs.createdAt))
         .limit(limit);
 
       return records.map(toExportJob);

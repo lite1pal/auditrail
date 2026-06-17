@@ -56,6 +56,10 @@ export interface PlatformRepo {
     invitationId: string;
   }): Promise<void>;
   findInvitationByTokenHash(tokenHash: string): Promise<Invitation | undefined>;
+  findPendingInvitationForEmail(input: {
+    email: string;
+    organizationId: string;
+  }): Promise<Invitation | undefined>;
   findMembership(input: {
     organizationId: string;
     userId: string;
@@ -91,6 +95,7 @@ export interface PlatformService {
     now?: Date;
     token: string;
     tokenSecret: string;
+    userEmail: string;
     userId: string;
   }): Promise<Membership>;
   listOrganizationsForUser(userId: string): Promise<Organization[]>;
@@ -145,10 +150,19 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
       });
 
       assertRole(membership, ["owner", "admin"]);
+      const email = emailSchema.parse(input.email);
+      const existingInvitation = await repo.findPendingInvitationForEmail({
+        email,
+        organizationId: input.organizationId
+      });
+
+      if (existingInvitation) {
+        throw new Error("duplicate_invitation");
+      }
 
       const token = createOpaqueToken();
       const invitation = await repo.createInvitation({
-        email: emailSchema.parse(input.email),
+        email,
         expiresAt: new Date(Date.now() + input.ttlMs).toISOString(),
         organizationId: input.organizationId,
         role: roleSchema.parse(input.role),
@@ -161,9 +175,11 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
       const tokenHash = hashToken(input.token, { secret: input.tokenSecret });
       const invitation = await repo.findInvitationByTokenHash(tokenHash);
       const now = input.now ?? new Date();
+      const userEmail = emailSchema.parse(input.userEmail);
 
       if (
         !invitation ||
+        invitation.email !== userEmail ||
         invitation.acceptedAt ||
         invitation.revokedAt ||
         invitation.expiresAt < now.toISOString() ||

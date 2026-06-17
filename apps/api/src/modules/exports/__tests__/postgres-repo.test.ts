@@ -30,6 +30,7 @@ describe("createPostgresExportJobRepo", () => {
             status: "pending"
           }
         ],
+        [],
         [
           {
             error: "failed",
@@ -72,6 +73,13 @@ describe("createPostgresExportJobRepo", () => {
     ).resolves.toMatchObject({
       id: "export-lookup"
     });
+    await expect(
+      repo.findById({
+        exportId: "missing-export",
+        organizationId: "org-1",
+        projectId: "project-1"
+      })
+    ).resolves.toBeUndefined();
     await expect(
       repo.listByProject({ organizationId: "org-1", projectId: "project-1" })
     ).resolves.toEqual([
@@ -128,9 +136,23 @@ function createFakeDb(options: {
             from() {
               return {
                 where() {
+                  async function resolveRows() {
+                    return selectResults.shift() ?? [];
+                  }
+
                   return {
                     async limit() {
-                      return selectResults.shift() ?? [];
+                      return resolveRows();
+                    },
+                    orderBy() {
+                      return {
+                        async limit() {
+                          return resolveRows();
+                        },
+                        then(resolve: (value: unknown[]) => void) {
+                          resolve(selectResults.shift() ?? []);
+                        }
+                      };
                     },
                     then(resolve: (value: unknown[]) => void) {
                       resolve(selectResults.shift() ?? []);

@@ -90,6 +90,10 @@ export async function registerPlatformRoutes(
         return reply.code(403).send({ error: "forbidden" });
       }
 
+      if (error instanceof Error && error.message === "duplicate_invitation") {
+        return reply.code(409).send({ error: "duplicate_invitation" });
+      }
+
       throw error;
     }
   });
@@ -181,6 +185,7 @@ export async function registerPlatformRoutes(
       const membership = await options.service.acceptInvitation({
         token: body.data.token,
         tokenSecret: options.invitationTokenSecret ?? "test-invitation-secret",
+        userEmail: user.email,
         userId: user.id
       });
 

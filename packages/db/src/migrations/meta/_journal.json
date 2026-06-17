@@ -22,6 +22,13 @@
       "when": 1781721900000,
       "tag": "0002_unique_memberships",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781722600000,
+      "tag": "0003_unique_pending_invitations",
+      "breakpoints": true
     }
   ]
 }

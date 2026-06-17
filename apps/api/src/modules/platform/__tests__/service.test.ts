@@ -193,6 +193,7 @@ describe("createPlatformService", () => {
         now: new Date("2026-01-01T00:00:00.000Z"),
         token: result.token,
         tokenSecret: "test-secret",
+        userEmail: "user@example.com",
         userId: "user-1"
       })
     ).resolves.toMatchObject({
@@ -234,6 +235,7 @@ describe("createPlatformService", () => {
         now: new Date("2026-01-01T00:00:00.000Z"),
         token: result.token,
         tokenSecret: "test-secret",
+        userEmail: "user@example.com",
         userId: "user-1"
       })
     ).resolves.toMatchObject({
@@ -243,6 +245,72 @@ describe("createPlatformService", () => {
     expect(repo.memberships).toHaveLength(2);
   });
 
+  it("rejects invitations for a different email", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-admin",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "admin-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+    const result = await service.inviteMember({
+      email: "invited@example.com",
+      organizationId: "org-1",
+      role: "member",
+      tokenSecret: "test-secret",
+      ttlMs: 60_000,
+      userId: "admin-1"
+    });
+
+    await expect(
+      service.acceptInvitation({
+        now: new Date("2026-01-01T00:00:00.000Z"),
+        token: result.token,
+        tokenSecret: "test-secret",
+        userEmail: "other@example.com",
+        userId: "user-1"
+      })
+    ).rejects.toThrow("invalid_invitation");
+  });
+
+  it("rejects duplicate pending invitations", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-admin",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "admin-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+
+    await service.inviteMember({
+      email: "user@example.com",
+      organizationId: "org-1",
+      role: "member",
+      tokenSecret: "test-secret",
+      ttlMs: 60_000,
+      userId: "admin-1"
+    });
+
+    await expect(
+      service.inviteMember({
+        email: "user@example.com",
+        organizationId: "org-1",
+        role: "viewer",
+        tokenSecret: "test-secret",
+        ttlMs: 60_000,
+        userId: "admin-1"
+      })
+    ).rejects.toThrow("duplicate_invitation");
+  });
+
   it("rejects invalid invitations", async () => {
     const service = createPlatformService(createInMemoryPlatformRepo());
 
@@ -250,6 +318,7 @@ describe("createPlatformService", () => {
       service.acceptInvitation({
         token: "bad-token",
         tokenSecret: "test-secret",
+        userEmail: "user@example.com",
         userId: "user-1"
       })
     ).rejects.toThrow("invalid_invitation");
@@ -335,6 +404,15 @@ function createInMemoryPlatformRepo(
     async findInvitationByTokenHash(tokenHash) {
       return invitations.find(
         (invitation) => "tokenHash" in invitation && invitation.tokenHash === tokenHash
+      );
+    },
+    async findPendingInvitationForEmail(input) {
+      return invitations.find(
+        (invitation) =>
+          invitation.email === input.email &&
+          invitation.organizationId === input.organizationId &&
+          !invitation.acceptedAt &&
+          !invitation.revokedAt
       );
     },
     async listOrganizationsForUser(userId) {

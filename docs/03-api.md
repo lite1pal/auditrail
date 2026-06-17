@@ -330,10 +330,14 @@ invitation token for the current user, and revoking pending invitations. Tokens
 are opaque and only token hashes are persisted.
 Accepting another valid invitation for an organization the user already belongs
 to returns the existing membership instead of creating a duplicate membership.
+Pending invitations are unique per organization/email. A signed-in user can only
+accept an invitation addressed to their own email.
 
 Export routes support creating async audit-event export jobs, listing project
 exports, checking export status, and returning signed download URLs for
 completed jobs.
+Export lists are returned newest first, while the pending export worker claims
+oldest jobs first.
 
 Runtime API infrastructure mode registers the platform routes with
 cookie-backed session resolution. Web settings screens consume:
