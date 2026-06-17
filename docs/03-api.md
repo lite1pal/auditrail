@@ -311,3 +311,15 @@ environment parsing.
 The app builder can register auth routes when an `AuthService` is injected.
 Runtime registration with Postgres persistence and email delivery is the next
 step after configuring the auth environment.
+
+`GET /api/v1/me` returns the authenticated browser user and their organization
+membership context, including organization and project summaries. API-key
+ingestion authentication remains separate from browser session authentication.
+
+The first platform management routes cover organization listing/creation and
+project listing/creation under an organization. They require browser session
+auth and enforce membership roles in the platform service.
+
+Invitation routes support creating organization invitations, accepting an
+invitation token for the current user, and revoking pending invitations. Tokens
+are opaque and only token hashes are persisted.

@@ -171,6 +171,34 @@ describe("registerAuthRoutes", () => {
 
   it("returns the current session user", async () => {
     const app = buildTestApp({
+      currentUserContext: {
+        async getCurrentUserContext(user) {
+          return {
+            memberships: [
+              {
+                membership: {
+                  id: "membership-1",
+                  organizationId: "org-1",
+                  role: "owner",
+                  userId: user.id
+                },
+                organization: {
+                  id: "org-1",
+                  name: "Acme"
+                },
+                projects: [
+                  {
+                    id: "project-1",
+                    name: "Production",
+                    organizationId: "org-1"
+                  }
+                ]
+              }
+            ],
+            user
+          };
+        }
+      },
       service: createAuthServiceStub({
         async getSessionUser(sessionToken) {
           expect(sessionToken).toBe("session-token");
@@ -193,7 +221,24 @@ describe("registerAuthRoutes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
-      memberships: [],
+      memberships: [
+        {
+          organization: {
+            id: "org-1",
+            name: "Acme"
+          },
+          organizationId: "org-1",
+          projectIds: ["project-1"],
+          projects: [
+            {
+              id: "project-1",
+              name: "Production",
+              organizationId: "org-1"
+            }
+          ],
+          role: "owner"
+        }
+      ],
       user: {
         email: "user@example.com",
         id: "user-1"
@@ -255,13 +300,13 @@ describe("registerAuthRoutes", () => {
   });
 });
 
-function buildTestApp(options: { service: AuthService }) {
+function buildTestApp(options: Parameters<typeof registerAuthRoutes>[1]) {
   const app = Fastify();
   app.register(registerAuthRoutes, {
     cookie: {
       secure: false
     },
-    service: options.service
+    ...options
   });
   return app;
 }

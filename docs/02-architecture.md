@@ -138,6 +138,13 @@ through repository adapters. The schema includes users, magic links, sessions,
 organization memberships, organization invitations, and export jobs. API services
 must continue to depend on repository interfaces rather than Drizzle directly.
 
+Browser session principal resolution is separate from machine API-key auth.
+`sessionAuthPlugin` resolves HttpOnly cookie sessions into `request.sessionUser`
+for browser routes. The existing API-key auth plugin remains responsible for
+machine ingestion routes and continues to set `request.apiKeyPrincipal`.
+The `/me` response is composed through the platform context service and includes
+user, membership, organization, and project context.
+
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 React Hook Form and Zod for forms, TanStack Query for API cache ownership,
 TanStack Table for data grids, Recharts for dashboard charts, `nuqs` for URL

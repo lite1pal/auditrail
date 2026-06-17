@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assertRole,
   createPlatformService,
   type Invitation,
   type Membership,
@@ -23,17 +24,30 @@ describe("createPlatformService", () => {
   });
 
   it("normalizes invitation email", async () => {
-    const service = createPlatformService(createInMemoryPlatformRepo());
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "admin",
+            userId: "user-1"
+          }
+        ]
+      })
+    );
 
-    const invitation = await service.inviteMember({
+    const result = await service.inviteMember({
       email: "USER@example.com",
-      expiresAt: "2026-01-01T00:00:00.000Z",
       organizationId: "org-1",
       role: "admin",
-      tokenHash: "hash"
+      tokenSecret: "test-secret",
+      ttlMs: 60_000,
+      userId: "user-1"
     });
 
-    expect(invitation.email).toBe("user@example.com");
+    expect(result.invitation.email).toBe("user@example.com");
+    expect(result.token).not.toBe("");
   });
 
   it("creates projects with normalized names", async () => {
@@ -49,15 +63,207 @@ describe("createPlatformService", () => {
       organizationId: "org-1"
     });
   });
+
+  it("allows admins to create projects for their organization", async () => {
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "admin",
+            userId: "user-1"
+          }
+        ]
+      })
+    );
+
+    const project = await service.createProjectForUser({
+      name: "Production",
+      organizationId: "org-1",
+      userId: "user-1"
+    });
+
+    expect(project.organizationId).toBe("org-1");
+  });
+
+  it("rejects project creation for viewers", async () => {
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "viewer",
+            userId: "user-1"
+          }
+        ]
+      })
+    );
+
+    await expect(
+      service.createProjectForUser({
+        name: "Production",
+        organizationId: "org-1",
+        userId: "user-1"
+      })
+    ).rejects.toThrow("forbidden");
+  });
+
+  it("lists organization projects for members", async () => {
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "member",
+            userId: "user-1"
+          }
+        ],
+        projects: [
+          {
+            id: "project-1",
+            name: "Production",
+            organizationId: "org-1"
+          }
+        ]
+      })
+    );
+
+    await expect(
+      service.listProjectsForUser({
+        organizationId: "org-1",
+        userId: "user-1"
+      })
+    ).resolves.toHaveLength(1);
+  });
+
+  it("lists organizations for users", async () => {
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "owner",
+            userId: "user-1"
+          }
+        ],
+        organizations: [
+          {
+            id: "org-1",
+            name: "Acme"
+          }
+        ]
+      })
+    );
+
+    await expect(service.listOrganizationsForUser("user-1")).resolves.toEqual([
+      {
+        id: "org-1",
+        name: "Acme"
+      }
+    ]);
+  });
+
+  it("accepts valid invitations", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-admin",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "admin-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+    const result = await service.inviteMember({
+      email: "user@example.com",
+      organizationId: "org-1",
+      role: "member",
+      tokenSecret: "test-secret",
+      ttlMs: 60_000,
+      userId: "admin-1"
+    });
+
+    await expect(
+      service.acceptInvitation({
+        now: new Date("2026-01-01T00:00:00.000Z"),
+        token: result.token,
+        tokenSecret: "test-secret",
+        userId: "user-1"
+      })
+    ).resolves.toMatchObject({
+      organizationId: "org-1",
+      role: "member",
+      userId: "user-1"
+    });
+  });
+
+  it("rejects invalid invitations", async () => {
+    const service = createPlatformService(createInMemoryPlatformRepo());
+
+    await expect(
+      service.acceptInvitation({
+        token: "bad-token",
+        tokenSecret: "test-secret",
+        userId: "user-1"
+      })
+    ).rejects.toThrow("invalid_invitation");
+  });
+
+  it("revokes invitations for admins", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-1",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "user-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+
+    await service.revokeInvitation({
+      invitationId: "invitation-1",
+      organizationId: "org-1",
+      userId: "user-1"
+    });
+
+    expect(repo.revokedInvitations).toEqual(["invitation-1"]);
+  });
 });
 
-function createInMemoryPlatformRepo(): PlatformRepo {
-  const organizations: Organization[] = [];
-  const projects: Project[] = [];
-  const memberships: Membership[] = [];
+function createInMemoryPlatformRepo(
+  options: {
+    memberships?: Membership[];
+    organizations?: Organization[];
+    projects?: Project[];
+  } = {}
+): PlatformRepo & {
+  invitations: Invitation[];
+  memberships: Membership[];
+  revokedInvitations: string[];
+} {
+  const organizations: Organization[] = [...(options.organizations ?? [])];
+  const projects: Project[] = [...(options.projects ?? [])];
+  const memberships: Membership[] = [...(options.memberships ?? [])];
   const invitations: Invitation[] = [];
+  const revokedInvitations: string[] = [];
 
   return {
+    invitations,
+    memberships,
+    revokedInvitations,
+    async acceptInvitation(input) {
+      const invitation = invitations.find((item) => item.id === input.invitationId);
+      if (invitation) {
+        invitation.acceptedAt = input.acceptedAt;
+      }
+    },
     async createInvitation(input) {
       const record = { ...input, id: `invitation-${invitations.length + 1}` };
       invitations.push(record);
@@ -77,6 +283,43 @@ function createInMemoryPlatformRepo(): PlatformRepo {
       const record = { ...input, id: `project-${projects.length + 1}` };
       projects.push(record);
       return record;
+    },
+    async findMembership(input) {
+      return memberships.find(
+        (membership) =>
+          membership.organizationId === input.organizationId &&
+          membership.userId === input.userId
+      );
+    },
+    async findInvitationByTokenHash(tokenHash) {
+      return invitations.find(
+        (invitation) => "tokenHash" in invitation && invitation.tokenHash === tokenHash
+      );
+    },
+    async listOrganizationsForUser(userId) {
+      return organizations.filter((organization) =>
+        memberships.some(
+          (membership) =>
+            membership.organizationId === organization.id &&
+            membership.userId === userId
+        )
+      );
+    },
+    async listProjects(organizationId) {
+      return projects.filter((project) => project.organizationId === organizationId);
+    },
+    async revokeInvitation(input) {
+      revokedInvitations.push(input.invitationId);
     }
+  } as PlatformRepo & {
+    invitations: Invitation[];
+    memberships: Membership[];
+    revokedInvitations: string[];
   };
 }
+
+describe("assertRole", () => {
+  it("rejects missing memberships", () => {
+    expect(() => assertRole(undefined, ["owner"])).toThrow("forbidden");
+  });
+});

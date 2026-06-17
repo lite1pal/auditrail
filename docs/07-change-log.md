@@ -104,3 +104,16 @@ Added the auth email delivery boundary with an in-memory sender for development
 and tests, added auth-specific environment validation, documented the magic-link
 URL contract, and allowed `buildApp()` to register auth routes through an
 explicit injected `AuthService`.
+
+Added browser session principal resolution with `sessionAuthPlugin` and expanded
+`/me` to support real organization/project membership context through an
+injectable platform context service. Machine API-key authentication remains
+separate for ingestion routes.
+
+Added the first organizations/projects API slice with role-checked platform
+service methods, Postgres repo support for membership/project lookups, and
+tested Fastify route adapters for organization and project management.
+
+Added the invitations API slice with token hashing, invite/accept/revoke service
+methods, Postgres repo support for invitation lookup and state updates, and
+tested route adapters for invitation lifecycle operations.

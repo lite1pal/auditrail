@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { API_BASE_PATH, API_VERSION_PREFIX } from "../api-version.js";
 import { buildApp } from "../app.js";
 import type { AuthService } from "../modules/auth/service.js";
+import type { PlatformService } from "../modules/platform/service.js";
 
 describe("health route", () => {
   it("can register infrastructure plugins for runtime mode", async () => {
@@ -153,6 +154,32 @@ describe("health route", () => {
 
     await app.close();
   });
+
+  it("can register platform routes with an injected service", async () => {
+    const app = buildApp({
+      platform: {
+        service: createPlatformServiceStub()
+      },
+      useRateLimit: false
+    });
+
+    app.decorateRequest("sessionUser");
+    app.addHook("preHandler", async (request) => {
+      request.sessionUser = {
+        email: "user@example.com",
+        id: "user-1"
+      };
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations`
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    await app.close();
+  });
 });
 
 function createAuthServiceStub(): AuthService {
@@ -165,5 +192,32 @@ function createAuthServiceStub(): AuthService {
     },
     async requestMagicLink() {},
     async revokeSession() {}
+  };
+}
+
+function createPlatformServiceStub(): PlatformService {
+  return {
+    async acceptInvitation() {
+      throw new Error("not implemented");
+    },
+    async createOrganization() {
+      throw new Error("not implemented");
+    },
+    async createProject() {
+      throw new Error("not implemented");
+    },
+    async createProjectForUser() {
+      throw new Error("not implemented");
+    },
+    async inviteMember() {
+      throw new Error("not implemented");
+    },
+    async listOrganizationsForUser() {
+      return [];
+    },
+    async listProjectsForUser() {
+      return [];
+    },
+    async revokeInvitation() {}
   };
 }

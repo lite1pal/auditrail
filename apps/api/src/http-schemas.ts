@@ -194,10 +194,32 @@ export function registerApiSchemas(app: FastifyInstance) {
           required: ["organizationId", "projectIds", "role"],
           properties: {
             organizationId: { type: "string" },
+            organization: {
+              type: "object",
+              additionalProperties: false,
+              required: ["id", "name"],
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" }
+              }
+            },
             projectIds: {
               type: "array",
               items: {
                 type: "string"
+              }
+            },
+            projects: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                required: ["id", "organizationId", "name"],
+                properties: {
+                  id: { type: "string" },
+                  organizationId: { type: "string" },
+                  name: { type: "string" }
+                }
               }
             },
             role: {

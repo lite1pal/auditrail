@@ -1,0 +1,60 @@
+import { describe, expect, it } from "vitest";
+
+import { toCurrentUserResponse } from "../presenters.js";
+
+describe("toCurrentUserResponse", () => {
+  it("includes organization and project context", () => {
+    expect(
+      toCurrentUserResponse({
+        memberships: [
+          {
+            membership: {
+              id: "membership-1",
+              organizationId: "org-1",
+              role: "admin",
+              userId: "user-1"
+            },
+            organization: {
+              id: "org-1",
+              name: "Acme"
+            },
+            projects: [
+              {
+                id: "project-1",
+                name: "Production",
+                organizationId: "org-1"
+              }
+            ]
+          }
+        ],
+        user: {
+          email: "user@example.com",
+          id: "user-1"
+        }
+      })
+    ).toEqual({
+      memberships: [
+        {
+          organization: {
+            id: "org-1",
+            name: "Acme"
+          },
+          organizationId: "org-1",
+          projectIds: ["project-1"],
+          projects: [
+            {
+              id: "project-1",
+              name: "Production",
+              organizationId: "org-1"
+            }
+          ],
+          role: "admin"
+        }
+      ],
+      user: {
+        email: "user@example.com",
+        id: "user-1"
+      }
+    });
+  });
+});

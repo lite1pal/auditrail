@@ -2,6 +2,8 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
 import { registerApiSchemas } from "../../http-schemas.js";
+import type { CurrentUserContextService } from "../platform/context.js";
+import { toCurrentUserResponse } from "../platform/presenters.js";
 import type { AuthService } from "./service.js";
 import {
   createSessionRouteSchema,
@@ -29,6 +31,7 @@ export interface AuthCookieOptions {
 
 export interface AuthRoutesOptions {
   cookie?: AuthCookieOptions;
+  currentUserContext?: CurrentUserContextService;
   service: AuthService;
 }
 
@@ -133,10 +136,14 @@ export async function registerAuthRoutes(
       });
     }
 
-    return reply.send({
-      memberships: [],
-      user
-    });
+    const context = options.currentUserContext
+      ? await options.currentUserContext.getCurrentUserContext(user)
+      : {
+          memberships: [],
+          user
+        };
+
+    return reply.send(toCurrentUserResponse(context));
   });
 }
 

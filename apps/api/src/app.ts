@@ -16,6 +16,8 @@ import {
 } from "./modules/auth/routes.js";
 import type { AuthService } from "./modules/auth/service.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
+import { registerPlatformRoutes } from "./modules/platform/routes.js";
+import type { PlatformService } from "./modules/platform/service.js";
 import { authPlugin } from "./plugins/auth.js";
 import { databasePlugin } from "./plugins/database.js";
 import { rateLimitPlugin } from "./plugins/rate-limit.js";
@@ -33,6 +35,9 @@ export interface BuildAppOptions {
   auth?: {
     cookie?: AuthCookieOptions;
     service: AuthService;
+  };
+  platform?: {
+    service: PlatformService;
   };
   useInfrastructure?: boolean;
   useRateLimit?: boolean;
@@ -187,6 +192,13 @@ export function buildApp(options: BuildAppOptions = {}) {
         };
 
     app.register(registerAuthRoutes, authRouteOptions);
+  }
+
+  if (options.platform) {
+    app.register(registerPlatformRoutes, {
+      prefix: API_VERSION_PREFIX,
+      service: options.platform.service
+    });
   }
 
   return app;
