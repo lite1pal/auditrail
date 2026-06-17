@@ -8,17 +8,27 @@ import {
   API_VERSION_PREFIX,
   getApiDescriptor
 } from "./api-version.js";
+import { loadConfig } from "./config.js";
+import { loadEnvFiles } from "./env-files.js";
 import { registerApiErrorHandler } from "./http-errors.js";
 import { registerApiSchemas, schemaIds } from "./http-schemas.js";
+import { createPostgresAuthRepo } from "./modules/auth/postgres-repo.js";
 import {
   registerAuthRoutes,
   type AuthCookieOptions
 } from "./modules/auth/routes.js";
-import type { AuthService } from "./modules/auth/service.js";
+import { createInMemoryMagicLinkSender } from "./modules/auth/senders.js";
+import {
+  createAuthService,
+  type AuthService,
+  type MagicLinkSender
+} from "./modules/auth/service.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
 import { registerExportRoutes } from "./modules/exports/routes.js";
 import type { ExportService } from "./modules/exports/service.js";
 import type { ExportObjectStorage } from "./modules/exports/storage.js";
+import { createCurrentUserContextService } from "./modules/platform/context.js";
+import { createPostgresPlatformRepo } from "./modules/platform/postgres-repo.js";
 import { registerPlatformRoutes } from "./modules/platform/routes.js";
 import type { PlatformService } from "./modules/platform/service.js";
 import { authPlugin } from "./plugins/auth.js";
@@ -181,6 +191,28 @@ export function buildApp(options: BuildAppOptions = {}) {
       app.register(databasePlugin);
     }
     app.register(authPlugin);
+    app.register(async (infrastructureApp) => {
+      const config = loadConfig(loadEnvFiles());
+      const authRepo = createPostgresAuthRepo(infrastructureApp.db);
+      const platformRepo = createPostgresPlatformRepo(infrastructureApp.db);
+      const magicLinkSender = createRuntimeMagicLinkSender(app, config);
+      const authService = createAuthService(authRepo, magicLinkSender, {
+        magicLinkTtlMs: config.AUTH_MAGIC_LINK_TTL_SECONDS * 1000,
+        sessionTtlMs: config.AUTH_SESSION_TTL_SECONDS * 1000,
+        tokenSecret: config.AUTH_TOKEN_SECRET
+      });
+
+      infrastructureApp.register(registerAuthRoutes, {
+        cookie: {
+          maxAgeSeconds: config.AUTH_SESSION_TTL_SECONDS,
+          name: config.AUTH_SESSION_COOKIE_NAME,
+          secure: config.AUTH_SESSION_COOKIE_SECURE
+        },
+        currentUserContext: createCurrentUserContextService(platformRepo),
+        prefix: API_VERSION_PREFIX,
+        service: authService
+      });
+    });
   }
 
   app.register(registerEventRoutes, {
@@ -219,4 +251,29 @@ export function buildApp(options: BuildAppOptions = {}) {
   }
 
   return app;
+}
+
+function createRuntimeMagicLinkSender(
+  app: ReturnType<typeof Fastify>,
+  config: ReturnType<typeof loadConfig>
+): MagicLinkSender {
+  const sender = createInMemoryMagicLinkSender({
+    webPublicUrl: config.WEB_PUBLIC_URL
+  });
+
+  return {
+    async sendMagicLink(input) {
+      await sender.sendMagicLink(input);
+
+      if (config.NODE_ENV !== "production") {
+        app.log.info(
+          {
+            email: input.email,
+            magicLinkUrl: sender.sent.at(-1)?.url
+          },
+          "created local magic link"
+        );
+      }
+    }
+  };
 }

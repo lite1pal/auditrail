@@ -127,3 +127,13 @@ magic-link sent, callback, logout, and protected-shell flows that call the
 existing Fastify API directly. The shared web API client supports raw responses
 for cookie exchange and server-side cookie forwarding for `/api/v1/me`, while
 the no-Next-route-handlers boundary remains intact.
+
+Mounted auth routes in runtime API infrastructure mode. `buildApp({
+useInfrastructure: true })` now creates the Postgres auth repo, platform context
+service, auth service, and local magic-link sender, then registers browser auth
+routes under `/api/v1`. Non-production startup logs generated magic-link URLs
+for local testing.
+
+Fixed migration metadata for the platform foundation migration so
+`drizzle-kit migrate` discovers `0001_platform_foundation.sql` on fresh
+databases instead of requiring manual SQL application.

@@ -123,3 +123,8 @@ When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic
 links. The web app mirrors the API session cookie onto its own origin during the
 magic-link callback, so both apps must agree on the session cookie name and TTL.
+
+Runtime API startup with `useInfrastructure: true` now registers auth routes
+against Postgres automatically. Non-production logs local magic-link URLs. Before
+production launch, replace the runtime magic-link sender with a real email
+provider adapter so auth links are delivered instead of only logged.

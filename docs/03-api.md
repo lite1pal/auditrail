@@ -312,6 +312,11 @@ The app builder can register auth routes when an `AuthService` is injected.
 Runtime registration with Postgres persistence and email delivery is the next
 step after configuring the auth environment.
 
+When `buildApp({ useInfrastructure: true })` is used, the API registers auth
+routes with the Postgres auth repository, platform context repository, and the
+runtime magic-link sender. Non-production runtime logs the generated magic-link
+URL so local sign-in can be completed without an email provider.
+
 `GET /api/v1/me` returns the authenticated browser user and their organization
 membership context, including organization and project summaries. API-key
 ingestion authentication remains separate from browser session authentication.
