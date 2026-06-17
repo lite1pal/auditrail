@@ -110,6 +110,12 @@ API descriptor:
 curl -i http://localhost:4000/api
 ```
 
+OpenAPI document:
+
+```bash
+curl -i http://localhost:4000/api/v1/openapi.json
+```
+
 Ingest an event:
 
 ```bash
@@ -165,3 +171,10 @@ Read `AGENTS.md` before making changes. The important constraints are:
 - env is validated before API build/start
 - shared packages must stay narrow
 - tests must prefer injected options over shared env mutation
+
+## Versioning
+
+- The only supported API base path is `/api/v1`
+- `/health` is unversioned for infrastructure checks
+- Breaking API changes must land in a new version path
+- Do not silently repurpose existing request or response fields on `/api/v1`

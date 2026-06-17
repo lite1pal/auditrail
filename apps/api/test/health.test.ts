@@ -14,6 +14,19 @@ describe("health route", () => {
     await app.close();
   });
 
+  it("can register infrastructure plugins with explicit overrides", async () => {
+    const app = buildApp({
+      useInfrastructure: true,
+      infrastructure: {
+        databaseUrl: "postgres://auditrail:auditrail@localhost:5433/auditrail"
+      }
+    });
+
+    expect(app).toBeDefined();
+
+    await app.close();
+  });
+
   it("returns ok", async () => {
     const app = buildApp();
 
@@ -66,6 +79,30 @@ describe("health route", () => {
     expect(response.json()).toEqual({
       status: "ok"
     });
+
+    await app.close();
+  });
+
+  it("returns an OpenAPI document for the current version", async () => {
+    const app = buildApp({
+      useRateLimit: false
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/openapi.json`
+    });
+    const body = response.json();
+
+    expect(response.statusCode).toBe(200);
+    expect(body.openapi).toBe("3.0.3");
+    expect(body.info).toMatchObject({
+      title: "AuditTrail API",
+      version: "v1"
+    });
+    expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events`);
+    expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/stats`);
+    expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/timeseries`);
 
     await app.close();
   });

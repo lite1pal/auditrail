@@ -1,11 +1,15 @@
 import cors from "@fastify/cors";
+import swagger from "@fastify/swagger";
 import Fastify from "fastify";
 
 import {
   API_BASE_PATH,
+  API_VERSION,
   API_VERSION_PREFIX,
   getApiDescriptor
 } from "./api-version.js";
+import { registerApiErrorHandler } from "./http-errors.js";
+import { registerApiSchemas, schemaIds } from "./http-schemas.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
 import { authPlugin } from "./plugins/auth.js";
 import { databasePlugin } from "./plugins/database.js";
@@ -32,6 +36,38 @@ export function buildApp(options: BuildAppOptions = {}) {
     logger: true
   });
 
+  registerApiErrorHandler(app);
+  registerApiSchemas(app);
+
+  app.register(swagger, {
+    openapi: {
+      info: {
+        title: "AuditTrail API",
+        version: API_VERSION,
+        description:
+          "Versioned audit event ingestion and query API. The canonical contract is /api/v1."
+      },
+      tags: [
+        {
+          name: "meta",
+          description: "API metadata and health"
+        },
+        {
+          name: "events",
+          description: "Audit event ingestion and query"
+        }
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer"
+          }
+        }
+      }
+    }
+  });
+
   app.register(cors, {
     origin: true
   });
@@ -43,17 +79,74 @@ export function buildApp(options: BuildAppOptions = {}) {
     }
   }
 
-  app.get("/health", async () => {
-    return {
-      status: "ok"
-    };
-  });
-  app.get(API_BASE_PATH, async () => getApiDescriptor());
-  app.get(`${API_VERSION_PREFIX}/health`, async () => {
-    return {
-      status: "ok"
-    };
-  });
+  app.get(
+    "/health",
+    {
+      schema: {
+        tags: ["meta"],
+        summary: "Returns operational health for infrastructure checks",
+        response: {
+          200: {
+            $ref: `${schemaIds.healthResponse}#`
+          }
+        }
+      }
+    },
+    async () => {
+      return {
+        status: "ok"
+      };
+    }
+  );
+  app.get(
+    API_BASE_PATH,
+    {
+      schema: {
+        tags: ["meta"],
+        summary: "Returns API version metadata",
+        response: {
+          200: {
+            $ref: `${schemaIds.apiDescriptorResponse}#`
+          }
+        }
+      }
+    },
+    async () => getApiDescriptor()
+  );
+  app.get(
+    `${API_VERSION_PREFIX}/health`,
+    {
+      schema: {
+        tags: ["meta"],
+        summary: "Returns versioned API health",
+        response: {
+          200: {
+            $ref: `${schemaIds.healthResponse}#`
+          }
+        }
+      }
+    },
+    async () => {
+      return {
+        status: "ok"
+      };
+    }
+  );
+  app.get(
+    `${API_VERSION_PREFIX}/openapi.json`,
+    {
+      schema: {
+        tags: ["meta"],
+        summary: "Returns the OpenAPI document for the current API version",
+        response: {
+          200: {
+            $ref: `${schemaIds.openApiDocumentResponse}#`
+          }
+        }
+      }
+    },
+    async () => app.swagger()
+  );
 
   if (options.useInfrastructure) {
     if (options.infrastructure) {

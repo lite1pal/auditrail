@@ -74,6 +74,17 @@ Runtime defaults exist for:
 - `RATE_LIMIT_MAX`
 - `RATE_LIMIT_WINDOW`
 
+## API Contract
+
+The API contract is generated from route schemas and exposed at:
+
+```text
+GET /api/v1/openapi.json
+```
+
+Any change to request or response shapes should be made in the route schema and route tests together.
+Do not maintain a separate hand-written API spec that can drift from the server.
+
 ## Adding API Routes
 
 Every API route must include tests for:

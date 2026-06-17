@@ -12,6 +12,12 @@ API descriptor:
 GET /api
 ```
 
+OpenAPI document:
+
+```text
+GET /api/v1/openapi.json
+```
+
 Canonical versioned base path:
 
 ```text
@@ -20,6 +26,52 @@ Canonical versioned base path:
 
 Operational health remains unversioned at `/health` for load balancers and container health checks.
 The versioned route `/api/v1/health` is available for API consumers that want a versioned health path.
+
+## Versioning Rules
+
+- `/api/v1` is the only supported contract path
+- breaking changes require a new version path such as `/api/v2`
+- additive, backward-compatible fields may be introduced within `v1`
+- deprecated fields or endpoints must be documented before removal
+- infrastructure health checks remain outside API versioning at `/health`
+
+## Shared Error Shapes
+
+Most protected routes use one of these shared response shapes:
+
+- simple auth/domain error:
+
+```json
+{
+  "error": "missing_api_key"
+}
+```
+
+- validation error:
+
+```json
+{
+  "error": "invalid_event_query",
+  "issues": [
+    {
+      "path": ["from"],
+      "message": "Invalid input",
+      "code": "format"
+    }
+  ]
+}
+```
+
+- rate-limit error:
+
+```json
+{
+  "statusCode": 429,
+  "code": "FST_ERR_RATE_LIMIT",
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded, retry in 1 minute"
+}
+```
 
 ## Authentication
 
@@ -74,6 +126,10 @@ Response:
 }
 ```
 
+## `GET /api/v1/openapi.json`
+
+Returns the OpenAPI 3 document for the current API version.
+
 ## `POST /api/v1/events`
 
 Ingests an audit event.
@@ -107,6 +163,8 @@ Errors:
 - `401 missing_api_key`
 - `401 invalid_api_key`
 - `429 Too Many Requests`
+
+Response schema is explicit in the OpenAPI document.
 
 ## `GET /api/v1/events`
 
