@@ -1,15 +1,31 @@
-import { toEventListViewModel } from "../domain/presenters";
+import {
+  toEventListViewModel,
+  toEventStatsViewModel,
+  toEventTimeseriesViewModel
+} from "../domain/presenters";
 import type { EventListQuery } from "../domain/query";
-import type { EventListResponse } from "../domain/types";
+import type {
+  EventListResponse,
+  EventStatsResponse,
+  EventTimeseriesResponse
+} from "../domain/types";
+import { EventDashboard } from "./event-dashboard";
 import { EventFilters } from "./event-filters";
 import { EventsTable } from "./events-table";
 
 interface AuditEventsScreenProps {
   initialEvents: EventListResponse;
   query: EventListQuery;
+  stats: EventStatsResponse;
+  timeseries: EventTimeseriesResponse;
 }
 
-export function AuditEventsScreen({ initialEvents, query }: AuditEventsScreenProps) {
+export function AuditEventsScreen({
+  initialEvents,
+  query,
+  stats,
+  timeseries
+}: AuditEventsScreenProps) {
   const viewModel = toEventListViewModel(initialEvents);
 
   return (
@@ -21,7 +37,16 @@ export function AuditEventsScreen({ initialEvents, query }: AuditEventsScreenPro
         </div>
       </section>
       <EventFilters query={query} />
-      <EventsTable rows={viewModel.rows} />
+      <EventDashboard
+        stats={toEventStatsViewModel(stats)}
+        timeseries={toEventTimeseriesViewModel(timeseries)}
+      />
+      <EventsTable
+        hasMore={viewModel.hasMore}
+        nextCursor={viewModel.nextCursor}
+        query={query}
+        rows={viewModel.rows}
+      />
     </main>
   );
 }

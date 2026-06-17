@@ -69,3 +69,7 @@ Established `apps/web` as a pure Next.js UI that consumes the existing
 `apps/api` Fastify service. The frontend must not add Next.js route handlers or
 API endpoints. The initial audit-events vertical slice follows the API app's
 thin adapter, service, boundary-validation, and presenter patterns.
+
+Expanded the web audit-events slice with server-loaded filters, cursor
+pagination, event stats, and timeseries charting. Browser refetching remains
+deferred until the API has an explicit browser-session principal model.

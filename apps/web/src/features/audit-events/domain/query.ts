@@ -17,6 +17,12 @@ export const eventListQuerySchema = z
 
 export type EventListQuery = z.infer<typeof eventListQuerySchema>;
 
+export interface EventDashboardRange {
+  bucket: "hour" | "day";
+  from: string;
+  to: string;
+}
+
 export function parseEventSearchParams(
   searchParams: Record<string, string | string[] | undefined>
 ): EventListQuery {
@@ -32,6 +38,36 @@ export function toApiEventListQuery(query: EventListQuery) {
     limit: query.limit,
     target: query.target,
     to: query.to
+  };
+}
+
+export function toEventListHref(query: EventListQuery, cursor?: string | null) {
+  const nextQuery = {
+    ...query,
+    cursor: cursor ?? undefined
+  };
+
+  return {
+    pathname: "/",
+    query: Object.fromEntries(
+      Object.entries(nextQuery).filter(([, value]) => value !== undefined)
+    )
+  };
+}
+
+export function toDashboardRange(
+  query: EventListQuery,
+  now: Date = new Date()
+): EventDashboardRange {
+  const to = query.to ?? now.toISOString();
+  const from =
+    query.from ??
+    new Date(new Date(to).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  return {
+    bucket: "day",
+    from,
+    to
   };
 }
 

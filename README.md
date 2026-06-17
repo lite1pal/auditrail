@@ -209,3 +209,9 @@ pnpm --filter web typecheck
 pnpm --filter web test
 pnpm --filter web dev
 ```
+
+The initial web event stream supports URL-backed filters, cursor pagination,
+event totals, top event types, and a timeseries chart using the existing
+`apps/api` endpoints. Full browser-session authentication still requires an API
+principal mapping for organization and project ownership before replacing the
+server-only local `WEB_API_KEY` path.

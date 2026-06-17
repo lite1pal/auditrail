@@ -1,4 +1,11 @@
-import type { EventListResponse, EventListViewModel } from "./types";
+import type {
+  EventListResponse,
+  EventListViewModel,
+  EventStatsResponse,
+  EventStatsViewModel,
+  EventTimeseriesResponse,
+  EventTimeseriesViewModel
+} from "./types";
 
 export function toEventListViewModel(
   response: EventListResponse
@@ -13,6 +20,29 @@ export function toEventListViewModel(
       id: event.id,
       metadata: JSON.stringify(event.metadata),
       target: event.target ?? "Unknown"
+    }))
+  };
+}
+
+export function toEventStatsViewModel(
+  response: EventStatsResponse
+): EventStatsViewModel {
+  return {
+    totalEvents: response.totalEvents.toLocaleString("en"),
+    topEventTypes: response.topEventTypes.map((eventType) => ({
+      count: eventType.count.toLocaleString("en"),
+      event: eventType.event
+    }))
+  };
+}
+
+export function toEventTimeseriesViewModel(
+  response: EventTimeseriesResponse
+): EventTimeseriesViewModel {
+  return {
+    points: response.points.map((point) => ({
+      bucketStart: formatIsoDate(point.bucketStart),
+      count: point.count
     }))
   };
 }

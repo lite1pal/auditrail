@@ -82,6 +82,12 @@ as `WEB_API_KEY`. Do not expose ingestion or machine API keys through
 `NEXT_PUBLIC_*` variables. Browser refetching of protected data requires a
 browser-safe user auth flow validated by `apps/api`.
 
+The current audit-events vertical slice is server-loaded from `apps/api` and
+renders URL-backed filters, cursor pagination, summary statistics, and
+timeseries data. The frontend must keep this flow as a direct Fastify API
+consumer until `apps/api` owns browser-session validation and maps users to
+organization/project principals.
+
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 React Hook Form and Zod for forms, TanStack Query for API cache ownership,
 TanStack Table for data grids, Recharts for dashboard charts, `nuqs` for URL

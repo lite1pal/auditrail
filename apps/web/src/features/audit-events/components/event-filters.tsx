@@ -1,4 +1,5 @@
 import type { EventListQuery } from "../domain/query";
+import { Button } from "../../../components/ui/button";
 
 interface EventFiltersProps {
   query: EventListQuery;
@@ -6,19 +7,20 @@ interface EventFiltersProps {
 
 export function EventFilters({ query }: EventFiltersProps) {
   return (
-    <section aria-label="Event filters" className="filter-bar">
-      <div>
+    <form aria-label="Event filters" className="filter-bar" method="get">
+      <label>
         <span>Event</span>
-        <strong>{query.event ?? "All"}</strong>
-      </div>
-      <div>
+        <input defaultValue={query.event} name="event" placeholder="user.created" />
+      </label>
+      <label>
         <span>Actor</span>
-        <strong>{query.actor ?? "All"}</strong>
-      </div>
-      <div>
+        <input defaultValue={query.actor} name="actor" placeholder="actor id" />
+      </label>
+      <label>
         <span>Target</span>
-        <strong>{query.target ?? "All"}</strong>
-      </div>
-    </section>
+        <input defaultValue={query.target} name="target" placeholder="target id" />
+      </label>
+      <Button type="submit">Apply</Button>
+    </form>
   );
 }

@@ -13,6 +13,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    hasMore: false,
+    nextCursor: null,
+    query: {
+      limit: 25
+    },
     rows: [
       {
         actor: "user-1",

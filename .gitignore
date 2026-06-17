@@ -7,3 +7,9 @@ coverage
 .turbo
 .env
 !.env.example
+
+# Web generated artifacts
+apps/web/storybook-static
+apps/web/test-results
+apps/web/playwright-report
+apps/web/blob-report

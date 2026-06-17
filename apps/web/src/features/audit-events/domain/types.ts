@@ -28,3 +28,18 @@ export interface EventListViewModel {
   nextCursor: string | null;
   rows: AuditEventRow[];
 }
+
+export interface EventStatsViewModel {
+  totalEvents: string;
+  topEventTypes: Array<{
+    count: string;
+    event: string;
+  }>;
+}
+
+export interface EventTimeseriesViewModel {
+  points: Array<{
+    bucketStart: string;
+    count: number;
+  }>;
+}

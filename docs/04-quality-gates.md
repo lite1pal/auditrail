@@ -132,6 +132,7 @@ Required web verification commands are:
 
 ```bash
 pnpm --filter web check:architecture
+pnpm --filter web lint
 pnpm --filter web typecheck
 pnpm --filter web test
 pnpm --filter web storybook:build
