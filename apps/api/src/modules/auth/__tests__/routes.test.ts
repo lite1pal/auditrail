@@ -1,0 +1,283 @@
+import Fastify from "fastify";
+import { describe, expect, it } from "vitest";
+
+import { registerAuthRoutes } from "../routes.js";
+import type { AuthService } from "../service.js";
+
+describe("registerAuthRoutes", () => {
+  it("requests magic links without leaking account state", async () => {
+    const calls: string[] = [];
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async requestMagicLink(email) {
+          calls.push(email);
+        }
+      })
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com"
+      },
+      url: "/auth/magic-links"
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(response.json()).toEqual({
+      accepted: true
+    });
+    expect(calls).toEqual(["user@example.com"]);
+  });
+
+  it("rejects invalid magic-link requests", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub()
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "not-an-email"
+      },
+      url: "/auth/magic-links"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      error: "invalid_auth_request"
+    });
+  });
+
+  it("creates sessions and sets an HttpOnly cookie", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async createSessionFromMagicLink() {
+          return {
+            session: {
+              expiresAt: "2026-01-02T00:00:00.000Z",
+              id: "session-1",
+              tokenHash: "hash",
+              userId: "user-1"
+            },
+            sessionToken: "session-token",
+            user: {
+              email: "user@example.com",
+              id: "user-1"
+            }
+          };
+        }
+      })
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com",
+        token: "magic-token"
+      },
+      url: "/auth/sessions"
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.headers["set-cookie"]).toContain(
+      "auditrail_session=session-token"
+    );
+    expect(response.headers["set-cookie"]).toContain("HttpOnly");
+    expect(response.json()).toEqual({
+      user: {
+        email: "user@example.com",
+        id: "user-1"
+      }
+    });
+  });
+
+  it("uses secure session cookies by default", async () => {
+    const app = Fastify();
+    app.register(registerAuthRoutes, {
+      service: createAuthServiceStub({
+        async createSessionFromMagicLink() {
+          return {
+            session: {
+              expiresAt: "2026-01-02T00:00:00.000Z",
+              id: "session-1",
+              tokenHash: "hash",
+              userId: "user-1"
+            },
+            sessionToken: "session-token",
+            user: {
+              email: "user@example.com",
+              id: "user-1"
+            }
+          };
+        }
+      })
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com",
+        token: "magic-token"
+      },
+      url: "/auth/sessions"
+    });
+
+    expect(response.headers["set-cookie"]).toContain("Secure");
+  });
+
+  it("rejects invalid magic links", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async createSessionFromMagicLink() {
+          throw new Error("invalid_magic_link");
+        }
+      })
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com",
+        token: "bad-token"
+      },
+      url: "/auth/sessions"
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: "invalid_magic_link"
+    });
+  });
+
+  it("rejects invalid session requests", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub()
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com"
+      },
+      url: "/auth/sessions"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      error: "invalid_auth_request"
+    });
+  });
+
+  it("returns the current session user", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async getSessionUser(sessionToken) {
+          expect(sessionToken).toBe("session-token");
+
+          return {
+            email: "user@example.com",
+            id: "user-1"
+          };
+        }
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        cookie: "auditrail_session=session-token"
+      },
+      method: "GET",
+      url: "/me"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      memberships: [],
+      user: {
+        email: "user@example.com",
+        id: "user-1"
+      }
+    });
+  });
+
+  it("rejects missing sessions", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub()
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/me"
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: "missing_session"
+    });
+  });
+
+  it("revokes the current session and expires the cookie", async () => {
+    const revokedTokens: string[] = [];
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async revokeSession(sessionToken) {
+          revokedTokens.push(sessionToken);
+        }
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        cookie: "auditrail_session=session-token"
+      },
+      method: "DELETE",
+      url: "/auth/sessions/current"
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["set-cookie"]).toContain("Max-Age=0");
+    expect(revokedTokens).toEqual(["session-token"]);
+  });
+
+  it("expires the session cookie even when no session is present", async () => {
+    const app = buildTestApp({
+      service: createAuthServiceStub()
+    });
+
+    const response = await app.inject({
+      method: "DELETE",
+      url: "/auth/sessions/current"
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["set-cookie"]).toContain("Max-Age=0");
+  });
+});
+
+function buildTestApp(options: { service: AuthService }) {
+  const app = Fastify();
+  app.register(registerAuthRoutes, {
+    cookie: {
+      secure: false
+    },
+    service: options.service
+  });
+  return app;
+}
+
+function createAuthServiceStub(
+  overrides: Partial<AuthService> = {}
+): AuthService {
+  return {
+    async createSessionFromMagicLink() {
+      throw new Error("not implemented");
+    },
+    async getSessionUser() {
+      return undefined;
+    },
+    async requestMagicLink() {},
+    async revokeSession() {},
+    ...overrides
+  };
+}

@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  jsonb,
   index,
   pgTable,
   text,
@@ -62,5 +63,159 @@ export const apiKeys = pgTable(
     index("api_keys_active_key_hash_idx")
       .on(table.keyHash)
       .where(sql`${table.revoked} = false`)
+  ]
+);
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull().unique(),
+    name: text("name"),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [index("users_email_idx").on(table.email)]
+);
+
+export const authMagicLinks = pgTable(
+  "auth_magic_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true
+    }).notNull(),
+    consumedAt: timestamp("consumed_at", {
+      withTimezone: true
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("auth_magic_links_email_idx").on(table.email),
+    index("auth_magic_links_token_hash_idx").on(table.tokenHash)
+  ]
+);
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true
+    }).notNull(),
+    revokedAt: timestamp("revoked_at", {
+      withTimezone: true
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("auth_sessions_user_id_idx").on(table.userId),
+    index("auth_sessions_token_hash_idx").on(table.tokenHash)
+  ]
+);
+
+export const organizationMemberships = pgTable(
+  "organization_memberships",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    role: text("role").notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("organization_memberships_organization_id_idx").on(table.organizationId),
+    index("organization_memberships_user_id_idx").on(table.userId)
+  ]
+);
+
+export const organizationInvitations = pgTable(
+  "organization_invitations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    email: text("email").notNull(),
+    role: text("role").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true
+    }).notNull(),
+    acceptedAt: timestamp("accepted_at", {
+      withTimezone: true
+    }),
+    revokedAt: timestamp("revoked_at", {
+      withTimezone: true
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("organization_invitations_organization_id_idx").on(
+      table.organizationId
+    ),
+    index("organization_invitations_email_idx").on(table.email),
+    index("organization_invitations_token_hash_idx").on(table.tokenHash)
+  ]
+);
+
+export const exportJobs = pgTable(
+  "export_jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id),
+    requestedByUserId: uuid("requested_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    status: text("status").notNull().default("pending"),
+    filters: jsonb("filters").notNull().default({}),
+    objectKey: text("object_key"),
+    error: text("error"),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("export_jobs_project_id_idx").on(table.projectId),
+    index("export_jobs_status_idx").on(table.status)
   ]
 );

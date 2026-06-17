@@ -5,6 +5,7 @@ export type ApiPath = keyof paths & string;
 
 export interface ApiClientOptions {
   baseUrl: string;
+  credentials?: RequestCredentials;
   getAccessToken?: () => Promise<string | undefined>;
   fetcher?: typeof fetch;
 }
@@ -29,6 +30,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       const accessToken = await options.getAccessToken?.();
       const response = await fetcher(buildUrl(options.baseUrl, requestOptions), {
         body: requestOptions.body ? JSON.stringify(requestOptions.body) : undefined,
+        credentials: options.credentials ?? "include",
         headers: buildHeaders(accessToken, requestOptions.body),
         method: requestOptions.method ?? "GET",
         signal: requestOptions.signal

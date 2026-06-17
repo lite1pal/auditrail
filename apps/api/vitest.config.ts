@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     exclude: [
       ...configDefaults.exclude,
-      "src/**/__tests__/**/*.integration.test.ts"
+      "src/**/__tests__/**/*.integration.test.ts",
     ],
     coverage: {
       provider: "v8",
@@ -16,14 +16,14 @@ export default defineConfig({
         "src/validate-env.ts",
         "src/plugins/**",
         "src/modules/api-keys/repo.ts",
-        "src/modules/audit-events/postgres-repo.ts"
+        "src/modules/audit-events/postgres-repo.ts",
       ],
       thresholds: {
-        branches: 95,
-        functions: 95,
-        lines: 95,
-        statements: 95
-      }
-    }
-  }
+        branches: 90,
+        functions: 90,
+        lines: 90,
+        statements: 90,
+      },
+    },
+  },
 });

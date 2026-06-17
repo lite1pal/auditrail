@@ -302,3 +302,8 @@ Planned route groups:
 
 Auth v1 uses custom email magic links and HttpOnly session cookies. Machine API
 keys remain for event ingestion and server-to-server access.
+
+The auth route adapter is implemented as a feature-owned Fastify plugin with
+tests and injectable services. Production registration still requires persistent
+auth repositories, email delivery configuration, and explicit session-cookie
+environment parsing.

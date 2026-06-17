@@ -29,7 +29,8 @@ describe("createPlatformService", () => {
       email: "USER@example.com",
       expiresAt: "2026-01-01T00:00:00.000Z",
       organizationId: "org-1",
-      role: "admin"
+      role: "admin",
+      tokenHash: "hash"
     });
 
     expect(invitation.email).toBe("user@example.com");

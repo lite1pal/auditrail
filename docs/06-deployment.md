@@ -106,3 +106,6 @@ for:
 - export worker concurrency and retry settings
 
 No secret should be exposed through `NEXT_PUBLIC_*`.
+
+The platform persistence migration is `packages/db/src/migrations/0001_platform_foundation.sql`.
+Run database migrations before enabling auth route registration in production.

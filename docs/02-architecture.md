@@ -128,6 +128,16 @@ These web modules currently own schemas and presenters; API clients, server
 loaders, and UI screens should be added only when the corresponding Fastify API
 routes exist.
 
+Auth routes are introduced behind an injectable Fastify route adapter. The route
+layer owns HTTP-only session cookie serialization, while token creation,
+verification, session lookup, and magic-link sending remain inside the auth
+service boundary.
+
+Platform persistence lives in `packages/db` and is exposed to API modules
+through repository adapters. The schema includes users, magic links, sessions,
+organization memberships, organization invitations, and export jobs. API services
+must continue to depend on repository interfaces rather than Drizzle directly.
+
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 React Hook Form and Zod for forms, TanStack Query for API cache ownership,
 TanStack Table for data grids, Recharts for dashboard charts, `nuqs` for URL

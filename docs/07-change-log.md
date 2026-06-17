@@ -89,3 +89,13 @@ magic-link auth, organizations/projects/invitations, and async export jobs. The
 web app now has matching feature boundaries for auth, organizations,
 invitations, and exports. Fastify routes and persistence are intentionally left
 for the next tested vertical slice.
+
+Added the first tested auth route adapter for magic-link requests, session
+creation, logout, and current-user lookup. The web auth client now targets those
+API paths directly and the shared API client includes credentials for
+cookie-backed browser sessions.
+
+Added the first platform persistence layer: Drizzle schema and migration for
+users, magic links, sessions, organization memberships, invitations, and export
+jobs, plus Postgres repository adapters for auth, platform, and export services.
+Route registration remains deferred until auth/email/cookie config is wired.

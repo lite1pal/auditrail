@@ -47,6 +47,7 @@ export interface PlatformRepo {
     expiresAt: string;
     organizationId: string;
     role: OrganizationRole;
+    tokenHash: string;
   }): Promise<Invitation>;
 }
 
@@ -61,6 +62,7 @@ export interface PlatformService {
     expiresAt: string;
     organizationId: string;
     role: OrganizationRole;
+    tokenHash: string;
   }): Promise<Invitation>;
 }
 
@@ -89,7 +91,8 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
         email: emailSchema.parse(input.email),
         expiresAt: input.expiresAt,
         organizationId: input.organizationId,
-        role: roleSchema.parse(input.role)
+        role: roleSchema.parse(input.role),
+        tokenHash: input.tokenHash
       });
     }
   };
