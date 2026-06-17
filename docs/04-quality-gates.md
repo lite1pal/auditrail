@@ -84,3 +84,6 @@ Every API route must include tests for:
 - relevant rate-limit behavior if route-specific behavior differs from default
 
 Use `app.inject()` for route tests unless a real network socket is required.
+
+New public API routes should register under the current versioned prefix, currently `/api/v1`.
+Do not move operational health checks away from unversioned `/health`.

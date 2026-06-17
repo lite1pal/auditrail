@@ -11,8 +11,8 @@ Keep the build vertical and incremental.
 
 This is now partially implemented through:
 
-- `GET /v1/events`
-- `GET /v1/events/stats`
+- `GET /api/v1/events`
+- `GET /api/v1/events/stats`
 
 The next API-only extension should prefer one of:
 
@@ -26,7 +26,7 @@ The next API-only extension should prefer one of:
    - actor/target type if introduced into the schema
 
 1. Add web dashboard:
-   - call `GET /v1/events`
+   - call `GET /api/v1/events`
    - show recent event table
    - add event detail drawer
 

@@ -190,10 +190,10 @@ module/
 
 The first build slice is now implemented:
 
-1. `POST /v1/events`
+1. `POST /api/v1/events`
 2. API key authentication
 3. event payload validation
 4. append event to Postgres
-5. `GET /v1/events` lists recent project events
+5. `GET /api/v1/events` lists recent project events
 
 The next slice should add either dashboard UI or queue handoff, but not both at the same time.

@@ -1,6 +1,11 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 
+import {
+  API_BASE_PATH,
+  API_VERSION_PREFIX,
+  getApiDescriptor
+} from "./api-version.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
 import { authPlugin } from "./plugins/auth.js";
 import { databasePlugin } from "./plugins/database.js";
@@ -43,6 +48,12 @@ export function buildApp(options: BuildAppOptions = {}) {
       status: "ok"
     };
   });
+  app.get(API_BASE_PATH, async () => getApiDescriptor());
+  app.get(`${API_VERSION_PREFIX}/health`, async () => {
+    return {
+      status: "ok"
+    };
+  });
 
   if (options.useInfrastructure) {
     if (options.infrastructure) {
@@ -54,7 +65,7 @@ export function buildApp(options: BuildAppOptions = {}) {
   }
 
   app.register(registerEventRoutes, {
-    prefix: "/v1"
+    prefix: API_VERSION_PREFIX
   });
 
   return app;

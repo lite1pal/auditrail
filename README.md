@@ -9,8 +9,8 @@ AuditTrail is a multi-tenant audit event platform for SaaS teams. The current bu
 - Shared packages for config, domain schemas, database schema/client, and test helpers
 - PostgreSQL and Redis through Docker Compose
 - Drizzle schema and migrations
-- API-key authenticated `POST /v1/events`
-- Authenticated `GET /v1/events`
+- API-key authenticated `POST /api/v1/events`
+- Authenticated `GET /api/v1/events`
 - Global API rate limiting, with `/health` exempt
 - API test coverage threshold of 95%
 
@@ -104,10 +104,16 @@ Health:
 curl -i http://localhost:4000/health
 ```
 
+API descriptor:
+
+```bash
+curl -i http://localhost:4000/api
+```
+
 Ingest an event:
 
 ```bash
-curl -i http://localhost:4000/v1/events \
+curl -i http://localhost:4000/api/v1/events \
   -H 'content-type: application/json' \
   -H 'authorization: Bearer atl_local_dev_key' \
   -d '{"event":"user.deleted","actor":"admin_123","target":"user_456","metadata":{"reason":"GDPR request"}}'
@@ -116,35 +122,35 @@ curl -i http://localhost:4000/v1/events \
 List recent events:
 
 ```bash
-curl -i 'http://localhost:4000/v1/events?limit=25' \
+curl -i 'http://localhost:4000/api/v1/events?limit=25' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
 Filter events:
 
 ```bash
-curl -i 'http://localhost:4000/v1/events?event=user.deleted&actor=admin_123&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
+curl -i 'http://localhost:4000/api/v1/events?event=user.deleted&actor=admin_123&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
 Paginate and use multi-value filters:
 
 ```bash
-curl -i 'http://localhost:4000/v1/events?limit=2&events=user.deleted,role.changed&actors=admin_123,service_456' \
+curl -i 'http://localhost:4000/api/v1/events?limit=2&events=user.deleted,role.changed&actors=admin_123,service_456' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
 Continue to the next page:
 
 ```bash
-curl -i 'http://localhost:4000/v1/events?limit=2&cursor=<nextCursor>' \
+curl -i 'http://localhost:4000/api/v1/events?limit=2&cursor=<nextCursor>' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 
 Get summary stats:
 
 ```bash
-curl -i 'http://localhost:4000/v1/events/stats?top=5&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
+curl -i 'http://localhost:4000/api/v1/events/stats?top=5&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
   -H 'authorization: Bearer atl_local_dev_key'
 ```
 

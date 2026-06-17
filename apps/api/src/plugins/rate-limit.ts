@@ -1,3 +1,4 @@
+import { API_VERSION_PREFIX } from "../api-version.js";
 import rateLimit from "@fastify/rate-limit";
 import fp from "fastify-plugin";
 
@@ -19,7 +20,10 @@ export const rateLimitPlugin = fp<RateLimitPluginOptions>(async (app, options) =
     skipOnError: false,
     hook: "preHandler",
     allowList(request) {
-      return request.routeOptions.url === "/health";
+      return (
+        request.routeOptions.url === "/health" ||
+        request.routeOptions.url === `${API_VERSION_PREFIX}/health`
+      );
     }
   });
 });

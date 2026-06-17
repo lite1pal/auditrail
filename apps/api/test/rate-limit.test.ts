@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { API_VERSION_PREFIX } from "../src/api-version.js";
 import { buildApp } from "../src/app.js";
 
 describe("rate limiting", () => {
@@ -13,11 +14,11 @@ describe("rate limiting", () => {
 
     await app.inject({
       method: "GET",
-      url: "/v1/events"
+      url: `${API_VERSION_PREFIX}/events`
     });
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events"
+      url: `${API_VERSION_PREFIX}/events`
     });
 
     expect(response.statusCode).toBe(429);
@@ -35,11 +36,11 @@ describe("rate limiting", () => {
 
     await app.inject({
       method: "GET",
-      url: "/health"
+      url: `${API_VERSION_PREFIX}/health`
     });
     const response = await app.inject({
       method: "GET",
-      url: "/health"
+      url: `${API_VERSION_PREFIX}/health`
     });
 
     expect(response.statusCode).toBe(200);

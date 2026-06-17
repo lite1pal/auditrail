@@ -6,6 +6,21 @@ Base URL for local development:
 http://localhost:4000
 ```
 
+API descriptor:
+
+```text
+GET /api
+```
+
+Canonical versioned base path:
+
+```text
+/api/v1
+```
+
+Operational health remains unversioned at `/health` for load balancers and container health checks.
+The versioned route `/api/v1/health` is available for API consumers that want a versioned health path.
+
 ## Authentication
 
 Protected API routes use a bearer API key:
@@ -39,7 +54,27 @@ Response:
 }
 ```
 
-## `POST /v1/events`
+## `GET /api`
+
+Returns supported API version metadata.
+
+Response:
+
+```json
+{
+  "basePath": "/api",
+  "latestVersion": "v1",
+  "defaultVersion": "v1",
+  "versions": [
+    {
+      "version": "v1",
+      "path": "/api/v1"
+    }
+  ]
+}
+```
+
+## `POST /api/v1/events`
 
 Ingests an audit event.
 
@@ -73,7 +108,7 @@ Errors:
 - `401 invalid_api_key`
 - `429 Too Many Requests`
 
-## `GET /v1/events`
+## `GET /api/v1/events`
 
 Lists recent audit events for the authenticated project.
 
@@ -131,7 +166,7 @@ Cursor ordering is stable on:
 - `createdAt DESC`
 - `id DESC` as a tie-breaker
 
-## `GET /v1/events/stats`
+## `GET /api/v1/events/stats`
 
 Returns a small dashboard-oriented summary for the authenticated project.
 
@@ -166,7 +201,7 @@ Errors:
 - `401 invalid_api_key`
 - `429 Too Many Requests`
 
-## `GET /v1/events/timeseries`
+## `GET /api/v1/events/timeseries`
 
 Returns time-bucketed event counts for the authenticated project.
 

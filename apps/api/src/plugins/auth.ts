@@ -1,3 +1,4 @@
+import { isProtectedApiRoute } from "../api-version.js";
 import fp from "fastify-plugin";
 
 import { loadConfig } from "../config.js";
@@ -23,7 +24,7 @@ export const authPlugin = fp(async (app) => {
   app.addHook("preHandler", async (request, reply) => {
     const routeUrl = request.routeOptions.url;
 
-    if (!routeUrl || !routeUrl.startsWith("/v1/events")) {
+    if (!isProtectedApiRoute(routeUrl)) {
       return;
     }
 

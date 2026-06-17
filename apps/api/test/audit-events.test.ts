@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import { describe, expect, it } from "vitest";
 
+import { API_VERSION_PREFIX } from "../src/api-version.js";
 import { buildApp } from "../src/app.js";
 import {
   decodeAuditEventCursor
@@ -19,7 +20,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "admin_123",
@@ -47,7 +48,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created",
         actor: "admin_123"
@@ -55,7 +56,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "admin_123"
@@ -64,7 +65,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?limit=1"
+      url: `${API_VERSION_PREFIX}/events?limit=1`
     });
     const body = response.json();
 
@@ -94,7 +95,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?limit=101"
+      url: `${API_VERSION_PREFIX}/events?limit=101`
     });
 
     expect(response.statusCode).toBe(400);
@@ -113,7 +114,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created",
         actor: "admin_123"
@@ -121,7 +122,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "admin_123"
@@ -130,7 +131,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?event=user.deleted"
+      url: `${API_VERSION_PREFIX}/events?event=user.deleted`
     });
 
     expect(response.statusCode).toBe(200);
@@ -157,7 +158,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created",
         actor: "admin_123"
@@ -165,7 +166,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "service_456"
@@ -174,7 +175,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?actor=admin_123"
+      url: `${API_VERSION_PREFIX}/events?actor=admin_123`
     });
 
     expect(response.statusCode).toBe(200);
@@ -202,7 +203,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created",
         target: "user_123"
@@ -210,7 +211,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         target: "user_456"
@@ -219,7 +220,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?target=user_456"
+      url: `${API_VERSION_PREFIX}/events?target=user_456`
     });
 
     expect(response.statusCode).toBe(200);
@@ -248,21 +249,21 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
@@ -270,7 +271,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?from=2026-06-16T12:04:00.000Z&to=2026-06-16T12:06:00.000Z"
+      url: `${API_VERSION_PREFIX}/events?from=2026-06-16T12:04:00.000Z&to=2026-06-16T12:06:00.000Z`
     });
 
     expect(response.statusCode).toBe(200);
@@ -299,21 +300,21 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
@@ -321,7 +322,7 @@ describe("audit event routes", () => {
 
     const firstPage = await app.inject({
       method: "GET",
-      url: "/v1/events?limit=2"
+      url: `${API_VERSION_PREFIX}/events?limit=2`
     });
     const firstPageBody = firstPage.json();
 
@@ -346,7 +347,7 @@ describe("audit event routes", () => {
 
     const secondPage = await app.inject({
       method: "GET",
-      url: `/v1/events?limit=2&cursor=${firstPageBody.pageInfo.nextCursor}`
+      url: `${API_VERSION_PREFIX}/events?limit=2&cursor=${firstPageBody.pageInfo.nextCursor}`
     });
 
     expect(secondPage.statusCode).toBe(200);
@@ -374,7 +375,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created",
         actor: "admin_123",
@@ -383,7 +384,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "service_456",
@@ -392,7 +393,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed",
         actor: "admin_123",
@@ -402,7 +403,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?events=user.deleted,role.changed&actors=admin_123,service_456&targets=user_456,role_789"
+      url: `${API_VERSION_PREFIX}/events?events=user.deleted,role.changed&actors=admin_123,service_456&targets=user_456,role_789`
     });
 
     expect(response.statusCode).toBe(200);
@@ -437,7 +438,7 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted",
         actor: "admin_123"
@@ -445,7 +446,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed",
         actor: "service_456"
@@ -453,7 +454,7 @@ describe("audit event routes", () => {
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "invoice.refunded",
         actor: "admin_123"
@@ -462,7 +463,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?event=user.deleted&events=user.deleted,role.changed&actors=admin_123,service_456"
+      url: `${API_VERSION_PREFIX}/events?event=user.deleted&events=user.deleted,role.changed&actors=admin_123,service_456`
     });
 
     expect(response.statusCode).toBe(200);
@@ -487,7 +488,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?from=not-a-date"
+      url: `${API_VERSION_PREFIX}/events?from=not-a-date`
     });
 
     expect(response.statusCode).toBe(400);
@@ -503,7 +504,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?from=2026-06-16T13:00:00.000Z&to=2026-06-16T12:00:00.000Z"
+      url: `${API_VERSION_PREFIX}/events/stats?from=2026-06-16T13:00:00.000Z&to=2026-06-16T12:00:00.000Z`
     });
 
     expect(response.statusCode).toBe(400);
@@ -519,7 +520,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/timeseries?from=2026-06-16T13:00:00.000Z&to=2026-06-16T12:00:00.000Z&bucket=hour"
+      url: `${API_VERSION_PREFIX}/events/timeseries?from=2026-06-16T13:00:00.000Z&to=2026-06-16T12:00:00.000Z&bucket=hour`
     });
 
     expect(response.statusCode).toBe(400);
@@ -535,7 +536,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events?cursor=not-a-valid-cursor"
+      url: `${API_VERSION_PREFIX}/events?cursor=not-a-valid-cursor`
     });
 
     expect(response.statusCode).toBe(400);
@@ -553,7 +554,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: ""
       }
@@ -573,7 +574,7 @@ describe("audit event routes", () => {
     });
 
     await app.register(registerEventRoutes, {
-      prefix: "/v1",
+      prefix: API_VERSION_PREFIX,
       service: {
         async ingest() {
           throw new Error("database unavailable");
@@ -595,7 +596,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
@@ -612,7 +613,7 @@ describe("audit event routes", () => {
     });
 
     await app.register(registerEventRoutes, {
-      prefix: "/v1",
+      prefix: API_VERSION_PREFIX,
       service: {
         async ingest() {
           throw new Error("not used");
@@ -634,7 +635,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events"
+      url: `${API_VERSION_PREFIX}/events`
     });
 
     expect(response.statusCode).toBe(500);
@@ -648,7 +649,7 @@ describe("audit event routes", () => {
     });
 
     await app.register(registerEventRoutes, {
-      prefix: "/v1",
+      prefix: API_VERSION_PREFIX,
       service: {
         async ingest() {
           throw new Error("not used");
@@ -667,7 +668,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?top=5"
+      url: `${API_VERSION_PREFIX}/events/stats?top=5`
     });
 
     expect(response.statusCode).toBe(500);
@@ -681,7 +682,7 @@ describe("audit event routes", () => {
     });
 
     await app.register(registerEventRoutes, {
-      prefix: "/v1",
+      prefix: API_VERSION_PREFIX,
       service: {
         async ingest() {
           throw new Error("not used");
@@ -703,7 +704,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/timeseries?from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z&bucket=hour"
+      url: `${API_VERSION_PREFIX}/events/timeseries?from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z&bucket=hour`
     });
 
     expect(response.statusCode).toBe(500);
@@ -718,7 +719,7 @@ describe("audit event routes", () => {
 
     app.decorateRequest("apiKeyPrincipal");
     app.addHook("preHandler", async (request, reply) => {
-      if (request.routeOptions.url === "/v1/events") {
+      if (request.routeOptions.url === `${API_VERSION_PREFIX}/events`) {
         return reply.code(401).send({
           error: "missing_api_key"
         });
@@ -726,12 +727,12 @@ describe("audit event routes", () => {
     });
 
     await app.register(registerEventRoutes, {
-      prefix: "/v1"
+      prefix: API_VERSION_PREFIX
     });
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
@@ -755,28 +756,28 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
@@ -784,7 +785,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?top=2"
+      url: `${API_VERSION_PREFIX}/events/stats?top=2`
     });
 
     expect(response.statusCode).toBe(200);
@@ -814,21 +815,21 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
@@ -836,7 +837,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?from=2026-06-16T12:04:00.000Z&to=2026-06-16T12:06:00.000Z"
+      url: `${API_VERSION_PREFIX}/events/stats?from=2026-06-16T12:04:00.000Z&to=2026-06-16T12:06:00.000Z`
     });
 
     expect(response.statusCode).toBe(200);
@@ -862,21 +863,21 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
@@ -884,7 +885,7 @@ describe("audit event routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/events/timeseries?from=2026-06-16T00:00:00.000Z&to=2026-06-18T00:00:00.000Z&bucket=hour"
+      url: `${API_VERSION_PREFIX}/events/timeseries?from=2026-06-16T00:00:00.000Z&to=2026-06-18T00:00:00.000Z&bucket=hour`
     });
 
     expect(response.statusCode).toBe(200);
@@ -913,21 +914,21 @@ describe("audit event routes", () => {
 
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.created"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "user.deleted"
       }
     });
     await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       payload: {
         event: "role.changed"
       }
@@ -935,12 +936,12 @@ describe("audit event routes", () => {
 
     const firstPage = await app.inject({
       method: "GET",
-      url: "/v1/events?limit=2"
+      url: `${API_VERSION_PREFIX}/events?limit=2`
     });
     const firstPageBody = firstPage.json();
     const secondPage = await app.inject({
       method: "GET",
-      url: `/v1/events?limit=2&cursor=${firstPageBody.pageInfo.nextCursor}`
+      url: `${API_VERSION_PREFIX}/events?limit=2&cursor=${firstPageBody.pageInfo.nextCursor}`
     });
 
     expect(firstPage.statusCode).toBe(200);
@@ -963,7 +964,7 @@ async function buildEventRouteTestApp(createdAtValues: string[]) {
   });
 
   await app.register(registerEventRoutes, {
-    prefix: "/v1",
+    prefix: API_VERSION_PREFIX,
     service
   });
 

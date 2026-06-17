@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import pg from "pg";
 import { z } from "zod";
 
+import { API_VERSION_PREFIX } from "../../src/api-version.js";
 import { loadEnvFiles } from "../../src/env-files.js";
 import { buildApp } from "../../src/app.js";
 import { loadConfig } from "../../src/config.js";
@@ -61,7 +62,7 @@ describe("event API integration", () => {
   it("ingests, lists, summarizes, and returns timeseries with a real API key", async () => {
     const ingestResponse = await app.inject({
       method: "POST",
-      url: "/v1/events",
+      url: `${API_VERSION_PREFIX}/events`,
       headers: {
         authorization: `Bearer ${apiKey}`
       },
@@ -79,7 +80,7 @@ describe("event API integration", () => {
 
     const listResponse = await app.inject({
       method: "GET",
-      url: "/v1/events?event=user.deleted",
+      url: `${API_VERSION_PREFIX}/events?event=user.deleted`,
       headers: {
         authorization: `Bearer ${apiKey}`
       }
@@ -107,7 +108,7 @@ describe("event API integration", () => {
 
     const statsResponse = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?top=5",
+      url: `${API_VERSION_PREFIX}/events/stats?top=5`,
       headers: {
         authorization: `Bearer ${apiKey}`
       }
@@ -126,7 +127,7 @@ describe("event API integration", () => {
 
     const timeseriesResponse = await app.inject({
       method: "GET",
-      url: "/v1/events/timeseries?from=2026-01-01T00:00:00.000Z&to=2100-01-01T00:00:00.000Z&bucket=hour",
+      url: `${API_VERSION_PREFIX}/events/timeseries?from=2026-01-01T00:00:00.000Z&to=2100-01-01T00:00:00.000Z&bucket=hour`,
       headers: {
         authorization: `Bearer ${apiKey}`
       }
@@ -140,11 +141,11 @@ describe("event API integration", () => {
   it("rejects missing and invalid API keys across the event route family", async () => {
     const missingAuthResponse = await app.inject({
       method: "GET",
-      url: "/v1/events/stats?top=5"
+      url: `${API_VERSION_PREFIX}/events/stats?top=5`
     });
     const invalidAuthResponse = await app.inject({
       method: "GET",
-      url: "/v1/events/timeseries?from=2026-01-01T00:00:00.000Z&to=2100-01-01T00:00:00.000Z&bucket=hour",
+      url: `${API_VERSION_PREFIX}/events/timeseries?from=2026-01-01T00:00:00.000Z&to=2100-01-01T00:00:00.000Z&bucket=hour`,
       headers: {
         authorization: "Bearer atl_invalid_key"
       }
