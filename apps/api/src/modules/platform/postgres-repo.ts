@@ -72,7 +72,7 @@ export function createPostgresPlatformRepo(
         )
         .limit(1);
 
-      if (!record) {
+      if (!record || record.userId !== input.userId) {
         return undefined;
       }
 
@@ -122,8 +122,15 @@ export function createPostgresPlatformRepo(
         )
         .where(eq(organizationMemberships.userId, userId));
       const contexts: UserMembershipContext[] = [];
+      const seenOrganizations = new Set<string>();
 
       for (const record of records) {
+        if (seenOrganizations.has(record.organization.id)) {
+          continue;
+        }
+
+        seenOrganizations.add(record.organization.id);
+
         const projectRecords = await db
           .select()
           .from(projects)

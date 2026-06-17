@@ -155,3 +155,9 @@ Fixed platform membership lookup after invitation acceptance. The Postgres
 platform repo now queries memberships by organization and user together, so
 project listing works for newly invited users even when the organization already
 has other members.
+
+Made organization membership idempotent for invitation acceptance. The platform
+service now returns an existing membership instead of creating a duplicate, the
+database migration adds a unique organization/user membership index after
+removing duplicates, and `/me` context loading defensively deduplicates stale
+duplicate rows.

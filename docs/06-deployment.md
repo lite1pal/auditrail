@@ -118,6 +118,9 @@ Current auth env variables:
 
 The platform persistence migration is `packages/db/src/migrations/0001_platform_foundation.sql`.
 Run database migrations before enabling auth route registration in production.
+`packages/db/src/migrations/0002_unique_memberships.sql` removes duplicate
+organization memberships and adds a uniqueness guarantee for
+`organization_id + user_id`.
 
 When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic

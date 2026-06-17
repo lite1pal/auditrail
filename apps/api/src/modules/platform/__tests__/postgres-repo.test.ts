@@ -117,6 +117,47 @@ describe("createPostgresPlatformRepo", () => {
     ]);
   });
 
+  it("deduplicates user membership contexts by organization", async () => {
+    const db = createFakeDb([], {
+      contextRows: [
+        {
+          membership: {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "owner",
+            userId: "user-1"
+          },
+          organization: {
+            id: "org-1",
+            name: "Acme"
+          }
+        },
+        {
+          membership: {
+            id: "membership-2",
+            organizationId: "org-1",
+            role: "member",
+            userId: "user-1"
+          },
+          organization: {
+            id: "org-1",
+            name: "Acme"
+          }
+        }
+      ],
+      projectRows: [
+        {
+          id: "project-1",
+          name: "Production",
+          organizationId: "org-1"
+        }
+      ]
+    });
+    const repo = createPostgresPlatformRepo(db);
+
+    await expect(repo.listUserMembershipContexts("user-1")).resolves.toHaveLength(1);
+  });
+
   it("finds memberships and lists organization resources", async () => {
     const db = createFakeDb([], {
       membershipRows: [

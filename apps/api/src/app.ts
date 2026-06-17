@@ -197,13 +197,17 @@ export function buildApp(options: BuildAppOptions = {}) {
     app.register(authPlugin);
     app.register(async (infrastructureApp) => {
       const config = loadConfig(loadEnvFiles());
+      const authTokenSecret = requireRuntimeConfig(
+        config.AUTH_TOKEN_SECRET,
+        "AUTH_TOKEN_SECRET"
+      );
       const authRepo = createPostgresAuthRepo(infrastructureApp.db);
       const platformRepo = createPostgresPlatformRepo(infrastructureApp.db);
       const magicLinkSender = createRuntimeMagicLinkSender(app, config);
       const authService = createAuthService(authRepo, magicLinkSender, {
         magicLinkTtlMs: config.AUTH_MAGIC_LINK_TTL_SECONDS * 1000,
         sessionTtlMs: config.AUTH_SESSION_TTL_SECONDS * 1000,
-        tokenSecret: config.AUTH_TOKEN_SECRET
+        tokenSecret: authTokenSecret
       });
       const platformService = createPlatformService(platformRepo);
 
@@ -223,7 +227,7 @@ export function buildApp(options: BuildAppOptions = {}) {
         service: authService
       });
       infrastructureApp.register(registerPlatformRoutes, {
-        invitationTokenSecret: config.AUTH_TOKEN_SECRET,
+        invitationTokenSecret: authTokenSecret,
         prefix: API_VERSION_PREFIX,
         service: platformService
       });
@@ -272,8 +276,9 @@ function createRuntimeMagicLinkSender(
   app: ReturnType<typeof Fastify>,
   config: ReturnType<typeof loadConfig>
 ): MagicLinkSender {
+  const webPublicUrl = requireRuntimeConfig(config.WEB_PUBLIC_URL, "WEB_PUBLIC_URL");
   const sender = createInMemoryMagicLinkSender({
-    webPublicUrl: config.WEB_PUBLIC_URL
+    webPublicUrl
   });
 
   return {
@@ -291,4 +296,12 @@ function createRuntimeMagicLinkSender(
       }
     }
   };
+}
+
+function requireRuntimeConfig(value: string | undefined, name: string): string {
+  if (!value) {
+    throw new Error(`missing_runtime_config:${name}`);
+  }
+
+  return value;
 }

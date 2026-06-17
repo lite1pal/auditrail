@@ -172,6 +172,20 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
         throw new Error("invalid_invitation");
       }
 
+      const existingMembership = await repo.findMembership({
+        organizationId: invitation.organizationId,
+        userId: input.userId
+      });
+
+      if (existingMembership) {
+        await repo.acceptInvitation({
+          acceptedAt: now.toISOString(),
+          invitationId: invitation.id
+        });
+
+        return existingMembership;
+      }
+
       const membership = await repo.createMembership({
         organizationId: invitation.organizationId,
         role: invitation.role,

@@ -202,6 +202,47 @@ describe("createPlatformService", () => {
     });
   });
 
+  it("returns an existing membership when accepting another invitation", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-admin",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "admin-1"
+        },
+        {
+          id: "membership-existing",
+          organizationId: "org-1",
+          role: "member",
+          userId: "user-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+    const result = await service.inviteMember({
+      email: "user@example.com",
+      organizationId: "org-1",
+      role: "viewer",
+      tokenSecret: "test-secret",
+      ttlMs: 60_000,
+      userId: "admin-1"
+    });
+
+    await expect(
+      service.acceptInvitation({
+        now: new Date("2026-01-01T00:00:00.000Z"),
+        token: result.token,
+        tokenSecret: "test-secret",
+        userId: "user-1"
+      })
+    ).resolves.toMatchObject({
+      id: "membership-existing",
+      role: "member"
+    });
+    expect(repo.memberships).toHaveLength(2);
+  });
+
   it("rejects invalid invitations", async () => {
     const service = createPlatformService(createInMemoryPlatformRepo());
 
