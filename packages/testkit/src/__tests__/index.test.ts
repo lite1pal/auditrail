@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestEnv, fixedDate } from "../src/index.js";
+import { createTestEnv, fixedDate } from "../index.js";
 
 describe("testkit", () => {
   it("creates stable dates", () => {

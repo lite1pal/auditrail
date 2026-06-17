@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { hashApiKey, parseApiKey } from "../src/modules/api-keys/keys.js";
+import { hashApiKey, parseApiKey } from "../keys.js";
 
 describe("api key helpers", () => {
   it("parses key prefixes and hashes keys with a pepper", () => {

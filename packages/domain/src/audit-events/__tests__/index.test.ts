@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ingestAuditEventSchema } from "../src/audit-events/index.js";
+import { ingestAuditEventSchema } from "../index.js";
 
 describe("audit event schemas", () => {
   it("accepts the MVP ingestion shape", () => {

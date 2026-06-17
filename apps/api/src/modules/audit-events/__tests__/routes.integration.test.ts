@@ -2,12 +2,12 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import pg from "pg";
 import { z } from "zod";
 
-import { API_VERSION_PREFIX } from "../../src/api-version.js";
-import { loadEnvFiles } from "../../src/env-files.js";
-import { buildApp } from "../../src/app.js";
-import { loadConfig } from "../../src/config.js";
-import { hashApiKey } from "../../src/modules/api-keys/keys.js";
-import { seedDemoProject } from "../../../../packages/db/src/seed.js";
+import { API_VERSION_PREFIX } from "../../../api-version.js";
+import { loadEnvFiles } from "../../../env-files.js";
+import { buildApp } from "../../../app.js";
+import { loadConfig } from "../../../config.js";
+import { hashApiKey } from "../../api-keys/keys.js";
+import { seedDemoProject } from "../../../../../../packages/db/src/seed.js";
 
 const config = loadConfig(loadEnvFiles());
 const integrationEnv = z

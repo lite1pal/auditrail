@@ -7,7 +7,7 @@ import {
   EVENTS_ROUTE_PREFIX,
   getApiDescriptor,
   isProtectedApiRoute
-} from "../src/api-version.js";
+} from "../api-version.js";
 
 describe("api version helpers", () => {
   it("identifies protected versioned event routes", () => {

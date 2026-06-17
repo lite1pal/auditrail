@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { API_VERSION_PREFIX } from "../src/api-version.js";
-import { buildApp } from "../src/app.js";
+import { API_VERSION_PREFIX } from "../../api-version.js";
+import { buildApp } from "../../app.js";
 
 describe("rate limiting", () => {
   it("limits API routes by default", async () => {

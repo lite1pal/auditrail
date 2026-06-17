@@ -1,16 +1,12 @@
 import Fastify from "fastify";
 import { describe, expect, it } from "vitest";
 
-import { API_VERSION_PREFIX } from "../src/api-version.js";
-import { buildApp } from "../src/app.js";
-import {
-  decodeAuditEventCursor
-} from "../src/modules/audit-events/cursor.js";
-import {
-  createInMemoryAuditEventRepo
-} from "../src/modules/audit-events/repo.js";
-import { registerEventRoutes } from "../src/modules/audit-events/routes.js";
-import { createAuditEventService } from "../src/modules/audit-events/service.js";
+import { API_VERSION_PREFIX } from "../../../api-version.js";
+import { buildApp } from "../../../app.js";
+import { decodeAuditEventCursor } from "../cursor.js";
+import { createInMemoryAuditEventRepo } from "../repo.js";
+import { registerEventRoutes } from "../routes.js";
+import { createAuditEventService } from "../service.js";
 
 describe("audit event routes", () => {
   it("accepts valid event payloads", async () => {

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createInMemoryAuditEventRepo } from "../src/modules/audit-events/repo.js";
+import { createInMemoryAuditEventRepo } from "../repo.js";
 import {
   assertValidCursor,
   buildNextCursor,
   normalizeIngestInput,
   slicePageEvents,
   toListFilters
-} from "../src/modules/audit-events/query.js";
+} from "../query.js";
 
 describe("audit event query helpers", () => {
   it("normalizes missing metadata to an empty object", () => {

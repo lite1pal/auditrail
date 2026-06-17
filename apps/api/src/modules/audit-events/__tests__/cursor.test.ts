@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeAuditEventCursor,
   encodeAuditEventCursor
-} from "../src/modules/audit-events/cursor.js";
+} from "../cursor.js";
 
 describe("audit event cursor helpers", () => {
   it("encodes and decodes cursors", () => {

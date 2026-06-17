@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createInMemoryAuditEventRepo,
   type AuditEventTenant
-} from "../src/modules/audit-events/repo.js";
+} from "../repo.js";
 
 const tenant: AuditEventTenant = {
   organizationId: "org_1",

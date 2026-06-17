@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { API_BASE_PATH, API_VERSION_PREFIX } from "../src/api-version.js";
-import { buildApp } from "../src/app.js";
+import { API_BASE_PATH, API_VERSION_PREFIX } from "../api-version.js";
+import { buildApp } from "../app.js";
 
 describe("health route", () => {
   it("can register infrastructure plugins for runtime mode", async () => {

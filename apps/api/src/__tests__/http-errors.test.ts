@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { registerApiErrorHandler } from "../src/http-errors.js";
+import { registerApiErrorHandler } from "../http-errors.js";
 
 describe("http error handler", () => {
   it("formats zod errors as invalid_event_query responses", async () => {

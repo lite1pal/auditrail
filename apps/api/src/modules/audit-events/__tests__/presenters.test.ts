@@ -5,7 +5,7 @@ import {
   toEventListResponse,
   toEventStatsResponse,
   toEventTimeseriesResponse
-} from "../src/modules/audit-events/presenters.js";
+} from "../presenters.js";
 
 describe("audit event presenters", () => {
   it("maps accepted event responses", () => {

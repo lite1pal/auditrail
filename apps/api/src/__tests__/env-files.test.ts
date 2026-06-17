@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { loadEnvFiles } from "../src/env-files.js";
+import { loadEnvFiles } from "../env-files.js";
 
 describe("env file loading", () => {
   it("loads root and app env files with app values taking precedence", () => {

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { parseEnvFile, parseWithSchema } from "../src/index.js";
-import { loadEnvFiles } from "../src/index.js";
+import { loadEnvFiles, parseEnvFile, parseWithSchema } from "../index.js";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { loadConfig } from "../src/config.js";
+import { loadConfig } from "../config.js";
 
 describe("api config", () => {
   it("parses required environment values", () => {
