@@ -1,7 +1,14 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
+import { registerApiSchemas } from "../../http-schemas.js";
 import type { AuthService } from "./service.js";
+import {
+  createSessionRouteSchema,
+  deleteSessionRouteSchema,
+  getMeRouteSchema,
+  requestMagicLinkRouteSchema
+} from "./http-contract.js";
 
 const requestMagicLinkBodySchema = z.object({
   email: z.string().email()
@@ -29,6 +36,8 @@ export async function registerAuthRoutes(
   app: FastifyInstance,
   options: AuthRoutesOptions
 ) {
+  registerApiSchemas(app);
+
   const cookie: Required<AuthCookieOptions> = {
     maxAgeSeconds: 60 * 60 * 24 * 30,
     name: "auditrail_session",
@@ -38,7 +47,10 @@ export async function registerAuthRoutes(
     ...options.cookie
   };
 
-  app.post("/auth/magic-links", async (request, reply) => {
+  app.post(
+    "/auth/magic-links",
+    { schema: requestMagicLinkRouteSchema },
+    async (request, reply) => {
     const body = requestMagicLinkBodySchema.safeParse(request.body);
 
     if (!body.success) {
@@ -52,9 +64,13 @@ export async function registerAuthRoutes(
     return reply.code(202).send({
       accepted: true
     });
-  });
+    }
+  );
 
-  app.post("/auth/sessions", async (request, reply) => {
+  app.post(
+    "/auth/sessions",
+    { schema: createSessionRouteSchema },
+    async (request, reply) => {
     try {
       const body = createSessionBodySchema.safeParse(request.body);
 
@@ -86,9 +102,13 @@ export async function registerAuthRoutes(
 
       throw error;
     }
-  });
+    }
+  );
 
-  app.delete("/auth/sessions/current", async (request, reply) => {
+  app.delete(
+    "/auth/sessions/current",
+    { schema: deleteSessionRouteSchema },
+    async (request, reply) => {
     const sessionToken = getCookieValue(request.headers.cookie, cookie.name);
 
     if (sessionToken) {
@@ -98,9 +118,10 @@ export async function registerAuthRoutes(
     reply.header("set-cookie", serializeExpiredSessionCookie(cookie));
 
     return reply.code(204).send();
-  });
+    }
+  );
 
-  app.get("/me", async (request, reply) => {
+  app.get("/me", { schema: getMeRouteSchema }, async (request, reply) => {
     const sessionToken = getCookieValue(request.headers.cookie, cookie.name);
     const user = sessionToken
       ? await options.service.getSessionUser(sessionToken)

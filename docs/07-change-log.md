@@ -99,3 +99,8 @@ Added the first platform persistence layer: Drizzle schema and migration for
 users, magic links, sessions, organization memberships, invitations, and export
 jobs, plus Postgres repository adapters for auth, platform, and export services.
 Route registration remains deferred until auth/email/cookie config is wired.
+
+Added the auth email delivery boundary with an in-memory sender for development
+and tests, added auth-specific environment validation, documented the magic-link
+URL contract, and allowed `buildApp()` to register auth routes through an
+explicit injected `AuthService`.

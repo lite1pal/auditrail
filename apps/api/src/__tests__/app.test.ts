@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { API_BASE_PATH, API_VERSION_PREFIX } from "../api-version.js";
 import { buildApp } from "../app.js";
+import type { AuthService } from "../modules/auth/service.js";
 
 describe("health route", () => {
   it("can register infrastructure plugins for runtime mode", async () => {
@@ -103,7 +104,66 @@ describe("health route", () => {
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events`);
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/stats`);
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/timeseries`);
+    expect(body.paths).not.toHaveProperty(`${API_VERSION_PREFIX}/auth/magic-links`);
+
+    await app.close();
+  });
+
+  it("can register auth routes with an injected service", async () => {
+    const app = buildApp({
+      auth: {
+        cookie: {
+          secure: false
+        },
+        service: createAuthServiceStub()
+      },
+      useRateLimit: false
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        email: "user@example.com"
+      },
+      url: `${API_VERSION_PREFIX}/auth/magic-links`
+    });
+
+    expect(response.statusCode).toBe(202);
+
+    await app.close();
+  });
+
+  it("adds auth routes to OpenAPI when auth is registered", async () => {
+    const app = buildApp({
+      auth: {
+        service: createAuthServiceStub()
+      },
+      useRateLimit: false
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/openapi.json`
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().paths).toHaveProperty(
+      `${API_VERSION_PREFIX}/auth/magic-links`
+    );
 
     await app.close();
   });
 });
+
+function createAuthServiceStub(): AuthService {
+  return {
+    async createSessionFromMagicLink() {
+      throw new Error("not implemented");
+    },
+    async getSessionUser() {
+      return undefined;
+    },
+    async requestMagicLink() {},
+    async revokeSession() {}
+  };
+}

@@ -10,6 +10,12 @@ const environmentSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   RATE_LIMIT_WINDOW: z.string().default("1 minute"),
   API_KEY_PEPPER: z.string().min(16),
+  AUTH_TOKEN_SECRET: z.string().min(32).optional(),
+  AUTH_MAGIC_LINK_TTL_SECONDS: z.coerce.number().int().positive().default(900),
+  AUTH_SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(2592000),
+  AUTH_SESSION_COOKIE_NAME: z.string().default("auditrail_session"),
+  AUTH_SESSION_COOKIE_SECURE: z.coerce.boolean().default(true),
+  WEB_PUBLIC_URL: z.string().url().optional(),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url()
 });

@@ -307,3 +307,7 @@ The auth route adapter is implemented as a feature-owned Fastify plugin with
 tests and injectable services. Production registration still requires persistent
 auth repositories, email delivery configuration, and explicit session-cookie
 environment parsing.
+
+The app builder can register auth routes when an `AuthService` is injected.
+Runtime registration with Postgres persistence and email delivery is the next
+step after configuring the auth environment.

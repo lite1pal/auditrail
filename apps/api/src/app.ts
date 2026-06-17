@@ -10,6 +10,11 @@ import {
 } from "./api-version.js";
 import { registerApiErrorHandler } from "./http-errors.js";
 import { registerApiSchemas, schemaIds } from "./http-schemas.js";
+import {
+  registerAuthRoutes,
+  type AuthCookieOptions
+} from "./modules/auth/routes.js";
+import type { AuthService } from "./modules/auth/service.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
 import { authPlugin } from "./plugins/auth.js";
 import { databasePlugin } from "./plugins/database.js";
@@ -25,6 +30,10 @@ export interface InfrastructureOptions {
 }
 
 export interface BuildAppOptions {
+  auth?: {
+    cookie?: AuthCookieOptions;
+    service: AuthService;
+  };
   useInfrastructure?: boolean;
   useRateLimit?: boolean;
   rateLimit?: RateLimitOptions;
@@ -55,6 +64,10 @@ export function buildApp(options: BuildAppOptions = {}) {
         {
           name: "events",
           description: "Audit event ingestion and query"
+        },
+        {
+          name: "auth",
+          description: "Browser session authentication"
         }
       ],
       components: {
@@ -160,6 +173,21 @@ export function buildApp(options: BuildAppOptions = {}) {
   app.register(registerEventRoutes, {
     prefix: API_VERSION_PREFIX
   });
+
+  if (options.auth) {
+    const authRouteOptions = options.auth.cookie
+      ? {
+          prefix: API_VERSION_PREFIX,
+          service: options.auth.service,
+          cookie: options.auth.cookie
+        }
+      : {
+          prefix: API_VERSION_PREFIX,
+          service: options.auth.service
+        };
+
+    app.register(registerAuthRoutes, authRouteOptions);
+  }
 
   return app;
 }

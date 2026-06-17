@@ -107,5 +107,14 @@ for:
 
 No secret should be exposed through `NEXT_PUBLIC_*`.
 
+Current auth env variables:
+
+- `AUTH_TOKEN_SECRET`
+- `AUTH_MAGIC_LINK_TTL_SECONDS`
+- `AUTH_SESSION_TTL_SECONDS`
+- `AUTH_SESSION_COOKIE_NAME`
+- `AUTH_SESSION_COOKIE_SECURE`
+- `WEB_PUBLIC_URL`
+
 The platform persistence migration is `packages/db/src/migrations/0001_platform_foundation.sql`.
 Run database migrations before enabling auth route registration in production.

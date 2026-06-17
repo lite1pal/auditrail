@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 export const schemaIds = {
   apiDescriptorResponse: "ApiDescriptorResponse",
   healthResponse: "HealthResponse",
+  acceptedResponse: "AcceptedResponse",
   simpleErrorResponse: "SimpleErrorResponse",
   validationIssue: "ValidationIssue",
   validationErrorResponse: "ValidationErrorResponse",
@@ -19,6 +20,12 @@ export const schemaIds = {
   summarizeEventsQuery: "SummarizeEventsQuery",
   timeseriesEventsQuery: "TimeseriesEventsQuery",
   openApiDocumentResponse: "OpenApiDocumentResponse"
+  ,
+  requestMagicLinkBody: "RequestMagicLinkBody",
+  createSessionBody: "CreateSessionBody",
+  authUserResponse: "AuthUserResponse",
+  sessionCreatedResponse: "SessionCreatedResponse",
+  currentUserResponse: "CurrentUserResponse"
 } as const;
 
 export function registerApiSchemas(app: FastifyInstance) {
@@ -56,6 +63,16 @@ export function registerApiSchemas(app: FastifyInstance) {
         type: "string",
         enum: ["ok"]
       }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.acceptedResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["accepted"],
+    properties: {
+      accepted: { type: "boolean" }
     }
   });
 
@@ -112,6 +129,96 @@ export function registerApiSchemas(app: FastifyInstance) {
       code: { type: "string" },
       error: { type: "string" },
       message: { type: "string" }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.requestMagicLinkBody,
+    type: "object",
+    additionalProperties: false,
+    required: ["email"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email"
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.createSessionBody,
+    type: "object",
+    additionalProperties: false,
+    required: ["email", "token"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email"
+      },
+      token: {
+        type: "string",
+        minLength: 1
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.authUserResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["id", "email"],
+    properties: {
+      id: { type: "string" },
+      email: {
+        type: "string",
+        format: "email"
+      },
+      name: { type: "string" }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.currentUserResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["user", "memberships"],
+    properties: {
+      user: {
+        $ref: `${schemaIds.authUserResponse}#`
+      },
+      memberships: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["organizationId", "projectIds", "role"],
+          properties: {
+            organizationId: { type: "string" },
+            projectIds: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            },
+            role: {
+              type: "string",
+              enum: ["owner", "admin", "member", "viewer"]
+            }
+          }
+        }
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.sessionCreatedResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["user"],
+    properties: {
+      user: {
+        $ref: `${schemaIds.authUserResponse}#`
+      }
     }
   });
 
