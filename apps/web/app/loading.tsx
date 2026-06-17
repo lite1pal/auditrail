@@ -1,7 +1,10 @@
+import { EmptyState } from "../src/components/ui/empty-state";
+import { PageShell } from "../src/components/ui/page-shell";
+
 export default function Loading() {
   return (
-    <main className="page-shell">
-      <section className="table-state">Loading AuditTrail...</section>
-    </main>
+    <PageShell>
+      <EmptyState label="Loading AuditTrail..." />
+    </PageShell>
   );
 }

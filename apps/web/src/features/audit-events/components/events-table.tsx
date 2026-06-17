@@ -1,10 +1,10 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
 import { useMemo } from "react";
 
 import { DataTable } from "../../../components/ui/data-table";
+import { PaginationLink } from "../../../components/ui/pagination-link";
 import type { EventListQuery } from "../domain/query";
 import { toEventListHref } from "../domain/query";
 import type { AuditEventRow } from "../domain/types";
@@ -36,7 +36,7 @@ export function EventsTable({
   );
 
   return (
-    <section className="events-section">
+    <section className="grid gap-4">
       <DataTable
         columns={columns}
         emptyLabel="No audit events match these filters."
@@ -44,9 +44,9 @@ export function EventsTable({
         rows={rows}
       />
       {hasMore && nextCursor ? (
-        <Link className="pagination-link" href={toEventListHref(query, nextCursor)}>
+        <PaginationLink href={toEventListHref(query, nextCursor)}>
           Next page
-        </Link>
+        </PaginationLink>
       ) : null}
     </section>
   );

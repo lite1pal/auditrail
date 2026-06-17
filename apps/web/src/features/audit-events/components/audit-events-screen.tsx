@@ -1,3 +1,5 @@
+import { PageShell } from "../../../components/ui/page-shell";
+import { SectionHeader } from "../../../components/ui/section-header";
 import {
   toEventListViewModel,
   toEventStatsViewModel,
@@ -29,13 +31,8 @@ export function AuditEventsScreen({
   const viewModel = toEventListViewModel(initialEvents);
 
   return (
-    <main className="page-shell">
-      <section className="page-heading">
-        <div>
-          <p className="eyebrow">Audit events</p>
-          <h1>Event stream</h1>
-        </div>
-      </section>
+    <PageShell>
+      <SectionHeader eyebrow="Audit events" title="Event stream" />
       <EventFilters query={query} />
       <EventDashboard
         stats={toEventStatsViewModel(stats)}
@@ -47,6 +44,6 @@ export function AuditEventsScreen({
         query={query}
         rows={viewModel.rows}
       />
-    </main>
+    </PageShell>
   );
 }

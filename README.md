@@ -210,8 +210,19 @@ pnpm --filter web test
 pnpm --filter web dev
 ```
 
+Refresh web API contract types after changing `apps/api` contracts:
+
+```bash
+pnpm --filter web api:types
+```
+
 The initial web event stream supports URL-backed filters, cursor pagination,
 event totals, top event types, and a timeseries chart using the existing
 `apps/api` endpoints. Full browser-session authentication still requires an API
 principal mapping for organization and project ownership before replacing the
 server-only local `WEB_API_KEY` path.
+
+The web UI system is Tailwind-first. Shared primitives live in
+`apps/web/src/components/ui`, feature components compose those primitives, and
+`apps/web/app/globals.css` should stay limited to Tailwind import, semantic
+tokens, reset, and base styles.

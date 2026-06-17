@@ -1,4 +1,7 @@
 import { toApiError } from "./api-errors";
+import type { paths } from "./generated/schema";
+
+export type ApiPath = keyof paths & string;
 
 export interface ApiClientOptions {
   baseUrl: string;
@@ -8,7 +11,7 @@ export interface ApiClientOptions {
 
 export interface ApiRequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  path: string;
+  path: ApiPath;
   query?: Record<string, string | number | boolean | undefined>;
   body?: unknown;
   signal?: AbortSignal;

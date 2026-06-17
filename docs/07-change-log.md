@@ -73,3 +73,13 @@ thin adapter, service, boundary-validation, and presenter patterns.
 Expanded the web audit-events slice with server-loaded filters, cursor
 pagination, event stats, and timeseries charting. Browser refetching remains
 deferred until the API has an explicit browser-session principal model.
+
+Hardened the web architecture by moving page data composition into an injectable
+feature server loader, constraining API paths with generated OpenAPI contract
+types, and expanding architecture checks for component and server/client
+boundaries.
+
+Introduced a Tailwind-first UI system for `apps/web`. Repeated visual patterns
+now live in small shared primitives, audit-event feature components compose those
+primitives directly, and global CSS is limited to Tailwind import, semantic
+tokens, reset, and base body styles.

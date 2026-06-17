@@ -1,21 +1,18 @@
-import {
-  getAuditEventStats,
-  getAuditEventTimeseries,
-  listAuditEvents,
-  type AuditEventsClient
-} from "../api/audit-events-client";
+import type { AuditEventsClient } from "../api/audit-events-client";
 import type { EventListQuery } from "../domain/query";
 
 export interface AuditEventsService {
-  list(query: EventListQuery): ReturnType<typeof listAuditEvents>;
-  stats(query: { from?: string; to?: string; top?: number }): ReturnType<
-    typeof getAuditEventStats
-  >;
+  list(query: EventListQuery): ReturnType<AuditEventsClient["list"]>;
+  stats(query: {
+    from?: string;
+    to?: string;
+    top?: number;
+  }): ReturnType<AuditEventsClient["stats"]>;
   timeseries(query: {
     bucket?: "hour" | "day";
     from: string;
     to: string;
-  }): ReturnType<typeof getAuditEventTimeseries>;
+  }): ReturnType<AuditEventsClient["timeseries"]>;
 }
 
 export function createAuditEventsService(
@@ -23,13 +20,13 @@ export function createAuditEventsService(
 ): AuditEventsService {
   return {
     list(query) {
-      return listAuditEvents(client, query);
+      return client.list(query);
     },
     stats(query) {
-      return getAuditEventStats(client, query);
+      return client.stats(query);
     },
     timeseries(query) {
-      return getAuditEventTimeseries(client, query);
+      return client.timeseries(query);
     }
   };
 }

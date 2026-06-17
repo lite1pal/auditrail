@@ -6,57 +6,72 @@ import {
   eventStatsResponseSchema,
   eventTimeseriesResponseSchema
 } from "../domain/schemas";
+import type {
+  EventListResponse,
+  EventStatsResponse,
+  EventTimeseriesResponse
+} from "../domain/types";
 
 export interface AuditEventsClient {
-  list(query: EventListQuery): Promise<unknown>;
-  stats(query: { from?: string; to?: string; top?: number }): Promise<unknown>;
+  list(query: EventListQuery): Promise<EventListResponse>;
+  stats(query: {
+    from?: string;
+    to?: string;
+    top?: number;
+  }): Promise<EventStatsResponse>;
   timeseries(query: {
     bucket?: "hour" | "day";
     from: string;
     to: string;
-  }): Promise<unknown>;
+  }): Promise<EventTimeseriesResponse>;
 }
 
 export function createAuditEventsClient(apiClient: ApiClient): AuditEventsClient {
   return {
     list(query) {
-      return apiClient.request({
-        path: "/api/v1/events",
-        query: toApiEventListQuery(query)
-      });
+      return listAuditEvents(apiClient, query);
     },
     stats(query) {
-      return apiClient.request({
-        path: "/api/v1/events/stats",
-        query
-      });
+      return getAuditEventStats(apiClient, query);
     },
     timeseries(query) {
-      return apiClient.request({
-        path: "/api/v1/events/timeseries",
-        query
-      });
+      return getAuditEventTimeseries(apiClient, query);
     }
   };
 }
 
 export async function listAuditEvents(
-  client: AuditEventsClient,
+  apiClient: ApiClient,
   query: EventListQuery
 ) {
-  return eventListResponseSchema.parse(await client.list(query));
+  return eventListResponseSchema.parse(
+    await apiClient.request({
+        path: "/api/v1/events",
+        query: toApiEventListQuery(query)
+    })
+  );
 }
 
 export async function getAuditEventStats(
-  client: AuditEventsClient,
+  apiClient: ApiClient,
   query: { from?: string; to?: string; top?: number }
 ) {
-  return eventStatsResponseSchema.parse(await client.stats(query));
+  return eventStatsResponseSchema.parse(
+    await apiClient.request({
+        path: "/api/v1/events/stats",
+        query
+    })
+  );
 }
 
 export async function getAuditEventTimeseries(
-  client: AuditEventsClient,
+  apiClient: ApiClient,
   query: { bucket?: "hour" | "day"; from: string; to: string }
 ) {
-  return eventTimeseriesResponseSchema.parse(await client.timeseries(query));
+  return eventTimeseriesResponseSchema.parse(
+    await apiClient.request({
+        path: "/api/v1/events/timeseries",
+        query
+    })
+  );
 }

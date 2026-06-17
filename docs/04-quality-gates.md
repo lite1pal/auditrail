@@ -123,9 +123,13 @@ The web app must enforce the frontend architecture before changes are complete:
 - no `app/**/route.ts` files
 - no `pages/api/**` files
 - feature components under `apps/web/src/features/**/components` stay under 120 lines
+- feature components cannot import `api`, `server`, `services`, or `state`
+- client files cannot import server-only modules
 - pure domain modules are unit tested
 - feature hooks and services are integration tested with fake clients or MSW
 - Storybook covers reusable UI and feature presentational components
+- every shared UI primitive has a Storybook story
+- global CSS contains only Tailwind import, tokens, reset, and base styles
 - Playwright covers critical user flows against `apps/web` and the real `apps/api`
 
 Required web verification commands are:

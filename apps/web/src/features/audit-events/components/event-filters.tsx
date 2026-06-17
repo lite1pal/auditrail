@@ -1,5 +1,7 @@
-import type { EventListQuery } from "../domain/query";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import type { EventListQuery } from "../domain/query";
 
 interface EventFiltersProps {
   query: EventListQuery;
@@ -7,20 +9,26 @@ interface EventFiltersProps {
 
 export function EventFilters({ query }: EventFiltersProps) {
   return (
-    <form aria-label="Event filters" className="filter-bar" method="get">
-      <label>
+    <form
+      aria-label="Event filters"
+      className="grid gap-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto]"
+      method="get"
+    >
+      <Label>
         <span>Event</span>
-        <input defaultValue={query.event} name="event" placeholder="user.created" />
-      </label>
-      <label>
+        <Input defaultValue={query.event} name="event" placeholder="user.created" />
+      </Label>
+      <Label>
         <span>Actor</span>
-        <input defaultValue={query.actor} name="actor" placeholder="actor id" />
-      </label>
-      <label>
+        <Input defaultValue={query.actor} name="actor" placeholder="actor id" />
+      </Label>
+      <Label>
         <span>Target</span>
-        <input defaultValue={query.target} name="target" placeholder="target id" />
-      </label>
-      <Button type="submit">Apply</Button>
+        <Input defaultValue={query.target} name="target" placeholder="target id" />
+      </Label>
+      <Button className="self-end" type="submit">
+        Apply
+      </Button>
     </form>
   );
 }

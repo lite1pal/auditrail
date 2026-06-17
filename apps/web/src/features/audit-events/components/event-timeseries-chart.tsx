@@ -10,6 +10,7 @@ import {
   YAxis
 } from "recharts";
 
+import { ChartPanel } from "../../../components/ui/chart-panel";
 import type { EventTimeseriesViewModel } from "../domain/types";
 
 interface EventTimeseriesChartProps {
@@ -18,8 +19,7 @@ interface EventTimeseriesChartProps {
 
 export function EventTimeseriesChart({ points }: EventTimeseriesChartProps) {
   return (
-    <article className="chart-panel">
-      <span>Events over time</span>
+    <ChartPanel label="Events over time">
       <ResponsiveContainer height={220} width="100%">
         <AreaChart data={points}>
           <CartesianGrid stroke="#edf0f5" />
@@ -29,6 +29,6 @@ export function EventTimeseriesChart({ points }: EventTimeseriesChartProps) {
           <Area dataKey="count" fill="#9cc2ff" stroke="#1f6feb" type="monotone" />
         </AreaChart>
       </ResponsiveContainer>
-    </article>
+    </ChartPanel>
   );
 }

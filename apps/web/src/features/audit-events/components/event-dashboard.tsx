@@ -2,6 +2,7 @@ import type {
   EventStatsViewModel,
   EventTimeseriesViewModel
 } from "../domain/types";
+import { MetricCard } from "../../../components/ui/metric-card";
 import { EventTimeseriesChart } from "./event-timeseries-chart";
 
 interface EventDashboardProps {
@@ -11,22 +12,21 @@ interface EventDashboardProps {
 
 export function EventDashboard({ stats, timeseries }: EventDashboardProps) {
   return (
-    <section className="dashboard-grid" aria-label="Event dashboard">
-      <article className="metric-panel">
-        <span>Total events</span>
-        <strong>{stats.totalEvents}</strong>
-      </article>
-      <article className="metric-panel">
-        <span>Top event types</span>
-        <ul>
+    <section
+      aria-label="Event dashboard"
+      className="grid gap-4 lg:grid-cols-[220px_280px_minmax(0,1fr)]"
+    >
+      <MetricCard label="Total events" value={stats.totalEvents} />
+      <MetricCard label="Top event types">
+        <ul className="m-0 grid list-none gap-2 p-0">
           {stats.topEventTypes.map((eventType) => (
-            <li key={eventType.event}>
+            <li className="flex items-center justify-between gap-3" key={eventType.event}>
               <span>{eventType.event}</span>
               <strong>{eventType.count}</strong>
             </li>
           ))}
         </ul>
-      </article>
+      </MetricCard>
       <EventTimeseriesChart points={timeseries.points} />
     </section>
   );

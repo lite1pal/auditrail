@@ -7,6 +7,8 @@ import {
   type ColumnDef
 } from "@tanstack/react-table";
 
+import { EmptyState } from "./empty-state";
+
 interface DataTableProps<TData> {
   columns: Array<ColumnDef<TData>>;
   emptyLabel: string;
@@ -27,20 +29,24 @@ export function DataTable<TData>({
   });
 
   if (loading) {
-    return <div className="table-state">Loading...</div>;
+    return <EmptyState label="Loading..." />;
   }
 
   if (rows.length === 0) {
-    return <div className="table-state">{emptyLabel}</div>;
+    return <EmptyState label={emptyLabel} />;
   }
 
   return (
-    <table className="data-table">
+    <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+    <table className="w-full border-collapse">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <th key={header.id}>
+              <th
+                className="border-b border-slate-200 bg-[var(--panel-subtle)] p-3 text-left text-sm font-bold text-slate-600"
+                key={header.id}
+              >
                 {flexRender(header.column.columnDef.header, header.getContext())}
               </th>
             ))}
@@ -51,7 +57,10 @@ export function DataTable<TData>({
         {table.getRowModel().rows.map((row) => (
           <tr key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
+              <td
+                className="border-b border-slate-100 p-3 align-top text-sm"
+                key={cell.id}
+              >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}
@@ -59,5 +68,6 @@ export function DataTable<TData>({
         ))}
       </tbody>
     </table>
+    </div>
   );
 }

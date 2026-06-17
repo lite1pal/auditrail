@@ -88,6 +88,31 @@ timeseries data. The frontend must keep this flow as a direct Fastify API
 consumer until `apps/api` owns browser-session validation and maps users to
 organization/project principals.
 
+Feature pages should use a feature-owned server loader rather than composing
+multiple services directly in `app/**/page.tsx`. Route files parse framework
+input and render screens; loaders compose server-only API clients and feature
+services. Loaders must support dependency injection for tests, matching the
+API app's injectable route/service pattern.
+
+API paths in `apps/web` are constrained by generated OpenAPI contract types from
+`apps/api`. Feature API clients still Zod-validate responses at the boundary so
+runtime failures remain explicit. Regenerate contract types with
+`pnpm --filter web api:types` after API contract changes.
+
+### Web UI System
+
+`apps/web` uses a Tailwind-first UI system. Global CSS is limited to Tailwind
+import, semantic CSS variables, document reset, and base body styles. Repeated
+visual patterns belong in small primitives under `apps/web/src/components/ui`;
+feature components compose those primitives with Tailwind utilities and must not
+depend on broad global class selectors.
+
+Shared primitives should stay generic: `Button`, `Input`, `Label`, `Card`,
+`DataTable`, `EmptyState`, `PageShell`, `SectionHeader`, `MetricCard`,
+`PaginationLink`, and `ChartPanel`. Feature-specific presentation remains in the
+feature module, while business logic remains in domain, service, API, hook, or
+server-loader modules.
+
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 React Hook Form and Zod for forms, TanStack Query for API cache ownership,
 TanStack Table for data grids, Recharts for dashboard charts, `nuqs` for URL
