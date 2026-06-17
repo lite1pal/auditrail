@@ -1,0 +1,58 @@
+---
+const signInLink = "http://localhost:3000/auth/sign-in";
+---
+
+<section class="product-hero padded">
+  <div class="container">
+    <div class="hero-content center">
+      <div class="content-copy">
+        <small class="eyebrow">Audit logs for product teams</small>
+        <h1 class="h1-title">Capture every sensitive action. Keep a verifiable trail.</h1>
+        <p>
+          AuditTrail records user and system events, scopes them to the right
+          organization and project, and keeps exports ready when you need proof.
+        </p>
+      </div>
+      <div class="content-form row">
+        <a href={signInLink} class="button button-primary twelve columns">Open the app</a>
+      </div>
+      <small><strong>Built for multi-tenant SaaS, internal tools, and security reviews.</strong></small>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+.product-hero{
+  background: var(--accent-gradient);
+  border-radius: 40px 40px 0 0;
+  margin-top: -30px;
+  .hero-content{
+    padding-top: 50px;
+  }
+
+  .content-copy{
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .h1-title{
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .content-form, p{
+    max-width: 620px;
+    margin: 20px auto;
+  }
+
+  .eyebrow{
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 900;
+    color: #2450a6;
+    font-size: 1.4rem;
+    margin-bottom: 14px;
+  }
+}
+</style>
