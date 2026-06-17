@@ -115,3 +115,25 @@ Preferred test placement:
 
 New public API routes should register under the current versioned prefix, currently `/api/v1`.
 Do not move operational health checks away from unversioned `/health`.
+
+## Web Quality Gates
+
+The web app must enforce the frontend architecture before changes are complete:
+
+- no `app/**/route.ts` files
+- no `pages/api/**` files
+- feature components under `apps/web/src/features/**/components` stay under 120 lines
+- pure domain modules are unit tested
+- feature hooks and services are integration tested with fake clients or MSW
+- Storybook covers reusable UI and feature presentational components
+- Playwright covers critical user flows against `apps/web` and the real `apps/api`
+
+Required web verification commands are:
+
+```bash
+pnpm --filter web check:architecture
+pnpm --filter web typecheck
+pnpm --filter web test
+pnpm --filter web storybook:build
+pnpm --filter web e2e
+```

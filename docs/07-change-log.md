@@ -62,3 +62,10 @@ Docs updated:
 
 - `README.md`
 - `docs/04-quality-gates.md`
+
+## Web Frontend Architecture Baseline
+
+Established `apps/web` as a pure Next.js UI that consumes the existing
+`apps/api` Fastify service. The frontend must not add Next.js route handlers or
+API endpoints. The initial audit-events vertical slice follows the API app's
+thin adapter, service, boundary-validation, and presenter patterns.

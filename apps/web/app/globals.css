@@ -47,3 +47,141 @@ a {
     color-scheme: dark;
   }
 }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #f7f8fa;
+  color: #17202a;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.page-shell {
+  display: grid;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 40px 24px;
+}
+
+.page-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.page-heading h1 {
+  font-size: 32px;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 4px 0 0;
+}
+
+.eyebrow {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.filter-bar {
+  background: #ffffff;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 16px;
+}
+
+.filter-bar div {
+  display: grid;
+  gap: 4px;
+}
+
+.filter-bar span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.filter-bar strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.data-table {
+  background: #ffffff;
+  border: 1px solid #d9dee7;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid #edf0f5;
+  font-size: 14px;
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  background: #f1f4f8;
+  color: #475467;
+  font-weight: 700;
+}
+
+.table-state {
+  background: #ffffff;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  color: #667085;
+  padding: 32px;
+  text-align: center;
+}
+
+.button {
+  align-items: center;
+  background: #1f6feb;
+  border: 1px solid #1f6feb;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.button-secondary {
+  background: #ffffff;
+  color: #17202a;
+}
+
+.button-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #17202a;
+}
+
+@media (max-width: 760px) {
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .page-shell {
+    padding: 24px 16px;
+  }
+}

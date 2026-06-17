@@ -188,3 +188,24 @@ Examples:
 - `/health` is unversioned for infrastructure checks
 - Breaking API changes must land in a new version path
 - Do not silently repurpose existing request or response fields on `/api/v1`
+
+## Web App
+
+`apps/web` is a Next.js UI for the existing Fastify API in `apps/api`.
+It must not define Next.js route handlers, `pages/api` endpoints, or proxy API
+routes. Configure explicit API URLs before running the app:
+
+```bash
+WEB_API_BASE_URL=http://localhost:4000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+WEB_API_KEY=replace-with-a-local-api-key
+```
+
+Useful web commands:
+
+```bash
+pnpm --filter web check:architecture
+pnpm --filter web typecheck
+pnpm --filter web test
+pnpm --filter web dev
+```
