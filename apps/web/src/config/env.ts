@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 const serverEnvironmentSchema = z.object({
-  WEB_API_BASE_URL: z.string().url(),
-  WEB_API_KEY: z.string().min(1).optional()
+  WEB_API_BASE_URL: z.string().url()
 });
 
 const publicEnvironmentSchema = z.object({

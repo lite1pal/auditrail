@@ -55,6 +55,9 @@ Seed demo data:
 pnpm db:seed
 ```
 
+`pnpm db:seed` creates the demo organization and project only. Protected API
+routes require an API key created from the dashboard settings flow.
+
 Start the API:
 
 ```bash
@@ -146,7 +149,7 @@ Ingest an event:
 ```bash
 curl -i http://localhost:4000/api/v1/events \
   -H 'content-type: application/json' \
-  -H 'authorization: Bearer atl_local_dev_key' \
+  -H 'authorization: Bearer <dashboard_api_key>' \
   -d '{"event":"user.deleted","actor":"admin_123","target":"user_456","metadata":{"reason":"GDPR request"}}'
 ```
 
@@ -154,35 +157,35 @@ List recent events:
 
 ```bash
 curl -i 'http://localhost:4000/api/v1/events?limit=25' \
-  -H 'authorization: Bearer atl_local_dev_key'
+  -H 'authorization: Bearer <dashboard_api_key>'
 ```
 
 Filter events:
 
 ```bash
 curl -i 'http://localhost:4000/api/v1/events?event=user.deleted&actor=admin_123&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
-  -H 'authorization: Bearer atl_local_dev_key'
+  -H 'authorization: Bearer <dashboard_api_key>'
 ```
 
 Paginate and use multi-value filters:
 
 ```bash
 curl -i 'http://localhost:4000/api/v1/events?limit=2&events=user.deleted,role.changed&actors=admin_123,service_456' \
-  -H 'authorization: Bearer atl_local_dev_key'
+  -H 'authorization: Bearer <dashboard_api_key>'
 ```
 
 Continue to the next page:
 
 ```bash
 curl -i 'http://localhost:4000/api/v1/events?limit=2&cursor=<nextCursor>' \
-  -H 'authorization: Bearer atl_local_dev_key'
+  -H 'authorization: Bearer <dashboard_api_key>'
 ```
 
 Get summary stats:
 
 ```bash
 curl -i 'http://localhost:4000/api/v1/events/stats?top=5&from=2026-06-16T12:00:00.000Z&to=2026-06-16T13:00:00.000Z' \
-  -H 'authorization: Bearer atl_local_dev_key'
+  -H 'authorization: Bearer <dashboard_api_key>'
 ```
 
 The settings screen now covers the MVP onboarding path: create a project,
@@ -226,7 +229,6 @@ routes. Configure explicit API URLs before running the app:
 ```bash
 WEB_API_BASE_URL=http://localhost:4000
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
-WEB_API_KEY=replace-with-a-local-api-key
 ```
 
 For browser-session auth, the API must also have auth routes enabled with:
@@ -253,7 +255,9 @@ pnpm --filter web api:types
 
 The initial web event stream supports URL-backed filters, cursor pagination,
 event totals, top event types, and a timeseries chart using the existing
-`apps/api` endpoints.
+`apps/api` endpoints. Dashboard reads now follow the signed-in browser session
+plus the selected `organizationId` and `projectId`, instead of a single global
+web API key.
 
 The web app also has a direct Fastify-backed magic-link sign-in flow. It
 requests magic links from `/api/v1/auth/magic-links`, exchanges callback tokens

@@ -10,7 +10,6 @@ export function createServerApiClient(): ApiClient {
 
   return createApiClient({
     baseUrl: config.WEB_API_BASE_URL,
-    getCookieHeader: async () => (await cookies()).toString(),
-    getAccessToken: async () => config.WEB_API_KEY
+    getCookieHeader: async () => (await cookies()).toString()
   });
 }

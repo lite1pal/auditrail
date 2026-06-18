@@ -6,6 +6,29 @@ This file tracks auth and sign-in work items.
 
 ## Done
 
+- [x] T-018 Remove seeded local API key support
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - packages/db/src/seed.ts
+    - scripts/seed-demo.ts
+    - apps/api/src/modules/audit-events/__tests__/routes.integration.test.ts
+    - README.md
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/auth.txt
+  acceptance:
+    - Local setup no longer creates or documents a fixed development API key
+    - API request examples use only dashboard-managed API keys
+    - Test-only seed paths remain explicit instead of being the default local workflow
+
 - [x] T-017 Add tests for auth sender selection and fallback behavior
   status: done
   priority: medium

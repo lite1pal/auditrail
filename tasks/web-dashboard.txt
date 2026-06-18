@@ -4,7 +4,48 @@ This file tracks web dashboard work items.
 
 ## Queue
 
+- [ ] T-025 Keep the selected project stable across dashboard reloads
+  status: in_progress
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/organizations/*
+    - apps/web/src/features/audit-events/*
+    - apps/web/src/features/organizations/__tests__/*
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Switching projects updates the dashboard to the newly selected project immediately
+    - Reloading the page preserves the selected project instead of resetting to the default
+    - Tests cover both project switching and reload persistence behavior
+
 ## Done
+
+- [x] T-024 Show events created with API keys on the dashboard
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/*
+    - apps/web/src/features/audit-events/__tests__/*
+    - apps/web/src/components/layout/app-shell.tsx
+    - apps/api/src/modules/audit-events/*
+    - README.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Events created with a created API key appear in the dashboard list
+    - The dashboard still shows events that already exist in the database
+    - Tests cover the dashboard query or filtering path that caused the missing events
 
 - [x] T-008 Add web tests for event detail inspection flow
   status: done

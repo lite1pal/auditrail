@@ -33,14 +33,14 @@ describe("loadWorkspacePage", () => {
           }
         },
         config: {
-          WEB_API_BASE_URL: "http://localhost:4000",
-          WEB_API_KEY: undefined
+          WEB_API_BASE_URL: "http://localhost:4000"
         },
         cookieStore: {
           get() {
             return {
               value: JSON.stringify({
                 name: "Production ingest",
+                organizationId: "org-1",
                 projectId: "project-2",
                 rawKey: "atlabc_secret"
               })
@@ -87,5 +87,76 @@ describe("loadWorkspacePage", () => {
     expect(result.newApiKey?.rawKey).toBe("atlabc_secret");
     expect(result.ingestCommand).toContain("authorization: Bearer atlabc_secret");
     expect(result.ingestCommand).toContain('"event":"billing.tested"');
+  });
+
+  it("ignores a flashed api key from a different organization", async () => {
+    const result = await loadWorkspacePage(
+      {
+        organizationId: "org-2"
+      },
+      {
+        apiKeysClient: {
+          async createApiKey() {
+            throw new Error("not used");
+          },
+          async listApiKeys() {
+            return {
+              apiKeys: []
+            };
+          },
+          async revokeApiKey() {
+            throw new Error("not used");
+          }
+        },
+        config: {
+          WEB_API_BASE_URL: "http://localhost:4000"
+        },
+        cookieStore: {
+          get() {
+            return {
+              value: JSON.stringify({
+                name: "Production ingest",
+                organizationId: "org-1",
+                projectId: "project-2",
+                rawKey: "atlabc_secret"
+              })
+            };
+          }
+        } as { get(name: string): { value: string } | undefined },
+        organizationsClient: {
+          async createOrganization() {
+            throw new Error("not used");
+          },
+          async createProject() {
+            throw new Error("not used");
+          },
+          async listOrganizations() {
+            return {
+              organizations: [
+                { id: "org-1", name: "Acme" },
+                { id: "org-2", name: "Beta" }
+              ]
+            };
+          },
+          async listProjects() {
+            return {
+              projects: [
+                {
+                  id: "project-9",
+                  name: "Sandbox",
+                  organizationId: "org-2"
+                }
+              ]
+            };
+          }
+        },
+        requestHeaders: new Headers({
+          host: "localhost:3000"
+        })
+      }
+    );
+
+    expect(result.activeOrganizationId).toBe("org-2");
+    expect(result.ingestCommand).toContain("authorization: Bearer <YOUR_API_KEY>");
   });
 });

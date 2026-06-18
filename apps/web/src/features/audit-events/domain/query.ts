@@ -17,6 +17,11 @@ export const eventListQuerySchema = z
 
 export type EventListQuery = z.infer<typeof eventListQuerySchema>;
 
+export interface EventListWorkspaceQuery {
+  organizationId?: string;
+  projectId?: string;
+}
+
 export interface EventDashboardRange {
   bucket: "hour" | "day";
   from: string;
@@ -41,8 +46,14 @@ export function toApiEventListQuery(query: EventListQuery) {
   };
 }
 
-export function toEventListHref(query: EventListQuery, cursor?: string | null) {
+export function toEventListHref(
+  query: EventListQuery,
+  cursor?: string | null,
+  workspace?: EventListWorkspaceQuery
+) {
   const nextQuery = {
+    organizationId: workspace?.organizationId,
+    projectId: workspace?.projectId,
     ...query,
     cursor: cursor ?? undefined
   };

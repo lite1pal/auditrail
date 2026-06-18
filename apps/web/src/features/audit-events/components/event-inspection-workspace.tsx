@@ -3,7 +3,10 @@
 import { useState } from "react";
 
 import { EventDetailPanel } from "@/src/features/audit-events/components/event-detail-panel";
-import type { EventListQuery } from "@/src/features/audit-events/domain/query";
+import type {
+  EventListQuery,
+  EventListWorkspaceQuery
+} from "@/src/features/audit-events/domain/query";
 import type { AuditEventRow } from "@/src/features/audit-events/domain/types";
 import { EventsTable } from "@/src/features/audit-events/components/events-table";
 
@@ -12,13 +15,15 @@ interface EventInspectionWorkspaceProps {
   nextCursor: string | null;
   query: EventListQuery;
   rows: AuditEventRow[];
+  workspace?: EventListWorkspaceQuery;
 }
 
 export function EventInspectionWorkspace({
   hasMore,
   nextCursor,
   query,
-  rows
+  rows,
+  workspace
 }: EventInspectionWorkspaceProps) {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const selectedEvent = rows.find((row) => row.id === selectedEventId) ?? null;
@@ -32,6 +37,7 @@ export function EventInspectionWorkspace({
         query={query}
         rows={rows}
         selectedEventId={selectedEventId}
+        workspace={workspace}
       />
       <EventDetailPanel event={selectedEvent} onClose={() => setSelectedEventId(null)} />
     </section>

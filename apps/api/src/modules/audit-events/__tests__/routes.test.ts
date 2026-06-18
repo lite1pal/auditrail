@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { API_VERSION_PREFIX } from "../../../api-version.js";
 import { buildApp } from "../../../app.js";
@@ -737,6 +737,160 @@ describe("audit event routes", () => {
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({
       error: "missing_api_key"
+    });
+
+    await app.close();
+  });
+
+  it("lists project events through the session-authenticated dashboard route", async () => {
+    const list = vi.fn(async () => [
+      {
+        id: "event-1",
+        eventType: "billing.tested",
+        actorId: "setup-script",
+        targetId: "first-event",
+        metadata: {
+          source: "mvp-onboarding"
+        },
+        createdAt: "2026-06-18T10:00:00.000Z"
+      }
+    ]);
+    const app = Fastify({
+      logger: false
+    });
+
+    app.decorateRequest("sessionUser");
+    app.addHook("preHandler", async (request) => {
+      request.sessionUser = {
+        email: "user@example.com",
+        id: "user-1"
+      };
+    });
+
+    await app.register(registerEventRoutes, {
+      prefix: API_VERSION_PREFIX,
+      projectAccess: {
+        async resolveTenantForUser(input: {
+          organizationId: string;
+          projectId: string;
+          userId: string;
+        }) {
+          expect(input).toEqual({
+            organizationId: "org-1",
+            projectId: "project-2",
+            userId: "user-1"
+          });
+
+          return {
+            organizationId: input.organizationId,
+            projectId: input.projectId
+          };
+        }
+      },
+      service: {
+        async ingest() {
+          throw new Error("not used");
+        },
+        list,
+        async summarize() {
+          return {
+            totalEvents: 0,
+            topEventTypes: []
+          };
+        },
+        async timeseries() {
+          return [];
+        }
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/org-1/projects/project-2/events?limit=25`
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(list).toHaveBeenCalledWith(
+      {
+        organizationId: "org-1",
+        projectId: "project-2"
+      },
+      expect.objectContaining({
+        limit: 26
+      })
+    );
+    expect(response.json()).toMatchObject({
+      events: [
+        {
+          event: "billing.tested",
+          actor: "setup-script",
+          target: "first-event"
+        }
+      ]
+    });
+
+    await app.close();
+  });
+
+  it("requires a session for project dashboard event routes", async () => {
+    const app = Fastify({
+      logger: false
+    });
+
+    app.decorateRequest("sessionUser");
+
+    await app.register(registerEventRoutes, {
+      prefix: API_VERSION_PREFIX,
+      projectAccess: {
+        async resolveTenantForUser() {
+          throw new Error("not used");
+        }
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/org-1/projects/project-2/events`
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: "missing_session"
+    });
+
+    await app.close();
+  });
+
+  it("maps missing projects on project dashboard event routes to 404", async () => {
+    const app = Fastify({
+      logger: false
+    });
+
+    app.decorateRequest("sessionUser");
+    app.addHook("preHandler", async (request) => {
+      request.sessionUser = {
+        email: "user@example.com",
+        id: "user-1"
+      };
+    });
+
+    await app.register(registerEventRoutes, {
+      prefix: API_VERSION_PREFIX,
+      projectAccess: {
+        async resolveTenantForUser() {
+          throw new Error("project_not_found");
+        }
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/org-1/projects/project-2/events`
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: "project_not_found"
     });
 
     await app.close();

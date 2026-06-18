@@ -49,8 +49,10 @@ describe("event API integration", () => {
     }
     await seedDemoProject({
       databaseUrl,
-      keyPrefix: "atl",
-      keyHash: hashApiKey(apiKey, apiKeyPepper)
+      apiKey: {
+        keyPrefix: "atl",
+        keyHash: hashApiKey(apiKey, apiKeyPepper)
+      }
     });
   });
 

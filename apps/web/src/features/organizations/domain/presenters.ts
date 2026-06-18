@@ -15,13 +15,25 @@ export function toProjectOption(project: Project) {
   };
 }
 
-export function toWorkspaceViewModel(currentUser: CurrentUserResponse) {
-  const firstMembership = currentUser.memberships[0];
-  const firstProject = firstMembership?.projects[0];
+export function toWorkspaceViewModel(
+  currentUser: CurrentUserResponse,
+  selection: {
+    organizationId?: string;
+    projectId?: string;
+  } = {}
+) {
+  const activeMembership =
+    currentUser.memberships.find(
+      (membership) => membership.organization.id === selection.organizationId
+    ) ?? currentUser.memberships[0];
+  const activeProject =
+    activeMembership?.projects.find(
+      (project) => project.id === selection.projectId
+    ) ?? activeMembership?.projects[0];
 
   return {
-    activeOrganization: firstMembership?.organization,
-    activeProject: firstProject,
+    activeOrganization: activeMembership?.organization,
+    activeProject,
     memberships: currentUser.memberships.map((membership) => ({
       organization: membership.organization,
       projects: membership.projects,

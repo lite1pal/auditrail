@@ -112,6 +112,9 @@ Expected response:
 
 - `PORT` is supported as a fallback for platforms that inject it automatically.
 - `TEST_DATABASE_URL` is not used in production.
+- Protected API requests require project API keys created through the dashboard
+  or API key management flow. Deployment and local seed setup do not provision a
+  default machine credential.
 - This stack is for deployment. Local development should keep using `docker-compose.yml`.
 ## Platform Runtime Requirements
 

@@ -50,6 +50,12 @@ export async function loadWorkspacePage(
       : [];
   const newApiKey = parseApiKeyFlash(cookieStore.get(apiKeyFlashCookieName)?.value);
   const activeProject = projects.find((project) => project.id === activeProjectId);
+  const activeProjectApiKey =
+    newApiKey &&
+    newApiKey.organizationId === activeOrganizationId &&
+    newApiKey.projectId === activeProjectId
+      ? newApiKey
+      : undefined;
 
   return {
     activeOrganizationId,
@@ -58,8 +64,7 @@ export async function loadWorkspacePage(
     ingestCommand: buildIngestCommand({
       apiBaseUrl: config.WEB_API_BASE_URL,
       projectName: activeProject?.name,
-      rawKey:
-        newApiKey?.projectId === activeProjectId ? newApiKey.rawKey : undefined
+      rawKey: activeProjectApiKey?.rawKey
     }),
     invitationUrl: buildInvitationUrl(
       getSearchValue(searchParams.invitationToken),
@@ -117,6 +122,7 @@ export async function createApiKeyAction(formData: FormData) {
     apiKeyFlashCookieName,
     JSON.stringify({
       name: result.apiKey.name,
+      organizationId,
       projectId,
       rawKey: result.rawKey
     }),
@@ -208,16 +214,23 @@ function parseApiKeyFlash(value: string | undefined) {
   try {
     const parsed = JSON.parse(value) as {
       name?: string;
+      organizationId?: string;
       projectId?: string;
       rawKey?: string;
     };
 
-    if (!parsed.name || !parsed.projectId || !parsed.rawKey) {
+    if (
+      !parsed.name ||
+      !parsed.organizationId ||
+      !parsed.projectId ||
+      !parsed.rawKey
+    ) {
       return undefined;
     }
 
     return {
       name: parsed.name,
+      organizationId: parsed.organizationId,
       projectId: parsed.projectId,
       rawKey: parsed.rawKey
     };

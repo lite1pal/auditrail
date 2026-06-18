@@ -7,12 +7,34 @@ import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import { toWorkspaceViewModel } from "@/src/features/organizations/domain/presenters";
 
 interface AppShellProps {
+  activeOrganizationId?: string;
+  activeProjectId?: string;
   children: ReactNode;
   currentUser: CurrentUserResponse;
 }
 
-export function AppShell({ children, currentUser }: AppShellProps) {
-  const workspace = toWorkspaceViewModel(currentUser);
+export function AppShell({
+  activeOrganizationId,
+  activeProjectId,
+  children,
+  currentUser
+}: AppShellProps) {
+  const workspace = toWorkspaceViewModel(currentUser, {
+    organizationId: activeOrganizationId,
+    projectId: activeProjectId
+  });
+  const workspaceSuffix = workspace.activeOrganization
+    ? `?organizationId=${workspace.activeOrganization.id}${workspace.activeProject ? `&projectId=${workspace.activeProject.id}` : ""}`
+    : "";
+  const dashboardHref = workspaceSuffix
+    ? { pathname: "/", query: Object.fromEntries(new URLSearchParams(workspaceSuffix)) }
+    : "/";
+  const settingsHref = workspaceSuffix
+    ? {
+        pathname: "/settings",
+        query: Object.fromEntries(new URLSearchParams(workspaceSuffix))
+      }
+    : "/settings";
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -26,10 +48,10 @@ export function AppShell({ children, currentUser }: AppShellProps) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Link className="text-sm font-bold" href="/">
+            <Link className="text-sm font-bold" href={dashboardHref}>
               Dashboard
             </Link>
-            <Link className="text-sm font-bold" href="/settings">
+            <Link className="text-sm font-bold" href={settingsHref}>
               Settings
             </Link>
             <form action={logoutAction}>

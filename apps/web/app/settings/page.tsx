@@ -20,7 +20,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const workspace = await loadWorkspacePage(await searchParams);
 
   return (
-    <AppShell currentUser={currentUser}>
+    <AppShell
+      activeOrganizationId={workspace.activeOrganizationId}
+      activeProjectId={workspace.activeProjectId}
+      currentUser={currentUser}
+    >
       <WorkspaceSettingsScreen
         acceptInvitationAction={acceptInvitationAction}
         activeOrganizationId={workspace.activeOrganizationId}

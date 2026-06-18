@@ -6,7 +6,10 @@ import { useMemo } from "react";
 import { Button } from "@/src/components/ui/button";
 import { DataTable } from "@/src/components/ui/data-table";
 import { PaginationLink } from "@/src/components/ui/pagination-link";
-import type { EventListQuery } from "@/src/features/audit-events/domain/query";
+import type {
+  EventListQuery,
+  EventListWorkspaceQuery
+} from "@/src/features/audit-events/domain/query";
 import { toEventListHref } from "@/src/features/audit-events/domain/query";
 import type { AuditEventRow } from "@/src/features/audit-events/domain/types";
 
@@ -18,6 +21,7 @@ interface EventsTableProps {
   query: EventListQuery;
   rows: AuditEventRow[];
   selectedEventId?: string | null;
+  workspace?: EventListWorkspaceQuery;
 }
 
 export function EventsTable({
@@ -27,7 +31,8 @@ export function EventsTable({
   onInspect,
   query,
   rows,
-  selectedEventId
+  selectedEventId,
+  workspace
 }: EventsTableProps) {
   const columns = useMemo<Array<ColumnDef<AuditEventRow>>>(
     () => {
@@ -78,7 +83,7 @@ export function EventsTable({
         rows={rows}
       />
       {hasMore && nextCursor ? (
-        <PaginationLink href={toEventListHref(query, nextCursor)}>
+        <PaginationLink href={toEventListHref(query, nextCursor, workspace)}>
           Next page
         </PaginationLink>
       ) : null}

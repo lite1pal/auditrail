@@ -26,9 +26,13 @@ export interface LoadAuditEventsPageOptions {
 
 export async function loadAuditEventsPage(
   query: EventListQuery,
+  workspace: {
+    organizationId: string;
+    projectId: string;
+  },
   options: LoadAuditEventsPageOptions = {}
 ): Promise<AuditEventsPageData> {
-  const service = options.service ?? createDefaultAuditEventsService();
+  const service = options.service ?? createDefaultAuditEventsService(workspace);
   const dashboardRange = toDashboardRange(query);
   const [events, stats, timeseries] = await Promise.all([
     service.list(query),
@@ -47,6 +51,11 @@ export async function loadAuditEventsPage(
   };
 }
 
-function createDefaultAuditEventsService() {
-  return createAuditEventsService(createAuditEventsClient(createServerApiClient()));
+function createDefaultAuditEventsService(workspace: {
+  organizationId: string;
+  projectId: string;
+}) {
+  return createAuditEventsService(
+    createAuditEventsClient(createServerApiClient(), workspace)
+  );
 }

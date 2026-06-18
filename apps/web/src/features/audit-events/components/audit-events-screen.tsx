@@ -9,7 +9,10 @@ import {
   toEventStatsViewModel,
   toEventTimeseriesViewModel
 } from "@/src/features/audit-events/domain/presenters";
-import type { EventListQuery } from "@/src/features/audit-events/domain/query";
+import type {
+  EventListQuery,
+  EventListWorkspaceQuery
+} from "@/src/features/audit-events/domain/query";
 import type {
   EventListResponse,
   EventStatsResponse,
@@ -24,20 +27,22 @@ interface AuditEventsScreenProps {
   query: EventListQuery;
   stats: EventStatsResponse;
   timeseries: EventTimeseriesResponse;
+  workspace?: EventListWorkspaceQuery;
 }
 
 export function AuditEventsScreen({
   initialEvents,
   query,
   stats,
-  timeseries
+  timeseries,
+  workspace
 }: AuditEventsScreenProps) {
   const viewModel = toEventListViewModel(initialEvents);
 
   return (
     <PageShell>
       <SectionHeader eyebrow="Audit events" title="Event stream" />
-      <EventFilters query={query} />
+      <EventFilters query={query} workspace={workspace} />
       <EventDashboard
         stats={toEventStatsViewModel(stats)}
         timeseries={toEventTimeseriesViewModel(timeseries)}
@@ -47,7 +52,15 @@ export function AuditEventsScreen({
           <EmptyState label="No audit events yet. Generate a project key in Settings and send one test event." />
           <div>
             <Button asChild variant="secondary">
-              <Link href="/settings">Open settings</Link>
+              <Link
+                href={
+                  workspace?.organizationId
+                    ? `/settings?organizationId=${workspace.organizationId}${workspace.projectId ? `&projectId=${workspace.projectId}` : ""}`
+                    : "/settings"
+                }
+              >
+                Open settings
+              </Link>
             </Button>
           </div>
         </section>
@@ -57,6 +70,7 @@ export function AuditEventsScreen({
           nextCursor={viewModel.nextCursor}
           query={query}
           rows={viewModel.rows}
+          workspace={workspace}
         />
       )}
     </PageShell>

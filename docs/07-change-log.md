@@ -2,6 +2,45 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Remove Seeded Local API Key
+
+Changed:
+
+- stopped `pnpm db:seed` from creating a fixed local API key by default
+- changed local API examples to require a dashboard-created project API key
+- kept explicit seed-time API key insertion available only for internal callers such as tests
+
+Why:
+
+- remove a machine-credential path that bypassed the dashboard-managed API key workflow
+- make local and deployed usage follow the same project API key lifecycle
+
+Docs updated:
+
+- `README.md`
+- `docs/03-api.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+
+## 2026-06-18 - Session-Scoped Dashboard Event Reads
+
+Changed:
+
+- moved dashboard audit-event reads off the global web API key path
+- added session-authenticated project-scoped event read routes for the web app
+- preserved selected organization and project context across dashboard and settings links
+
+Why:
+
+- ensure events written with a newly created project API key appear in the same project's dashboard
+- remove the mismatch where the web UI could read a different project's data through one configured machine key
+
+Docs updated:
+
+- `README.md`
+- `docs/03-api.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Web Container Prebuild
 
 Changed:

@@ -78,10 +78,20 @@ Most protected routes use one of these shared response shapes:
 Protected API routes use a bearer API key:
 
 ```text
-Authorization: Bearer atl_local_dev_key
+Authorization: Bearer <dashboard_api_key>
 ```
 
-The seed script creates `atl_local_dev_key` for local development.
+Protected requests are accepted only for active API keys stored in the platform.
+Local setup does not create a fixed development key. Create a project API key
+from the dashboard or the API key management flow before calling protected
+routes.
+
+The browser dashboard uses the signed-in session instead of a machine API key.
+Its event reads are scoped by the selected organization and project through:
+
+- `GET /api/v1/organizations/:organizationId/projects/:projectId/events`
+- `GET /api/v1/organizations/:organizationId/projects/:projectId/events/stats`
+- `GET /api/v1/organizations/:organizationId/projects/:projectId/events/timeseries`
 
 ## Rate Limiting
 

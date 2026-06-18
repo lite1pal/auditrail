@@ -15,6 +15,7 @@ import { registerApiSchemas, schemaIds } from "./http-schemas.js";
 import { createPostgresApiKeyRepo } from "./modules/api-keys/postgres-repo.js";
 import { registerApiKeyRoutes } from "./modules/api-keys/routes.js";
 import {
+  assertRole,
   createApiKeyService,
   type ApiKeyService
 } from "./modules/api-keys/service.js";
@@ -263,12 +264,45 @@ export function buildApp(options: BuildAppOptions = {}) {
         prefix: API_VERSION_PREFIX,
         service: apiKeyService
       });
+      infrastructureApp.register(registerEventRoutes, {
+        prefix: API_VERSION_PREFIX,
+        projectAccess: {
+          async resolveTenantForUser(input: {
+            organizationId: string;
+            projectId: string;
+            userId: string;
+          }) {
+            const membership = await apiKeyRepo.findMembership({
+              organizationId: input.organizationId,
+              userId: input.userId
+            });
+
+            assertRole(membership, ["owner", "admin", "member", "viewer"]);
+
+            const project = await apiKeyRepo.findProject({
+              organizationId: input.organizationId,
+              projectId: input.projectId
+            });
+
+            if (!project) {
+              throw new Error("project_not_found");
+            }
+
+            return {
+              organizationId: input.organizationId,
+              projectId: input.projectId
+            };
+          }
+        }
+      });
     });
   }
 
-  app.register(registerEventRoutes, {
-    prefix: API_VERSION_PREFIX
-  });
+  if (!options.useInfrastructure) {
+    app.register(registerEventRoutes, {
+      prefix: API_VERSION_PREFIX
+    });
+  }
 
   if (options.auth) {
     const authRouteOptions = options.auth.cookie

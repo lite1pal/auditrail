@@ -28,7 +28,14 @@ describe("loadAuditEventsPage", () => {
       }
     };
 
-    const result = await loadAuditEventsPage({ limit: 25 }, { service });
+    const result = await loadAuditEventsPage(
+      { limit: 25 },
+      {
+        organizationId: "org-1",
+        projectId: "project-1"
+      },
+      { service }
+    );
 
     expect(result.events.events).toEqual([]);
     expect(result.stats.totalEvents).toBe(0);

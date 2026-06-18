@@ -159,6 +159,39 @@ export interface paths {
       };
     };
   };
+  [path: `/api/v1/organizations/${string}/projects/${string}/events`]: {
+    get: {
+      responses: {
+        200: {
+          content: {
+            "application/json": components["schemas"]["EventListResponse"];
+          };
+        };
+      };
+    };
+  };
+  [path: `/api/v1/organizations/${string}/projects/${string}/events/stats`]: {
+    get: {
+      responses: {
+        200: {
+          content: {
+            "application/json": components["schemas"]["EventStatsResponse"];
+          };
+        };
+      };
+    };
+  };
+  [path: `/api/v1/organizations/${string}/projects/${string}/events/timeseries`]: {
+    get: {
+      responses: {
+        200: {
+          content: {
+            "application/json": components["schemas"]["EventTimeseriesResponse"];
+          };
+        };
+      };
+    };
+  };
   [path: `/api/v1/organizations/${string}/projects/${string}/api-keys/${string}/revoke`]: {
     post: {
       responses: {
