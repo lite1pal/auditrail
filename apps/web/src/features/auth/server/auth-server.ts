@@ -54,6 +54,12 @@ export async function createSessionAction(formData: FormData) {
 
   const setCookie = response.headers.get("set-cookie");
 
+  console.log(
+    "createSessionAction set-cookie:",
+    response.headers.get("set-cookie"),
+  );
+  console.log("cookies after set:", (await cookies()).toString());
+
   if (setCookie) {
     await setSessionCookie(setCookie);
   }
