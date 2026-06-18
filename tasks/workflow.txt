@@ -6,6 +6,28 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-023 Add low-context agent quickstart docs for repo work
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/T-023-low-context-agent-quickstart
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - AGENTS.md
+    - README.md
+    - apps/web/README.md
+    - docs/01-agent-engineering-rules.md
+    - docs/07-change-log.md
+    - docs/08-agent-quickstart.md
+    - tasks/workflow.txt
+  acceptance:
+    - The repo has one concise agent-oriented quickstart for low-context work
+    - Entry-point docs point agents to the quickstart before broad repo scans
+    - `apps/web/README.md` no longer contains generic framework boilerplate
+
 - [x] T-022 Enforce alias-only imports in `apps/web`
   status: done
   priority: high

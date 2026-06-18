@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AuditTrail Web App
 
-## Getting Started
+Next.js product UI for the Fastify API in `apps/api`.
 
-First, run the development server:
+## What This App Owns
+
+- browser sign-in and magic-link callback flow
+- protected dashboard UI
+- organization and project settings UI
+- API key management UI
+- audit-event table, dashboard cards, and detail inspection
+
+## Hard Boundaries
+
+- do not add `app/**/route.ts`
+- do not add `pages/api/**`
+- do not proxy API calls through Next.js handlers
+- call the existing Fastify API directly
+- use `@/...` imports for all local code
+
+## Where To Start
+
+For most feature tasks:
+
+1. `src/features/<feature>/components/*`
+2. `src/features/<feature>/domain/*`
+3. `src/features/<feature>/__tests__/*`
+
+Shared UI primitives live in `src/components/ui`.
+Shared infra lives in `src/lib`.
+
+## Useful Commands
+
+Run from the repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm --filter web check:architecture
+pnpm --filter web lint
+pnpm --filter web typecheck
+pnpm --filter web test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For local development:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+WEB_API_BASE_URL=http://localhost:4000 \
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000 \
+pnpm dev:web
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Auth Reminder
 
-## Learn More
+The web app depends on API auth routes. Local browser auth also needs:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+AUTH_TOKEN_SECRET=replace-with-a-long-random-secret
+WEB_PUBLIC_URL=http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cheap Context Path
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you are working on a web task and want minimal context, read:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. `../AGENTS.md`
+2. the owning `tasks/*.txt` entry
+3. `../docs/08-agent-quickstart.md`
+4. the relevant `src/features/<feature>` folder

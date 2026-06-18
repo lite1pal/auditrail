@@ -101,6 +101,16 @@ pnpm --filter @auditrail/api test
 The `tasks/` directory is the repository-local task tracker used by agents.
 Each category has its own `.txt` file with `Queue` and `Done` sections.
 
+## Agent Quickstart
+
+For low-context agent work, start with:
+
+1. `AGENTS.md`
+2. the relevant `tasks/*.txt` file
+3. [docs/08-agent-quickstart.md](/Users/denistarasenko/Work/Projects/auditrail/docs/08-agent-quickstart.md:1)
+
+That path is the shortest repo-native way to find the right feature files and commands without scanning unrelated code.
+
 ## Deploying
 
 For Coolify deployment, the repo now includes:

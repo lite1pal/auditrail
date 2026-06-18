@@ -17,6 +17,10 @@ Agents should:
 7. mark tasks complete only after tests pass, or after explicitly documenting skipped tests
 8. automatically create a tracked task for any non-trivial request unless the user explicitly opts out
 
+For low-context work, agents should prefer `docs/08-agent-quickstart.md`
+before broad repo searches. The quickstart is the cheap path to repo layout,
+feature entry points, and verification commands.
+
 Supported task states:
 
 - `todo`

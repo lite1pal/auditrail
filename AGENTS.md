@@ -8,6 +8,7 @@ The `tasks/` directory is the only task tracker for this project.
 - Update status, branch, PR, notes, and completion fields directly in the owning `tasks/*.txt` file.
 - Move completed tasks to `## Done` in the same category file and keep history intact.
 - Read all relevant task files before starting work.
+- For low-context work, prefer `docs/08-agent-quickstart.md` before broad repo scans.
 
 Supported task states are:
 

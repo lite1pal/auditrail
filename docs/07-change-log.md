@@ -2,6 +2,27 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Low-Context Agent Quickstart
+
+Changed:
+
+- added a compact agent quickstart with repo map, cheap read paths, and command shortlist
+- linked repo entry-point docs to the quickstart for low-context work
+- replaced the generic `apps/web/README.md` boilerplate with project-specific guidance
+
+Why:
+
+- reduce context cost for smaller models and narrow task-oriented runs
+- keep agents from wasting tokens on broad scans or framework boilerplate
+
+Docs updated:
+
+- `README.md`
+- `docs/01-agent-engineering-rules.md`
+- `docs/07-change-log.md`
+- `docs/08-agent-quickstart.md`
+- `apps/web/README.md`
+
 ## 2026-06-18 - Auth Sender Config Hardening
 
 Changed:
