@@ -160,4 +160,6 @@ provider adapter so auth links are delivered instead of only logged. Production
 startup now requires an explicit `AUTH_MAGIC_LINK_SENDER` value. The temporary
 local logging sender is allowed only outside production. When
 `AUTH_MAGIC_LINK_SENDER=resend`, startup also requires `AUTH_RESEND_API_KEY`
-and `AUTH_RESEND_FROM_EMAIL`.
+and `AUTH_RESEND_FROM_EMAIL`. Runtime startup now selects the Resend adapter for
+that provider value and keeps the local logging sender only as a non-production
+fallback.

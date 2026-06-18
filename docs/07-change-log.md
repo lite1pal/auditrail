@@ -40,6 +40,26 @@ Docs updated:
 - `apps/api/src/modules/auth/README.md`
 - `docs/07-change-log.md`
 
+## 2026-06-18 - Auth Runtime Sender Selection
+
+Changed:
+
+- updated runtime auth startup to select the Resend sender when configured
+- kept the in-memory logging sender as the non-production fallback path
+- added app-level tests for provider selection and local fallback behavior
+
+Why:
+
+- make startup wiring honor the validated sender config without changing the auth service boundary
+- preserve the local sign-in workflow for development and test environments
+
+Docs updated:
+
+- `apps/api/src/modules/auth/README.md`
+- `docs/03-api.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Alias-Only Imports In Web
 
 Changed:

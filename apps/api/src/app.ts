@@ -23,7 +23,10 @@ import {
   registerAuthRoutes,
   type AuthCookieOptions
 } from "./modules/auth/routes.js";
-import { createInMemoryMagicLinkSender } from "./modules/auth/senders.js";
+import {
+  createInMemoryMagicLinkSender,
+  createResendMagicLinkSender
+} from "./modules/auth/senders.js";
 import {
   createAuthService,
   type AuthService,
@@ -74,6 +77,10 @@ export interface BuildAppOptions {
   useRateLimit?: boolean;
   rateLimit?: RateLimitOptions;
   infrastructure?: InfrastructureOptions;
+}
+
+interface RuntimeMagicLinkSenderDependencies {
+  fetch?: typeof fetch;
 }
 
 export function buildApp(options: BuildAppOptions = {}) {
@@ -306,12 +313,24 @@ export function buildApp(options: BuildAppOptions = {}) {
 
 export function createRuntimeMagicLinkSender(
   app: ReturnType<typeof Fastify>,
-  config: ReturnType<typeof loadConfig>
+  config: ReturnType<typeof loadConfig>,
+  dependencies: RuntimeMagicLinkSenderDependencies = {}
 ): MagicLinkSender {
   const webPublicUrl = requireRuntimeConfig(config.WEB_PUBLIC_URL, "WEB_PUBLIC_URL");
-  const sender = createInMemoryMagicLinkSender({
-    webPublicUrl
-  });
+
+  if (config.AUTH_MAGIC_LINK_SENDER === "resend") {
+    return createResendMagicLinkSender({
+      apiKey: requireRuntimeConfig(config.AUTH_RESEND_API_KEY, "AUTH_RESEND_API_KEY"),
+      fetch: dependencies.fetch,
+      fromEmail: requireRuntimeConfig(
+        config.AUTH_RESEND_FROM_EMAIL,
+        "AUTH_RESEND_FROM_EMAIL"
+      ),
+      webPublicUrl
+    });
+  }
+
+  const sender = createInMemoryMagicLinkSender({ webPublicUrl });
 
   return {
     async sendMagicLink(input) {

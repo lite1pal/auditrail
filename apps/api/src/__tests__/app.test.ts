@@ -271,7 +271,12 @@ describe("health route", () => {
     const app = buildApp({
       useRateLimit: false
     });
-    const sender = createRuntimeMagicLinkSender(app, createConfig("production"));
+    const sender = createRuntimeMagicLinkSender(app, createConfig("production"), {
+      fetch: async () =>
+        new Response(null, {
+          status: 202
+        })
+    });
 
     await sender.sendMagicLink({
       email: "user@example.com",
@@ -279,6 +284,22 @@ describe("health route", () => {
     });
 
     expect(app).toBeDefined();
+
+    await app.close();
+  });
+
+  it("uses the local logging sender outside production", async () => {
+    const app = buildApp({
+      useRateLimit: false
+    });
+    const sender = createRuntimeMagicLinkSender(app, createConfig("development"));
+
+    await expect(
+      sender.sendMagicLink({
+        email: "user@example.com",
+        token: "token-1"
+      })
+    ).resolves.toBeUndefined();
 
     await app.close();
   });
@@ -361,7 +382,11 @@ function createConfig(nodeEnv: ApiConfig["NODE_ENV"]): ApiConfig {
     API_HOST: "0.0.0.0",
     API_KEY_PEPPER: "test-api-key-pepper",
     API_PORT: 4000,
+    AUTH_MAGIC_LINK_SENDER: nodeEnv === "production" ? "resend" : undefined,
     AUTH_MAGIC_LINK_TTL_SECONDS: 900,
+    AUTH_RESEND_API_KEY: nodeEnv === "production" ? "re_test_api_key" : undefined,
+    AUTH_RESEND_FROM_EMAIL:
+      nodeEnv === "production" ? "noreply@example.com" : undefined,
     AUTH_SESSION_COOKIE_NAME: "auditrail_session",
     AUTH_SESSION_COOKIE_SECURE: true,
     AUTH_SESSION_TTL_SECONDS: 2_592_000,

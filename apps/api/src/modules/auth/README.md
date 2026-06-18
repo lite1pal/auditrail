@@ -24,6 +24,8 @@ Owns browser-session authentication for the API.
 - magic links are single-use
 - session tokens are hashed before storage
 - route handlers stay thin and delegate to the service
+- runtime sender selection may choose a local logging sender outside production,
+  but production must use a provider-backed sender
 
 ## When Editing
 
