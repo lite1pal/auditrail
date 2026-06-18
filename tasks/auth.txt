@@ -1,0 +1,69 @@
+# Auth Tasks
+
+This file tracks auth and sign-in work items.
+
+## Queue
+
+- [ ] T-004 Add config validation for a production magic-link sender
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/config.ts
+    - apps/api/src/__tests__/config.test.ts
+  acceptance:
+    - Auth config requires explicit provider selection for production sending
+    - Provider-specific env values are validated at startup
+    - Config tests cover valid and invalid sender settings
+
+- [ ] T-015 Implement a provider-backed auth email sender adapter
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/*
+  acceptance:
+    - Auth includes one concrete provider-backed sender implementation
+    - The sender accepts only validated config
+    - Existing auth service integration remains unchanged at the boundary
+
+- [ ] T-016 Keep the local logging sender as a non-production fallback
+  status: todo
+  priority: low
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/*
+    - apps/api/src/app.ts
+  acceptance:
+    - Local development can still use a logging sender
+    - Provider selection does not break current non-production flows
+    - Startup wiring chooses the correct sender implementation
+
+- [ ] T-017 Add tests for auth sender selection and fallback behavior
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/__tests__/*
+  acceptance:
+    - Tests cover provider-backed sender selection
+    - Tests cover local logging fallback selection
+    - Tests cover invalid config rejection at startup
+
+## Done

@@ -6,16 +6,15 @@ This file records meaningful architecture and structural changes so the codebase
 
 Changed:
 
-- made GitHub Issues the canonical task tracker
-- added `tasks.txt` as the local agent queue/cache
-- added `scripts/task-sync.sh` for `gh`-based task and issue state transitions
-- added `.github/ISSUE_TEMPLATE/task.yml`
+- made the `tasks/` directory the canonical task tracker
+- added category-scoped task files under `tasks/`
+- added `scripts/task-sync.sh` for local task validation
 - added hard task workflow rules to `AGENTS.md` and `docs/01-agent-engineering-rules.md`
 
 Why:
 
-- keep human-reviewable task history in GitHub while preserving a repo-local queue the agent can edit reliably
-- avoid agents inventing hidden state outside the repository and issue tracker
+- keep task history inside the repository where the agent can update it deterministically
+- avoid agents inventing hidden state outside `tasks/*.txt`
 
 Docs updated:
 
@@ -208,3 +207,23 @@ duplicate rows.
 Hardened database behavior for invitations and exports. Pending invitations are
 now unique per organization/email, invitation acceptance verifies the signed-in
 user email, and export listing/worker pickup uses deterministic ordering.
+## 2026-06-18 - Task Directory Split
+
+Changed:
+
+- replaced the single `tasks.txt` file with category-scoped files under `tasks/`
+- moved existing open work into per-category task files
+- moved workflow history into `tasks/workflow.txt`
+- updated repository docs to reference `tasks/*.txt` instead of `tasks.txt`
+
+Why:
+
+- keep each task file small and focused enough to scan quickly
+- make task ownership and category boundaries explicit in the repository
+
+Docs updated:
+
+- `README.md`
+- `AGENTS.md`
+- `docs/01-agent-engineering-rules.md`
+- `docs/07-change-log.md`

@@ -4,20 +4,18 @@ AuditTrail should be easy for AI agents to extend without silently weakening the
 
 ## Task workflow
 
-GitHub Issues are the source of truth for tasks. `tasks.txt` is the agent's
-local queue/cache so work can be resumed reliably from the repository alone.
+The `tasks/` directory is the only task tracker for this project.
 
 Agents should:
 
-1. read `tasks.txt` before starting work
+1. read the relevant `tasks/*.txt` files before starting work
 2. work on exactly one task at a time
-3. create or link a GitHub issue before coding if the task has no `github:` value
+3. create new tasks directly in the appropriate `tasks/*.txt` category file
 4. use branch names in the form `codex/<task-id>-<slug>`
-5. update `tasks.txt` when issue/branch/PR/state changes
-6. move completed tasks to `Done` without deleting history
-7. search for existing GitHub issues before creating a new one
-8. mark tasks complete only after tests pass, or after explicitly documenting skipped tests
-9. automatically create or link a tracked task for any non-trivial request unless the user explicitly opts out
+5. update the owning `tasks/*.txt` file when branch/PR/state changes
+6. move completed tasks to `Done` in the same file without deleting history
+7. mark tasks complete only after tests pass, or after explicitly documenting skipped tests
+8. automatically create a tracked task for any non-trivial request unless the user explicitly opts out
 
 Supported task states:
 
@@ -27,9 +25,6 @@ Supported task states:
 - `blocked`
 - `review`
 - `done`
-
-The repository includes `scripts/task-sync.sh` for the common `gh`-based issue
-operations and `tasks.txt` updates.
 
 ## API route rule
 

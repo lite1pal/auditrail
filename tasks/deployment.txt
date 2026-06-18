@@ -1,0 +1,70 @@
+# Deployment Tasks
+
+This file tracks deployment and runtime work items.
+
+## Queue
+
+- [ ] T-003 Run the API from compiled output in production
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/package.json
+    - Dockerfile
+  acceptance:
+    - Production API startup uses compiled files instead of `tsx`
+    - The Docker runtime command matches the compiled API entrypoint
+    - Local production-start verification is documented in task notes
+
+- [ ] T-012 Run the web app from a production build in containers
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/package.json
+    - Dockerfile
+  acceptance:
+    - Container startup uses the built web app
+    - The runtime command no longer depends on development tooling
+    - Build and start commands are aligned with the Docker image
+
+- [ ] T-013 Trim Docker runtime dependencies for hosted deployment
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - Dockerfile
+    - package.json
+  acceptance:
+    - Runtime image excludes unnecessary development dependencies
+    - Build-time dependencies remain available only in build stages
+    - The final image still starts both production services correctly
+
+- [ ] T-014 Update hosted deployment docs for the new runtime flow
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - docs/06-deployment.md
+  acceptance:
+    - Deployment docs describe the compiled runtime behavior
+    - Verification commands are listed from the repository root
+    - Operator-facing setup notes match the current container flow
+
+## Done

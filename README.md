@@ -98,27 +98,8 @@ pnpm --filter @auditrail/api test
 
 ## Task Tracking
 
-GitHub Issues are the canonical task tracker. `tasks.txt` is the local queue
-and cache used by agents while working in the repository.
-
-Common workflow helpers:
-
-```bash
-scripts/task-sync.sh create T-001
-scripts/task-sync.sh start T-001
-scripts/task-sync.sh review T-001 123
-scripts/task-sync.sh done T-001 123
-```
-
-The issue template for new tracked work lives at
-`.github/ISSUE_TEMPLATE/task.yml`.
-
-Expected default behavior for non-trivial work:
-
-- the agent creates or links a tracked task first
-- the task is mirrored into GitHub Issues if needed
-- implementation starts only after the task is in `tasks.txt`
-- completion updates both GitHub and `tasks.txt`
+The `tasks/` directory is the repository-local task tracker used by agents.
+Each category has its own `.txt` file with `Queue` and `Done` sections.
 
 ## Deploying
 

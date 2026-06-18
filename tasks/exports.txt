@@ -1,0 +1,71 @@
+# Export Tasks
+
+This file tracks export-related work items.
+
+## Queue
+
+- [ ] T-002 Add a project-level export action in the web app
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/exports/*
+  acceptance:
+    - Users can trigger export creation from the selected project view
+    - The export action uses the existing API client path
+    - Loading and error states are visible in the UI
+
+- [ ] T-009 Render export history states for the selected project
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/exports/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/organizations/server/*
+  acceptance:
+    - The export list shows pending, completed, and failed states
+    - Empty history renders a dedicated empty state
+    - The list updates after a successful export creation
+
+- [ ] T-010 Add completed export download action in the web app
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/exports/*
+    - apps/web/src/lib/api/generated/schema.d.ts
+  acceptance:
+    - Completed exports render a download action
+    - The download action uses the API-provided export URL
+    - Failed or pending exports do not expose the download action
+
+- [ ] T-011 Add web tests for export create and history states
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/exports/*
+  acceptance:
+    - Tests cover export creation from the project view
+    - Tests cover pending, completed, and failed history states
+    - Tests cover download action visibility rules
+
+## Done

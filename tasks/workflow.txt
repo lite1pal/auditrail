@@ -1,0 +1,46 @@
+# Workflow Tasks
+
+This file tracks task-system and agent-workflow work items.
+
+## Queue
+
+## Done
+
+- [x] T-000 Add task system bootstrap
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/T-000-task-system-bootstrap
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - AGENTS.md
+    - tasks/workflow.txt
+    - scripts/task-sync.sh
+  acceptance:
+    - task files exist inside the repository
+    - task state stays in repository-managed text files
+    - Codex has an explicit task workflow
+
+- [x] T-021 Split task tracking into category files under `tasks/`
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - AGENTS.md
+    - README.md
+    - docs/01-agent-engineering-rules.md
+    - docs/07-change-log.md
+    - scripts/task-sync.sh
+    - tasks/*
+  acceptance:
+    - Task tracking lives in the `tasks/` directory
+    - Each category has its own `.txt` file
+    - Repository docs describe the category-file workflow consistently

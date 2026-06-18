@@ -1,0 +1,69 @@
+# Audit Summary Tasks
+
+This file tracks audit summary work items.
+
+## Queue
+
+- [ ] T-005 Add top-actors summary data to the audit events API
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/*
+  acceptance:
+    - API responses include top actors for the active filter range
+    - The summary shape is validated at the HTTP boundary
+    - Existing audit event list responses remain compatible
+
+- [ ] T-018 Add top-targets summary data to the audit events API
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/*
+  acceptance:
+    - API responses include top targets for the active filter range
+    - The summary shape is validated at the HTTP boundary
+    - Existing audit event list responses remain compatible
+
+- [ ] T-019 Render dashboard cards for top actors and top targets
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/*
+  acceptance:
+    - The dashboard renders top actors without breaking existing stats
+    - The dashboard renders top targets without breaking existing stats
+    - Empty summary data renders a stable empty state
+
+- [ ] T-020 Document and test the audit summary response shape
+  status: todo
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/__tests__/*
+    - apps/web/src/features/audit-events/*
+    - docs/03-api.md
+  acceptance:
+    - API tests cover the summary response shape
+    - Web tests cover summary rendering states
+    - `docs/03-api.md` documents the new summary fields
+
+## Done
