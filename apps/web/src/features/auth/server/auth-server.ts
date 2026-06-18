@@ -87,6 +87,8 @@ async function setSessionCookie(setCookie: string) {
 
   const store = await cookies();
 
+  store.delete("auditrail_session");
+
   store.set(name, value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
