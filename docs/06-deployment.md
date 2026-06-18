@@ -67,9 +67,13 @@ WEB_API_BASE_URL=http://api:4000
 NEXT_PUBLIC_API_BASE_URL=${API_PUBLIC_URL}
 ```
 
+The web image bakes `NEXT_PUBLIC_API_BASE_URL` from `API_PUBLIC_URL` during the
+Docker build so the browser bundle points at the deployed API origin.
+
 ## Stack behavior
 
-- `web` builds from the root `Dockerfile` and runs `pnpm start:web:container`
+- `web` builds from the root `Dockerfile`, compiles during image build, and
+  runs `pnpm start:web:container`
 - `api` builds from the root `Dockerfile`
 - `postgres` uses `postgres:17-alpine`
 - `redis` uses `redis:7-alpine`
@@ -86,7 +90,7 @@ NEXT_PUBLIC_API_BASE_URL=${API_PUBLIC_URL}
 4. Coolify starts `api`.
 5. The API container runs `pnpm db:migrate`.
 6. Coolify starts `web`.
-7. The web container builds and serves the Next.js app on port `3000`.
+7. The web container serves the prebuilt Next.js app on port `3000`.
 
 ## Health check
 

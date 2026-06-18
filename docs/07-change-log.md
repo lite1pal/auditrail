@@ -2,6 +2,28 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Web Container Prebuild
+
+Changed:
+
+- moved the `web` production build into the root Docker image build
+- changed the web runtime command to serve the prebuilt Next.js output only
+- added a dedicated root build script so the Docker image and repo command stay aligned
+- replaced the remote Google font fetch with local system font stacks so the
+  container build can run offline
+
+Why:
+
+- keep container startup focused on serving the app instead of compiling it
+- make the deployed runtime match the production build artifact instead of rebuilding on boot
+- avoid build failures in containerized environments without external font access
+
+Docs updated:
+
+- `README.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Low-Context Agent Quickstart
 
 Changed:

@@ -4,38 +4,6 @@ This file tracks deployment and runtime work items.
 
 ## Queue
 
-- [ ] T-003 Run the API from compiled output in production
-  status: todo
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - apps/api/package.json
-    - Dockerfile
-  acceptance:
-    - Production API startup uses compiled files instead of `tsx`
-    - The Docker runtime command matches the compiled API entrypoint
-    - Local production-start verification is documented in task notes
-
-- [ ] T-012 Run the web app from a production build in containers
-  status: todo
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - apps/web/package.json
-    - Dockerfile
-  acceptance:
-    - Container startup uses the built web app
-    - The runtime command no longer depends on development tooling
-    - Build and start commands are aligned with the Docker image
-
 - [ ] T-013 Trim Docker runtime dependencies for hosted deployment
   status: todo
   priority: medium
@@ -68,3 +36,25 @@ This file tracks deployment and runtime work items.
     - Operator-facing setup notes match the current container flow
 
 ## Done
+
+- [x] T-012 Run the web app from a production build in containers
+  status: done
+  priority: high
+  owner: codex
+  branch: main
+  pr:
+  last_updated: 2026-06-18
+  blocked_reason:
+  files:
+    - package.json
+    - Dockerfile
+    - docker-compose.coolify.yml
+    - apps/web/app/layout.tsx
+    - apps/web/app/globals.css
+    - README.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+  acceptance:
+    - Container startup uses the built web app
+    - The runtime command no longer depends on development tooling
+    - Build and start commands are aligned with the Docker image
