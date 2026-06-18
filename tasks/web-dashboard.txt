@@ -2,9 +2,25 @@
 
 This file tracks web dashboard work items.
 
-## Queue
-
 ## Done
+
+- [x] T-026 Ignore blank event filter inputs in the dashboard query parser
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/domain/query.ts
+    - apps/web/src/features/audit-events/__tests__/query.test.ts
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Submitting the dashboard filter form with empty inputs does not throw a Zod error
+    - Blank event, actor, and target parameters are ignored by the query parser
+    - Tests cover the empty-input regression
 
 - [x] T-025 Keep the selected project stable across dashboard reloads
   status: done

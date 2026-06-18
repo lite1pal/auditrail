@@ -13,6 +13,18 @@ describe("parseEventSearchParams", () => {
     });
   });
 
+  it("ignores blank filter inputs from the form", () => {
+    expect(
+      parseEventSearchParams({
+        actor: "",
+        event: "",
+        target: ""
+      })
+    ).toEqual({
+      limit: 25
+    });
+  });
+
   it("rejects inverted date ranges", () => {
     expect(() =>
       parseEventSearchParams({

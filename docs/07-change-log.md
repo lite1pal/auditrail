@@ -2,6 +2,22 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Ignore Blank Dashboard Filter Inputs
+
+Changed:
+
+- normalized empty dashboard query-string values to `undefined` before Zod parsing
+- added a regression test for submitting the event, actor, and target filters with blank inputs
+
+Why:
+
+- prevent the dashboard filter form from throwing on untouched inputs during a GET submit
+- preserve the existing validation rules for non-empty values while treating empty form fields as absent
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Simplify To The Core MVP Slice
 
 Changed:

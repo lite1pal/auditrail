@@ -86,9 +86,14 @@ function flattenSearchParams(
   searchParams: Record<string, string | string[] | undefined>
 ) {
   return Object.fromEntries(
-    Object.entries(searchParams).map(([key, value]) => [
-      key,
-      Array.isArray(value) ? value[0] : value
-    ])
+    Object.entries(searchParams).flatMap(([key, value]) => {
+      const normalizedValue = Array.isArray(value)
+        ? value.find((item) => item !== "")
+        : value === ""
+          ? undefined
+          : value;
+
+      return normalizedValue === undefined ? [] : [[key, normalizedValue]];
+    })
   );
 }
