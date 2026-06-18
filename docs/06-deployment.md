@@ -126,7 +126,10 @@ No secret should be exposed through `NEXT_PUBLIC_*`.
 Current auth and hosted-MVP env variables:
 
 - `AUTH_TOKEN_SECRET`
+- `AUTH_MAGIC_LINK_SENDER`
 - `AUTH_MAGIC_LINK_TTL_SECONDS`
+- `AUTH_RESEND_API_KEY`
+- `AUTH_RESEND_FROM_EMAIL`
 - `AUTH_SESSION_TTL_SECONDS`
 - `AUTH_SESSION_COOKIE_NAME`
 - `AUTH_SESSION_COOKIE_SECURE`
@@ -153,4 +156,8 @@ name and TTL.
 Runtime API startup with `useInfrastructure: true` now registers auth routes
 against Postgres automatically. Non-production logs local magic-link URLs. Before
 production launch, replace the runtime magic-link sender with a real email
-provider adapter so auth links are delivered instead of only logged.
+provider adapter so auth links are delivered instead of only logged. Production
+startup now requires an explicit `AUTH_MAGIC_LINK_SENDER` value. The temporary
+local logging sender is allowed only outside production. When
+`AUTH_MAGIC_LINK_SENDER=resend`, startup also requires `AUTH_RESEND_API_KEY`
+and `AUTH_RESEND_FROM_EMAIL`.

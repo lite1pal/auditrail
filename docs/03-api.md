@@ -315,7 +315,9 @@ step after configuring the auth environment.
 When `buildApp({ useInfrastructure: true })` is used, the API registers auth
 routes with the Postgres auth repository, platform context repository, and the
 runtime magic-link sender. Non-production runtime logs the generated magic-link
-URL so local sign-in can be completed without an email provider.
+URL so local sign-in can be completed without an email provider. Production
+startup requires an explicit auth sender selection and rejects the local logging
+sender.
 
 `GET /api/v1/me` returns the authenticated browser user and their organization
 membership context, including organization and project summaries. API-key

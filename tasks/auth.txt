@@ -4,22 +4,6 @@ This file tracks auth and sign-in work items.
 
 ## Queue
 
-- [ ] T-004 Add config validation for a production magic-link sender
-  status: todo
-  priority: medium
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - apps/api/src/config.ts
-    - apps/api/src/__tests__/config.test.ts
-  acceptance:
-    - Auth config requires explicit provider selection for production sending
-    - Provider-specific env values are validated at startup
-    - Config tests cover valid and invalid sender settings
-
 - [ ] T-015 Implement a provider-backed auth email sender adapter
   status: todo
   priority: medium
@@ -67,3 +51,23 @@ This file tracks auth and sign-in work items.
     - Tests cover invalid config rejection at startup
 
 ## Done
+
+- [x] T-004 Add config validation for a production magic-link sender
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/T-004-auth-sender-config-validation
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/config.ts
+    - apps/api/src/__tests__/config.test.ts
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+  acceptance:
+    - Auth config requires explicit provider selection for production sending
+    - Provider-specific env values are validated at startup
+    - Config tests cover valid and invalid sender settings

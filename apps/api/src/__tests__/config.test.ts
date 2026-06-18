@@ -21,6 +21,9 @@ describe("api config", () => {
       RATE_LIMIT_WINDOW: "30 seconds",
       API_KEY_PEPPER: "test-api-key-pepper",
       AUTH_MAGIC_LINK_TTL_SECONDS: 900,
+      AUTH_MAGIC_LINK_SENDER: undefined,
+      AUTH_RESEND_API_KEY: undefined,
+      AUTH_RESEND_FROM_EMAIL: undefined,
       AUTH_SESSION_COOKIE_NAME: "auditrail_session",
       AUTH_SESSION_COOKIE_SECURE: true,
       AUTH_SESSION_TTL_SECONDS: 2592000,
@@ -42,5 +45,53 @@ describe("api config", () => {
         REDIS_URL: "redis://localhost:6379"
       }).API_PORT
     ).toBe(4010);
+  });
+
+  it("requires an explicit production sender selection", () => {
+    expect(() =>
+      loadConfig({
+        NODE_ENV: "production",
+        API_KEY_PEPPER: "test-api-key-pepper",
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+        REDIS_URL: "redis://localhost:6379"
+      })
+    ).toThrow(/AUTH_MAGIC_LINK_SENDER must be set explicitly in production/);
+  });
+
+  it("rejects the logging sender in production", () => {
+    expect(() =>
+      loadConfig({
+        NODE_ENV: "production",
+        API_KEY_PEPPER: "test-api-key-pepper",
+        AUTH_MAGIC_LINK_SENDER: "log",
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+        REDIS_URL: "redis://localhost:6379"
+      })
+    ).toThrow(/AUTH_MAGIC_LINK_SENDER=log is not allowed in production/);
+  });
+
+  it("requires provider-specific resend settings when resend is selected", () => {
+    expect(() =>
+      loadConfig({
+        AUTH_MAGIC_LINK_SENDER: "resend",
+        API_KEY_PEPPER: "test-api-key-pepper",
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+        REDIS_URL: "redis://localhost:6379"
+      })
+    ).toThrow(/AUTH_RESEND_API_KEY is required/);
+  });
+
+  it("accepts a fully configured resend sender in production", () => {
+    expect(
+      loadConfig({
+        NODE_ENV: "production",
+        API_KEY_PEPPER: "test-api-key-pepper",
+        AUTH_MAGIC_LINK_SENDER: "resend",
+        AUTH_RESEND_API_KEY: "re_test_api_key",
+        AUTH_RESEND_FROM_EMAIL: "noreply@example.com",
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+        REDIS_URL: "redis://localhost:6379"
+      }).AUTH_MAGIC_LINK_SENDER
+    ).toBe("resend");
   });
 });

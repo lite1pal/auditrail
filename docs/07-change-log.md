@@ -2,6 +2,26 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Auth Sender Config Hardening
+
+Changed:
+
+- added an explicit `AUTH_MAGIC_LINK_SENDER` config selector for API runtime auth
+- reserved `resend` as the first provider-backed sender contract with validated
+  `AUTH_RESEND_API_KEY` and `AUTH_RESEND_FROM_EMAIL` env values
+- made production config reject the local logging sender and missing sender selection
+
+Why:
+
+- prevent production auth startup from silently using a non-delivery local sender
+- validate provider-specific email requirements before runtime wiring begins
+
+Docs updated:
+
+- `docs/03-api.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Alias-Only Imports In Web
 
 Changed:
