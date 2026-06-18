@@ -16,8 +16,8 @@ import type {
   EventTimeseriesResponse
 } from "../domain/types";
 import { EventDashboard } from "./event-dashboard";
+import { EventInspectionWorkspace } from "./event-inspection-workspace";
 import { EventFilters } from "./event-filters";
-import { EventsTable } from "./events-table";
 
 interface AuditEventsScreenProps {
   initialEvents: EventListResponse;
@@ -52,7 +52,7 @@ export function AuditEventsScreen({
           </div>
         </section>
       ) : (
-        <EventsTable
+        <EventInspectionWorkspace
           hasMore={viewModel.hasMore}
           nextCursor={viewModel.nextCursor}
           query={query}

@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 
+import { Button } from "../../../components/ui/button";
 import { DataTable } from "../../../components/ui/data-table";
 import { PaginationLink } from "../../../components/ui/pagination-link";
 import type { EventListQuery } from "../domain/query";
@@ -13,26 +14,59 @@ interface EventsTableProps {
   hasMore: boolean;
   loading?: boolean;
   nextCursor: string | null;
+  onInspect?: (eventId: string) => void;
   query: EventListQuery;
   rows: AuditEventRow[];
+  selectedEventId?: string | null;
 }
 
 export function EventsTable({
   hasMore,
   loading,
   nextCursor,
+  onInspect,
   query,
-  rows
+  rows,
+  selectedEventId
 }: EventsTableProps) {
   const columns = useMemo<Array<ColumnDef<AuditEventRow>>>(
-    () => [
-      { accessorKey: "createdAt", header: "Created" },
-      { accessorKey: "event", header: "Event" },
-      { accessorKey: "actor", header: "Actor" },
-      { accessorKey: "target", header: "Target" },
-      { accessorKey: "metadata", header: "Metadata" }
-    ],
-    []
+    () => {
+      const baseColumns: Array<ColumnDef<AuditEventRow>> = [
+        { accessorKey: "createdAt", header: "Created" },
+        { accessorKey: "event", header: "Event" },
+        { accessorKey: "actor", header: "Actor" },
+        { accessorKey: "target", header: "Target" },
+        { accessorKey: "metadata", header: "Metadata" }
+      ];
+
+      if (!onInspect) {
+        return baseColumns;
+      }
+
+      return [
+        ...baseColumns,
+        {
+          cell: ({ row }) => {
+            const selected = row.original.id === selectedEventId;
+
+            return (
+              <Button
+                aria-pressed={selected}
+                onClick={() => onInspect(row.original.id)}
+                size="sm"
+                type="button"
+                variant={selected ? "secondary" : "ghost"}
+              >
+                {selected ? "Inspecting" : "Inspect"}
+              </Button>
+            );
+          },
+          header: "Inspect",
+          id: "inspect"
+        }
+      ];
+    },
+    [onInspect, selectedEventId]
   );
 
   return (

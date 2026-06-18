@@ -4,21 +4,6 @@ This file tracks web dashboard work items.
 
 ## Queue
 
-- [ ] T-001 Add an event row action that opens detail inspection
-  status: todo
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - apps/web/src/features/audit-events/components/*
-  acceptance:
-    - Each event row exposes a clear detail action
-    - Selecting the action updates the UI state for the chosen event
-    - Existing event table behavior remains intact
-
 - [ ] T-006 Render an event detail panel shell
   status: todo
   priority: high
@@ -66,3 +51,20 @@ This file tracks web dashboard work items.
     - Tests cover fallback rendering for missing actor or target data
 
 ## Done
+
+- [x] T-001 Add an event row action that opens detail inspection
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/T-001-event-row-detail-action
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/components/*
+    - apps/web/src/features/audit-events/__tests__/*
+  acceptance:
+    - Each event row exposes a clear detail action
+    - Selecting the action updates the UI state for the chosen event
+    - Existing event table behavior remains intact
