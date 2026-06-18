@@ -19,12 +19,11 @@
     "db:seed": "tsx scripts/seed-demo.ts",
     "start:container": "pnpm db:migrate && pnpm --dir apps/api exec tsx src/server.ts",
     "start:web:container": "pnpm --filter web start --hostname 0.0.0.0 --port 3000",
-    "infra:up": "docker compose up -d postgres redis",
+    "infra:up": "docker compose up -d postgres",
     "infra:down": "docker compose down"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
-    "turbo": "^2.6.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }

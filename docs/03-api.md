@@ -308,7 +308,6 @@ Planned route groups:
 - auth: magic-link request, session creation, current session logout
 - identity: current user and active membership context
 - organizations: organization, project, membership, and invitation management
-- exports: async audit-event export job creation, listing, status, and signed download
 
 Auth v1 uses custom email magic links and HttpOnly session cookies. Machine API
 keys remain for event ingestion and server-to-server access.
@@ -347,12 +346,6 @@ Accepting another valid invitation for an organization the user already belongs
 to returns the existing membership instead of creating a duplicate membership.
 Pending invitations are unique per organization/email. A signed-in user can only
 accept an invitation addressed to their own email.
-
-Export routes support creating async audit-event export jobs, listing project
-exports, checking export status, and returning signed download URLs for
-completed jobs.
-Export lists are returned newest first, while the pending export worker claims
-oldest jobs first.
 
 Runtime API infrastructure mode registers the platform routes with
 cookie-backed session resolution. Web settings screens consume:

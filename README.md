@@ -7,7 +7,7 @@ AuditTrail is a multi-tenant audit event platform for SaaS teams. The current MV
 - Fastify API in `apps/api`
 - Next.js app in `apps/web`
 - Shared packages for config, domain schemas, database schema/client, and test helpers
-- PostgreSQL and Redis through Docker Compose
+- PostgreSQL through Docker Compose
 - Drizzle schema and migrations
 - API-key authenticated `POST /api/v1/events`
 - Authenticated `GET /api/v1/events`
@@ -32,7 +32,7 @@ cp .env.example .env
 Start infrastructure:
 
 ```bash
-docker compose up -d postgres redis
+docker compose up -d postgres
 ```
 
 Generate and apply migrations:
@@ -119,7 +119,7 @@ That path is the shortest repo-native way to find the right feature files and co
 For Coolify deployment, the repo now includes:
 
 - a root `Dockerfile` reused by `web` and `api`
-- `docker-compose.coolify.yml` for a single Coolify stack containing `web`, `api`, `postgres`, and `redis`
+- `docker-compose.coolify.yml` for a single Coolify stack containing `web`, `api`, and `postgres`
 - the web image prebuilds the Next.js app and the runtime command only serves the compiled output
 
 See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1) for the required env vars and the stack setup.
@@ -285,6 +285,6 @@ The web UI system is Tailwind-first. Shared primitives live in
 tokens, reset, and base styles.
 
 Production platform work is staged behind tested API modules. Custom auth,
-organizations, invitations, and exports start as pure `apps/api` services with
-repository interfaces and unit tests; Fastify routes should be added only with
-route tests and docs in the same change.
+organizations, invitations, and API keys start as pure `apps/api` services
+with repository interfaces and unit tests; Fastify routes should be added only
+with route tests and docs in the same change.

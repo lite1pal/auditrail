@@ -56,7 +56,6 @@ The validator reads root `.env`, then `apps/api/.env`, then process env. App-lev
 Required API envs:
 
 - `DATABASE_URL`
-- `REDIS_URL`
 - `API_KEY_PEPPER`
 - `API_HOST`
 - `API_PORT`
@@ -69,8 +68,6 @@ Defaults exist only for non-secret process settings. Service URLs must be explic
 ## Local ports
 
 Postgres maps to host port `5433` by default to avoid conflicting with an existing local Postgres on `5432`.
-
-Redis maps to host port `6379` by default.
 
 ## Shared package rule
 

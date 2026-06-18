@@ -32,9 +32,6 @@ import {
   type MagicLinkSender
 } from "./modules/auth/service.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
-import { registerExportRoutes } from "./modules/exports/routes.js";
-import type { ExportService } from "./modules/exports/service.js";
-import type { ExportObjectStorage } from "./modules/exports/storage.js";
 import { createWorkspaceAccessService } from "./modules/platform/access.js";
 import { createCurrentUserContextService } from "./modules/platform/context.js";
 import { createPostgresPlatformRepo } from "./modules/platform/postgres-repo.js";
@@ -67,11 +64,6 @@ export interface BuildAppOptions {
   };
   platform?: {
     service: PlatformService;
-  };
-  exports?: {
-    organizationId: string;
-    service: ExportService;
-    storage: ExportObjectStorage;
   };
   runtimeMagicLinkSender?: MagicLinkSender;
   useInfrastructure?: boolean;
@@ -305,15 +297,6 @@ export function buildApp(options: BuildAppOptions = {}) {
     app.register(registerApiKeyRoutes, {
       prefix: API_VERSION_PREFIX,
       service: options.apiKeys.service
-    });
-  }
-
-  if (options.exports) {
-    app.register(registerExportRoutes, {
-      prefix: API_VERSION_PREFIX,
-      organizationId: options.exports.organizationId,
-      service: options.exports.service,
-      storage: options.exports.storage
     });
   }
 

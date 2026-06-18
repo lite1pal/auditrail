@@ -12,7 +12,7 @@ const environmentSchema = z
     RATE_LIMIT_WINDOW: z.string().default("1 minute"),
     API_KEY_PEPPER: z.string().min(16),
     AUTH_TOKEN_SECRET: z.string().min(32).optional(),
-    AUTH_MAGIC_LINK_SENDER: z.enum(["log", "resend"]).optional(),
+    AUTH_MAGIC_LINK_SENDER: z.enum(["resend"]).optional(),
     AUTH_MAGIC_LINK_TTL_SECONDS: z.coerce.number().int().positive().default(900),
     AUTH_RESEND_API_KEY: z.string().min(1).optional(),
     AUTH_RESEND_FROM_EMAIL: z.string().email().optional(),
@@ -20,8 +20,7 @@ const environmentSchema = z
     AUTH_SESSION_COOKIE_NAME: z.string().default("auditrail_session"),
     AUTH_SESSION_COOKIE_SECURE: z.coerce.boolean().default(true),
     WEB_PUBLIC_URL: z.string().url().optional(),
-    DATABASE_URL: z.string().url(),
-    REDIS_URL: z.string().url()
+    DATABASE_URL: z.string().url()
   })
   .superRefine((env, context) => {
     if (env.AUTH_MAGIC_LINK_SENDER === "resend") {
@@ -56,15 +55,6 @@ const environmentSchema = z
       });
       return;
     }
-
-    if (env.AUTH_MAGIC_LINK_SENDER === "log") {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          "AUTH_MAGIC_LINK_SENDER=log is not allowed in production; configure a provider-backed sender",
-        path: ["AUTH_MAGIC_LINK_SENDER"]
-      });
-    }
   });
 
 export type ApiConfig = z.infer<typeof environmentSchema>;
@@ -83,13 +73,6 @@ export function loadRuntimeConfig(
       "AUTH_MAGIC_LINK_SENDER must be set explicitly for standard runtime startup"
     );
   }
-
-  if (config.AUTH_MAGIC_LINK_SENDER === "log") {
-    throw new Error(
-      "AUTH_MAGIC_LINK_SENDER=log is not allowed in standard runtime; use the local auth harness instead"
-    );
-  }
-
   return config;
 }
 

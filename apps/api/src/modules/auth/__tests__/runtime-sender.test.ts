@@ -21,7 +21,6 @@ describe("createRuntimeMagicLinkSender", () => {
         AUTH_RESEND_API_KEY: "re_test_api_key",
         AUTH_RESEND_FROM_EMAIL: "noreply@example.com",
         DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379",
         WEB_PUBLIC_URL: "https://app.example.com"
       }),
       {
@@ -60,7 +59,6 @@ describe("createRuntimeMagicLinkSender", () => {
           NODE_ENV: "development",
           API_KEY_PEPPER: "test-api-key-pepper",
           DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-          REDIS_URL: "redis://localhost:6379",
           WEB_PUBLIC_URL: "http://localhost:3000"
         })
       )
@@ -76,7 +74,6 @@ describe("createRuntimeMagicLinkSender", () => {
         API_KEY_PEPPER: "test-api-key-pepper",
         AUTH_MAGIC_LINK_SENDER: "resend",
         DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379",
         WEB_PUBLIC_URL: "https://app.example.com"
       })
     ).toThrow(/AUTH_RESEND_API_KEY is required/);

@@ -1,11 +1,10 @@
 # Deployment
 
-Deploy AuditTrail to Coolify as one Docker Compose stack with four services:
+Deploy AuditTrail to Coolify as one Docker Compose stack with three services:
 
 - `web`
 - `api`
 - `postgres`
-- `redis`
 
 That keeps the deployment unit together without putting multiple long-running processes into one container.
 
@@ -28,7 +27,6 @@ Exposed web port:
 The stack uses internal service hostnames:
 
 - Postgres hostname: `postgres`
-- Redis hostname: `redis`
 
 The API container already runs migrations on startup before the server boots.
 
@@ -62,7 +60,6 @@ PORT=4000
 RATE_LIMIT_MAX=100
 RATE_LIMIT_WINDOW=1 minute
 DATABASE_URL=postgres://auditrail:auditrail@postgres:5432/auditrail
-REDIS_URL=redis://redis:6379
 WEB_API_BASE_URL=http://api:4000
 NEXT_PUBLIC_API_BASE_URL=${API_PUBLIC_URL}
 ```
@@ -76,17 +73,15 @@ Docker build so the browser bundle points at the deployed API origin.
   runs `pnpm start:web:container`
 - `api` builds from the root `Dockerfile`
 - `postgres` uses `postgres:17-alpine`
-- `redis` uses `redis:7-alpine`
 - Postgres data is persisted in `postgres-data`
-- Redis data is persisted in `redis-data`
-- `api` waits for healthy Postgres and Redis before starting
+- `api` waits for healthy Postgres before starting
 - `web` waits for `api` before starting
 
 ## Deploy flow
 
 1. Push changes to the connected git branch.
 2. Coolify rebuilds the stack from `docker-compose.coolify.yml`.
-3. Coolify starts `postgres` and `redis`.
+3. Coolify starts `postgres`.
 4. Coolify starts `api`.
 5. The API container runs `pnpm db:migrate`.
 6. Coolify starts `web`.
@@ -126,7 +121,6 @@ for:
 - email provider credentials for magic links
 - public web app URL for magic-link redirects
 - S3-compatible object storage endpoint, bucket, region, and credentials
-- export worker concurrency and retry settings
 
 No secret should be exposed through `NEXT_PUBLIC_*`.
 

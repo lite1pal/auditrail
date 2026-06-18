@@ -7,7 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: [".next/**", "node_modules/**", "storybook-static/**"]
+    ignores: [".next/**", "node_modules/**"]
   },
   {
     files: ["scripts/**/*.mjs"],

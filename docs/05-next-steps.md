@@ -18,7 +18,7 @@ The next API-only extension should prefer one of:
 
 1. event-count time buckets for charts
 1. top actors / top targets summaries
-1. saved filter presets or export-oriented query reuse
+1. saved filter presets
 
 1. Add richer event filters only if backed by indexes or clear product need:
    - environment
@@ -32,14 +32,8 @@ The next API-only extension should prefer one of:
 
 1. Add queue package and worker:
    - BullMQ
-   - Redis connection
    - `audit-event.created` job
    - placeholder webhook delivery processor
-
-1. Add export jobs:
-   - CSV export
-   - date-range filters
-   - background job status
 
 1. Add tamper-evident hash chain:
    - previous hash
@@ -50,7 +44,7 @@ The next API-only extension should prefer one of:
    - run compiled JavaScript instead of `tsx` source
    - reduce image size
    - remove dev dependencies from runtime
-   - clean up workspace package builds and exports first
+   - clean up workspace package builds first
    - keep the Coolify stack shape unchanged while doing this; only harden the `api` image/runtime
 
 ## Not Yet

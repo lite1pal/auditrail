@@ -6,6 +6,32 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-026 Simplify repo to the core MVP product slice
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/*
+    - apps/web/src/*
+    - apps/web/package.json
+    - package.json
+    - pnpm-workspace.yaml
+    - docker-compose.yml
+    - docker-compose.coolify.yml
+    - README.md
+    - docs/*
+    - tasks/workflow.txt
+    - tasks/exports.txt
+  acceptance:
+    - The repo keeps only the active auth, workspace, API-key, ingest, and dashboard path
+    - Disconnected export code and unused tooling or dependencies are removed
+    - Docs and task files match the reduced product scope
+
 - [x] T-023 Add low-context agent quickstart docs for repo work
   status: done
   priority: high

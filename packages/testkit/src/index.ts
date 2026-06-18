@@ -13,7 +13,6 @@ export function createTestEnv(
     RATE_LIMIT_WINDOW: "1 minute",
     API_KEY_PEPPER: "test-api-key-pepper",
     DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-    REDIS_URL: "redis://localhost:6379",
     ...overrides
   };
 }

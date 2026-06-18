@@ -35,8 +35,8 @@ Run from the repository root:
 
 ```bash
 pnpm --filter web check:architecture
-pnpm --filter web lint
 pnpm --filter web typecheck
+pnpm --filter web lint
 pnpm --filter web test
 ```
 

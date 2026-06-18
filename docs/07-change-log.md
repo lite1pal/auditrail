@@ -2,6 +2,33 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Simplify To The Core MVP Slice
+
+Changed:
+
+- removed the disconnected exports backend and web feature code
+- removed Redis from the active runtime env contract and compose stacks
+- removed dead web runtime code, Storybook, Playwright smoke coverage, and unused dependencies
+- narrowed standard auth runtime config to provider-backed sender selection only while keeping the explicit local-auth harness
+
+Why:
+
+- keep the production code path limited to sign-in, workspace management, project API keys, ingest, and dashboard reads
+- remove side systems and optional branches that increased maintenance cost without serving the hosted MVP
+- make local and deployment setup match the currently implemented runtime surface
+
+Docs updated:
+
+- `README.md`
+- `docs/01-agent-engineering-rules.md`
+- `docs/02-architecture.md`
+- `docs/03-api.md`
+- `docs/04-quality-gates.md`
+- `docs/05-next-steps.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+- `apps/web/README.md`
+
 ## 2026-06-18 - Remove Seeded Local API Key
 
 Changed:

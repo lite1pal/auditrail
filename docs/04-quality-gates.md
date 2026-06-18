@@ -63,7 +63,6 @@ The API validates env before build and start.
 Required service/security values:
 
 - `DATABASE_URL`
-- `REDIS_URL`
 - `API_KEY_PEPPER`
 
 Runtime defaults exist for:
@@ -130,11 +129,8 @@ The web app must enforce the frontend architecture before changes are complete:
 - feature components cannot import `api`, `server`, `services`, or `state`
 - client files cannot import server-only modules
 - pure domain modules are unit tested
-- feature hooks and services are integration tested with fake clients or MSW
-- Storybook covers reusable UI and feature presentational components
-- every shared UI primitive has a Storybook story
+- feature services are integration tested with fake clients or injected stubs
 - global CSS contains only Tailwind import, tokens, reset, and base styles
-- Playwright covers critical user flows against `apps/web` and the real `apps/api`
 
 Required web verification commands are:
 
@@ -143,8 +139,6 @@ pnpm --filter web check:architecture
 pnpm --filter web lint
 pnpm --filter web typecheck
 pnpm --filter web test
-pnpm --filter web storybook:build
-pnpm --filter web e2e
 ```
 
 ## Platform Module Gates

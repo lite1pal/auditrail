@@ -9,10 +9,9 @@ describe("api config", () => {
         API_PORT: "4001",
         RATE_LIMIT_MAX: "10",
         RATE_LIMIT_WINDOW: "30 seconds",
-        API_KEY_PEPPER: "test-api-key-pepper",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
-      })
+      API_KEY_PEPPER: "test-api-key-pepper",
+      DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
+    })
     ).toEqual({
       NODE_ENV: "development",
       API_HOST: "0.0.0.0",
@@ -27,8 +26,7 @@ describe("api config", () => {
       AUTH_SESSION_COOKIE_NAME: "auditrail_session",
       AUTH_SESSION_COOKIE_SECURE: true,
       AUTH_SESSION_TTL_SECONDS: 2592000,
-      DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-      REDIS_URL: "redis://localhost:6379"
+      DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
     });
   });
 
@@ -41,8 +39,7 @@ describe("api config", () => {
       loadConfig({
         PORT: "4010",
         API_KEY_PEPPER: "test-api-key-pepper",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
       }).API_PORT
     ).toBe(4010);
   });
@@ -52,22 +49,9 @@ describe("api config", () => {
       loadConfig({
         NODE_ENV: "production",
         API_KEY_PEPPER: "test-api-key-pepper",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
       })
     ).toThrow(/AUTH_MAGIC_LINK_SENDER must be set explicitly in production/);
-  });
-
-  it("rejects the logging sender in production", () => {
-    expect(() =>
-      loadConfig({
-        NODE_ENV: "production",
-        API_KEY_PEPPER: "test-api-key-pepper",
-        AUTH_MAGIC_LINK_SENDER: "log",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
-      })
-    ).toThrow(/AUTH_MAGIC_LINK_SENDER=log is not allowed in production/);
   });
 
   it("requires provider-specific resend settings when resend is selected", () => {
@@ -75,8 +59,7 @@ describe("api config", () => {
       loadConfig({
         AUTH_MAGIC_LINK_SENDER: "resend",
         API_KEY_PEPPER: "test-api-key-pepper",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
       })
     ).toThrow(/AUTH_RESEND_API_KEY is required/);
   });
@@ -89,8 +72,7 @@ describe("api config", () => {
         AUTH_MAGIC_LINK_SENDER: "resend",
         AUTH_RESEND_API_KEY: "re_test_api_key",
         AUTH_RESEND_FROM_EMAIL: "noreply@example.com",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
       }).AUTH_MAGIC_LINK_SENDER
     ).toBe("resend");
   });
@@ -99,20 +81,8 @@ describe("api config", () => {
     expect(() =>
       loadRuntimeConfig({
         API_KEY_PEPPER: "test-api-key-pepper",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
+        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail"
       })
     ).toThrow(/AUTH_MAGIC_LINK_SENDER must be set explicitly for standard runtime startup/);
-  });
-
-  it("rejects the local logging sender for standard runtime startup", () => {
-    expect(() =>
-      loadRuntimeConfig({
-        API_KEY_PEPPER: "test-api-key-pepper",
-        AUTH_MAGIC_LINK_SENDER: "log",
-        DATABASE_URL: "postgres://auditrail:auditrail@localhost:5433/auditrail",
-        REDIS_URL: "redis://localhost:6379"
-      })
-    ).toThrow(/AUTH_MAGIC_LINK_SENDER=log is not allowed in standard runtime/);
   });
 });

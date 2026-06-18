@@ -74,8 +74,8 @@ Frontend modules should mirror the successful API boundaries:
 
 Feature code belongs under `apps/web/src/features/<feature>`. Shared primitives
 belong under `apps/web/src/components/ui`, and shared infrastructure belongs
-under `apps/web/src/lib`. Server data is owned by TanStack Query or server
-component loaders, not by global client stores.
+under `apps/web/src/lib`. Server data is owned by server component loaders and
+feature-owned API clients, not by global client stores.
 
 Protected browser screens must use the API-owned session model. Server
 components forward the incoming HttpOnly session cookie to `apps/api`, and
@@ -128,17 +128,13 @@ scan in reviews.
 
 Production platform behavior starts in pure API modules before routes are added.
 Custom auth lives under `apps/api/src/modules/auth`, organization/project
-membership logic under `apps/api/src/modules/platform`, machine credential
-management under `apps/api/src/modules/api-keys`, and deferred export logic
-under `apps/api/src/modules/exports`. These modules follow the same pattern as
-audit events: Zod at boundaries, pure services, repository interfaces, and
-tests before Fastify routes.
+membership logic under `apps/api/src/modules/platform`, and machine credential
+management under `apps/api/src/modules/api-keys`. These modules follow the same
+pattern as audit events: Zod at boundaries, pure services, repository
+interfaces, and tests before Fastify routes.
 
 The web app mirrors those platform capabilities with feature boundaries under
 `apps/web/src/features/auth`, `organizations`, `invitations`, and `api-keys`.
-Deferred capabilities such as exports may keep their code boundaries, but they
-must stay out of the primary MVP onboarding path until their full runtime slice
-exists.
 
 The organization/project UI lives under `apps/web/src/features/organizations`
 and the protected `/settings` route. It uses server actions only as direct
@@ -153,8 +149,9 @@ service boundary.
 
 Platform persistence lives in `packages/db` and is exposed to API modules
 through repository adapters. The schema includes users, magic links, sessions,
-organization memberships, organization invitations, and export jobs. API services
-must continue to depend on repository interfaces rather than Drizzle directly.
+organization memberships, organization invitations, projects, API keys, and
+audit events. API services must continue to depend on repository interfaces
+rather than Drizzle directly.
 
 Browser session principal resolution is separate from machine API-key auth.
 `sessionAuthPlugin` resolves HttpOnly cookie sessions into `request.sessionUser`
@@ -164,9 +161,7 @@ The `/me` response is composed through the platform context service and includes
 user, membership, organization, and project context.
 
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
-React Hook Form and Zod for forms, TanStack Query for API cache ownership,
-TanStack Table for data grids, Recharts for dashboard charts, `nuqs` for URL
-state, Zustand only for shared UI state, custom Fastify magic-link/session auth,
-`next-intl` for i18n, Sentry for monitoring, and PostHog for product analytics.
-OpenAPI types must be generated from `apps/api`'s `/api/v1/openapi.json`;
-`apps/web` must not become a second API contract source.
+Zod-validated Fastify API clients, TanStack Table for data grids, Recharts for
+dashboard charts, and custom Fastify magic-link/session auth. OpenAPI types
+must be generated from `apps/api`'s `/api/v1/openapi.json`; `apps/web` must not
+become a second API contract source.

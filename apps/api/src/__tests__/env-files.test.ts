@@ -14,13 +14,16 @@ describe("env file loading", () => {
     mkdirSync(app, {
       recursive: true
     });
-    writeFileSync(join(root, ".env"), "API_PORT=4000\nDATABASE_URL='postgres://root'\n");
-    writeFileSync(join(app, ".env"), 'API_PORT=4002\nREDIS_URL="redis://app"\n');
+    writeFileSync(
+      join(root, ".env"),
+      "API_PORT=4000\nDATABASE_URL='postgres://root'\n"
+    );
+    writeFileSync(join(app, ".env"), 'API_PORT=4002\nAUTH_TOKEN_SECRET="app-secret"\n');
 
     expect(loadEnvFiles(app)).toMatchObject({
       API_PORT: "4002",
       DATABASE_URL: "postgres://root",
-      REDIS_URL: "redis://app"
+      AUTH_TOKEN_SECRET: "app-secret"
     });
   });
 
