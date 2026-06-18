@@ -22,6 +22,24 @@ Docs updated:
 - `docs/06-deployment.md`
 - `docs/07-change-log.md`
 
+## 2026-06-18 - Resend Auth Sender Adapter
+
+Changed:
+
+- added a concrete Resend-backed magic-link sender adapter in the auth module
+- kept the auth service boundary unchanged by continuing to depend on `MagicLinkSender`
+- added sender tests for successful Resend requests and provider error handling
+
+Why:
+
+- provide the first production-capable email delivery implementation behind the existing auth boundary
+- keep runtime wiring separate from provider behavior so sender selection can be tested independently
+
+Docs updated:
+
+- `apps/api/src/modules/auth/README.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Alias-Only Imports In Web
 
 Changed:

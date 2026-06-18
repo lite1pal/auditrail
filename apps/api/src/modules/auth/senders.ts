@@ -12,6 +12,12 @@ export interface MagicLinkUrlOptions {
   webPublicUrl: string;
 }
 
+export interface ResendMagicLinkSenderOptions extends MagicLinkUrlOptions {
+  apiKey: string;
+  fromEmail: string;
+  fetch?: typeof fetch;
+}
+
 export function buildMagicLinkUrl(
   input: { email: string; token: string },
   options: MagicLinkUrlOptions
@@ -35,6 +41,36 @@ export function createInMemoryMagicLinkSender(
         ...input,
         url: buildMagicLinkUrl(input, options)
       });
+    }
+  };
+}
+
+export function createResendMagicLinkSender(
+  options: ResendMagicLinkSenderOptions
+): MagicLinkSender {
+  const fetchFn = options.fetch ?? fetch;
+
+  return {
+    async sendMagicLink(input) {
+      const magicLinkUrl = buildMagicLinkUrl(input, options);
+      const response = await fetchFn("https://api.resend.com/emails", {
+        body: JSON.stringify({
+          from: options.fromEmail,
+          html: `<p>Open your AuditTrail magic link: <a href="${magicLinkUrl}">${magicLinkUrl}</a></p>`,
+          subject: "Your AuditTrail sign-in link",
+          text: `Open your AuditTrail magic link: ${magicLinkUrl}`,
+          to: [input.email]
+        }),
+        headers: {
+          Authorization: `Bearer ${options.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        throw new Error(`resend_send_failed:${response.status}`);
+      }
     }
   };
 }

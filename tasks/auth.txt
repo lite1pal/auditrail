@@ -4,21 +4,6 @@ This file tracks auth and sign-in work items.
 
 ## Queue
 
-- [ ] T-015 Implement a provider-backed auth email sender adapter
-  status: todo
-  priority: medium
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - apps/api/src/modules/auth/*
-  acceptance:
-    - Auth includes one concrete provider-backed sender implementation
-    - The sender accepts only validated config
-    - Existing auth service integration remains unchanged at the boundary
-
 - [ ] T-016 Keep the local logging sender as a non-production fallback
   status: todo
   priority: low
@@ -51,6 +36,25 @@ This file tracks auth and sign-in work items.
     - Tests cover invalid config rejection at startup
 
 ## Done
+
+- [x] T-015 Implement a provider-backed auth email sender adapter
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/T-015-provider-auth-sender
+  pr:
+  last_updated: 2026-06-18
+  completed: 2026-06-18
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/*
+    - apps/api/src/modules/auth/__tests__/*
+    - apps/api/src/modules/auth/README.md
+    - docs/07-change-log.md
+  acceptance:
+    - Auth includes one concrete provider-backed sender implementation
+    - The sender accepts only validated config
+    - Existing auth service integration remains unchanged at the boundary
 
 - [x] T-004 Add config validation for a production magic-link sender
   status: done

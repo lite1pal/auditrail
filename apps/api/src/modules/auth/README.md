@@ -15,7 +15,7 @@ Owns browser-session authentication for the API.
 - `service.ts`: auth workflow and token/session rules
 - `routes.ts`: Fastify HTTP adapter
 - `postgres-repo.ts`: Postgres persistence
-- `senders.ts`: development/test sender implementations
+- `senders.ts`: magic-link sender implementations, including local in-memory and Resend-backed delivery
 - `tokens.ts`: opaque token creation and hashing
 
 ## Invariants
