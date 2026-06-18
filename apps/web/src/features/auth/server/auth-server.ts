@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 
 import { toApiError } from "@/src/lib/api/api-errors";
 import { createServerApiClient } from "@/src/lib/api/server-api-client";
-import { createAuthClient, getCurrentUser } from "@/src/features/auth/api/auth-client";
+import {
+  createAuthClient,
+  getCurrentUser,
+} from "@/src/features/auth/api/auth-client";
 
 export async function loadCurrentUser() {
   try {
@@ -38,9 +41,11 @@ export async function createSessionAction(formData: FormData) {
 
   const email = String(formData.get("email") ?? "");
   const token = String(formData.get("token") ?? "");
-  const response = await createAuthClient(createServerApiClient()).createSession({
+  const response = await createAuthClient(
+    createServerApiClient(),
+  ).createSession({
     email,
-    token
+    token,
   });
 
   if (!response.ok) {
@@ -66,20 +71,20 @@ export async function logoutAction() {
 
 async function setSessionCookie(setCookie: string) {
   const [cookiePair] = setCookie.split(";");
-  if (!cookiePair) {
-    return;
-  }
+  if (!cookiePair) return;
 
-  const [name, value] = cookiePair.split("=");
-  if (!name || !value) {
-    return;
-  }
+  const separatorIndex = cookiePair.indexOf("=");
+  if (separatorIndex === -1) return;
+
+  const name = cookiePair.slice(0, separatorIndex);
+  const value = cookiePair.slice(separatorIndex + 1);
 
   const store = await cookies();
 
   store.set(name, value, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     path: "/",
-    sameSite: "lax"
+    sameSite: "lax",
   });
 }
