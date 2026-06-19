@@ -18,6 +18,14 @@ export function EventFilters({ query, workspace }: EventFiltersProps) {
       className="grid gap-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto]"
       method="get"
     >
+      <div className="grid gap-1 md:col-span-4">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Filters
+        </p>
+        <p className="text-sm text-[var(--muted)]">
+          Narrow the current project by event, actor, or target.
+        </p>
+      </div>
       <input
         name="organizationId"
         type="hidden"

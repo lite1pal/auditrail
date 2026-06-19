@@ -87,6 +87,19 @@ Docker build so the browser bundle points at the deployed API origin.
 6. Coolify starts `web`.
 7. The web container serves the prebuilt Next.js app on port `3000`.
 
+## Verification from the repository root
+
+Use these commands to check the container runtime before or after deployment:
+
+```bash
+pnpm build:web:container
+docker compose -f docker-compose.coolify.yml up --build
+```
+
+`pnpm build:web:container` validates the prebuilt web artifact path, and the
+Compose command exercises the same stack definition Coolify uses in hosted
+deployments.
+
 ## Health check
 
 Container health is based on:

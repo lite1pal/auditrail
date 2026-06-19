@@ -23,15 +23,18 @@ export function ProjectList({
         </p>
       </div>
       {projects.length === 0 ? (
-        <p className="text-sm text-[var(--muted)]">No projects yet.</p>
+        <p className="text-sm text-[var(--muted)]">
+          No projects yet. Create one to generate keys and start collecting events.
+        </p>
       ) : (
         <ul className="grid gap-2">
           {projects.map((project) => (
             <li
-              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2 text-sm"
               key={project.id}
             >
               <Link
+                aria-current={project.id === activeProjectId ? "page" : undefined}
                 className="grid gap-1"
                 href={
                   organizationId
@@ -39,10 +42,14 @@ export function ProjectList({
                     : "/settings"
                 }
               >
-                <strong>
-                  {project.name}
-                  {project.id === activeProjectId ? " (selected)" : ""}
-                </strong>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong>{project.name}</strong>
+                  {project.id === activeProjectId ? (
+                    <span className="rounded-full bg-[var(--foreground)] px-2 py-0.5 text-[11px] font-bold text-[var(--panel)]">
+                      Selected
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-xs text-[var(--muted)]">{project.id}</p>
               </Link>
             </li>

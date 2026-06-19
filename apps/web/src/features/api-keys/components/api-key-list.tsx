@@ -24,12 +24,14 @@ export function ApiKeyList({
         </p>
       </div>
       {apiKeys.length === 0 ? (
-        <p className="text-sm text-[var(--muted)]">No API keys yet.</p>
+        <p className="text-sm text-[var(--muted)]">
+          No API keys yet. Generate one for the selected project to unlock the ingest command.
+        </p>
       ) : (
         <ul className="grid gap-3">
           {apiKeys.map((apiKey) => (
             <li
-              className="grid gap-3 rounded-lg border border-[var(--border)] p-3"
+              className="grid gap-3 rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] p-3"
               key={apiKey.id}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">

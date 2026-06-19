@@ -20,21 +20,6 @@ This file tracks deployment and runtime work items.
     - Build-time dependencies remain available only in build stages
     - The final image still starts both production services correctly
 
-- [ ] T-014 Update hosted deployment docs for the new runtime flow
-  status: todo
-  priority: medium
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-18
-  blocked_reason:
-  files:
-    - docs/06-deployment.md
-  acceptance:
-    - Deployment docs describe the compiled runtime behavior
-    - Verification commands are listed from the repository root
-    - Operator-facing setup notes match the current container flow
-
 ## Done
 
 - [x] T-012 Run the web app from a production build in containers
@@ -58,3 +43,19 @@ This file tracks deployment and runtime work items.
     - Container startup uses the built web app
     - The runtime command no longer depends on development tooling
     - Build and start commands are aligned with the Docker image
+
+- [x] T-014 Update hosted deployment docs for the new runtime flow
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-19
+  completed: 2026-06-19
+  blocked_reason:
+  files:
+    - docs/06-deployment.md
+  acceptance:
+    - Deployment docs describe the compiled runtime behavior
+    - Verification commands are listed from the repository root
+    - Operator-facing setup notes match the current container flow

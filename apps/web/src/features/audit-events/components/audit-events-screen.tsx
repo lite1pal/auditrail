@@ -49,7 +49,7 @@ export function AuditEventsScreen({
       />
       {viewModel.rows.length === 0 ? (
         <section className="grid gap-4">
-          <EmptyState label="No audit events yet. Generate a project key in Settings and send one test event." />
+          <EmptyState label="No audit events yet. Create a project key in Settings, send one test event, and come back to see the stream and metrics fill in." />
           <div>
             <Button asChild variant="secondary">
               <Link

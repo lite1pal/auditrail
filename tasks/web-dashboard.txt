@@ -2,6 +2,29 @@
 
 This file tracks web dashboard work items.
 
+## Queue
+
+- [ ] T-027 Refresh dashboard and settings page UX
+  status: in_progress
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-18
+  completed:
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/components/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/organizations/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The settings page presents the current workspace more clearly
+    - Core settings actions are grouped into clearer sections
+    - Empty states give the user a stronger next step on the dashboard and settings pages
+    - Tests cover the updated settings page content or structure
+
 ## Done
 
 - [x] T-026 Ignore blank event filter inputs in the dashboard query parser

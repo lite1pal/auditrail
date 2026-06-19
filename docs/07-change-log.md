@@ -2,6 +2,25 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-18 - Refresh Dashboard And Settings UX
+
+Changed:
+
+- added a workspace summary card to the settings page with current organization, project, and key counts
+- grouped settings affordances into clearer orientation, workspace, project, and key sections
+- improved empty-state copy on the dashboard, project list, and API key list to point at the next step
+- made the organization switcher and project list show the active selection more explicitly
+
+Why:
+
+- reduce the amount of scanning required to understand the selected workspace
+- make the settings page feel like a workspace home instead of a raw form stack
+- keep the dashboard connected to the setup flow when there are no events yet
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-18 - Ignore Blank Dashboard Filter Inputs
 
 Changed:
