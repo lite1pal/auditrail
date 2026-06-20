@@ -2,6 +2,24 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Immediate Sidebar Workspace Switching And Shadcn-Style Shell Refresh
+
+Changed:
+
+- made the sidebar organization and project controls update the current route immediately instead of waiting for a second submit action
+- synced the switcher client state back to the active URL-backed workspace so re-renders and reloads keep the visible selection stable
+- refreshed shared web primitives and the dashboard or settings shell with more polished card, filter, table, and summary surfaces
+
+Why:
+
+- restore the expected workspace-switch behavior where the selected org and project become the current page context right away
+- remove the stale local-state path that made the sidebar selection appear to reset after navigation or reload
+- move the shell closer to the intended modern dashboard style without introducing a large external dependency path
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Web UI Coverage Gate For The Dashboard Slice
 
 Changed:

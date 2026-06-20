@@ -65,6 +65,7 @@ describe("AppShell", () => {
       "/members?organizationId=org-1&projectId=project-1"
     );
     expect(screen.getByText("Workspace switcher")).toBeTruthy();
+    expect(screen.getByText("Selection is stored in the URL.")).toBeTruthy();
     expect(screen.getByLabelText("Organization")).toBeTruthy();
     expect(screen.getByLabelText("Project")).toBeTruthy();
     expect(screen.getByText("Child content")).toBeTruthy();

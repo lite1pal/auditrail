@@ -15,11 +15,11 @@ export function EventFilters({ query, workspace }: EventFiltersProps) {
   return (
     <form
       aria-label="Event filters"
-      className="grid gap-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto]"
+      className="grid gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)] md:grid-cols-[repeat(3,minmax(0,1fr))_auto]"
       method="get"
     >
       <div className="grid gap-1 md:col-span-4">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
           Filters
         </p>
         <p className="text-sm text-[var(--muted)]">
@@ -45,7 +45,7 @@ export function EventFilters({ query, workspace }: EventFiltersProps) {
         <Input defaultValue={query.target} name="target" placeholder="target id" />
       </Label>
       <Button className="self-end" type="submit">
-        Apply
+        Apply filters
       </Button>
     </form>
   );

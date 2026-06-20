@@ -41,7 +41,11 @@ export function AuditEventsScreen({
 
   return (
     <PageShell>
-      <SectionHeader eyebrow="Audit events" title="Event stream" />
+      <SectionHeader
+        description="Track the active project, inspect a single event on demand, and narrow the stream without leaving the dashboard canvas."
+        eyebrow="Audit events"
+        title="Event stream"
+      />
       <EventFilters query={query} workspace={workspace} />
       <EventDashboard
         stats={toEventStatsViewModel(stats)}

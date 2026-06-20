@@ -4,19 +4,22 @@ This file tracks web dashboard work items.
 
 ## Queue
 
-- [ ] T-027 Refresh dashboard and settings page UX
-  status: todo
+## Done
+
+- [x] T-027 Refresh dashboard and settings page UX
+  status: done
   priority: medium
   owner: codex
   branch:
   pr:
   last_updated: 2026-06-20
-  completed:
-  blocked_reason: decomposed into T-028 through T-032 so the UX changes can be delivered and verified one slice at a time
+  completed: 2026-06-20
+  blocked_reason: delivered through T-028 through T-034 so the UX changes could land in smaller verified slices
   files:
     - apps/web/src/features/audit-events/components/*
     - apps/web/src/features/organizations/components/*
-    - apps/web/src/features/organizations/__tests__/*
+    - apps/web/src/components/layout/*
+    - apps/web/src/components/ui/*
     - docs/07-change-log.md
     - tasks/web-dashboard.txt
   acceptance:
@@ -25,7 +28,48 @@ This file tracks web dashboard work items.
     - Empty states give the user a stronger next step on the dashboard and settings pages
     - Tests cover the updated settings page content or structure
 
-## Done
+- [x] T-034 Refresh the dashboard shell with shadcn-style UI primitives
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/app/globals.css
+    - apps/web/src/components/layout/*
+    - apps/web/src/components/ui/*
+    - apps/web/src/features/audit-events/components/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/**/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The dashboard and settings shell use more polished card, input, and navigation surfaces
+    - The sidebar workspace controls match the updated visual system
+    - Tests cover the updated switcher behavior and key dashboard or settings content still renders
+
+- [x] T-033 Make sidebar workspace switching apply immediately and persist
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/src/components/layout/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/organizations/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Changing organization or project in the sidebar updates the current route without an extra submit step
+    - Reloading after a sidebar workspace change preserves the selected organization and project
+    - Tests cover the immediate route update and prop-driven state sync
 
 - [x] T-028 Replace the top navigation with a dashboard sidebar shell
   status: done

@@ -2,9 +2,8 @@
 
 import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-
-import { Button } from "@/src/components/ui/button";
+import { useEffect, useState, useTransition } from "react";
+import { Select } from "@/src/components/ui/select";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 
 interface WorkspaceSidebarSwitcherProps {
@@ -12,7 +11,6 @@ interface WorkspaceSidebarSwitcherProps {
   activeProjectId?: string;
   memberships: CurrentUserResponse["memberships"];
 }
-
 export function WorkspaceSidebarSwitcher({
   activeOrganizationId,
   activeProjectId,
@@ -20,6 +18,7 @@ export function WorkspaceSidebarSwitcher({
 }: WorkspaceSidebarSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
   const initialOrganizationId =
     activeOrganizationId ?? memberships[0]?.organization.id ?? "";
   const initialProjectId =
@@ -29,41 +28,49 @@ export function WorkspaceSidebarSwitcher({
     "";
   const [organizationId, setOrganizationId] = useState(initialOrganizationId);
   const [projectId, setProjectId] = useState(initialProjectId);
+
+  useEffect(() => {
+    setOrganizationId(initialOrganizationId);
+    setProjectId(initialProjectId);
+  }, [initialOrganizationId, initialProjectId]);
+
   const selectedMembership = memberships.find(
     (membership) => membership.organization.id === organizationId
   );
 
-  function applySelection() {
-    if (!organizationId) {
+  function openWorkspace(nextOrganizationId: string, nextProjectId: string) {
+    if (!nextOrganizationId) {
       return;
     }
 
     const query = new URLSearchParams({
-      organizationId
+      organizationId: nextOrganizationId
     });
 
-    if (projectId) {
-      query.set("projectId", projectId);
+    if (nextProjectId) {
+      query.set("projectId", nextProjectId);
     }
 
-    router.push(`${pathname}?${query.toString()}` as Route);
+    startTransition(() => {
+      router.push(`${pathname}?${query.toString()}` as Route);
+    });
   }
 
   return (
-    <div className="grid gap-3">
+    <div aria-busy={isPending} className="grid gap-3">
       <div className="grid gap-1">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
           Workspace switcher
         </p>
         <p className="text-sm text-[var(--muted)]">
-          Change organization and project context without leaving this page.
+          Changing either field updates the current page immediately.
         </p>
       </div>
-      <label className="grid gap-1 text-sm font-bold">
+      <label className="grid gap-1 text-sm font-semibold">
         <span>Organization</span>
-        <select
+        <Select
           aria-label="Organization"
-          className="min-h-10 rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 text-sm font-medium"
+          disabled={memberships.length === 0 || isPending}
           onChange={(event) => {
             const nextOrganizationId = event.target.value;
             const nextProjectId =
@@ -73,6 +80,7 @@ export function WorkspaceSidebarSwitcher({
 
             setOrganizationId(nextOrganizationId);
             setProjectId(nextProjectId);
+            openWorkspace(nextOrganizationId, nextProjectId);
           }}
           value={organizationId}
         >
@@ -81,15 +89,17 @@ export function WorkspaceSidebarSwitcher({
               {membership.organization.name}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <label className="grid gap-1 text-sm font-bold">
+      <label className="grid gap-1 text-sm font-semibold">
         <span>Project</span>
-        <select
+        <Select
           aria-label="Project"
-          className="min-h-10 rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 text-sm font-medium"
+          disabled={!selectedMembership || isPending}
           onChange={(event) => {
-            setProjectId(event.target.value);
+            const nextProjectId = event.target.value;
+            setProjectId(nextProjectId);
+            openWorkspace(organizationId, nextProjectId);
           }}
           value={projectId}
         >
@@ -98,11 +108,11 @@ export function WorkspaceSidebarSwitcher({
               {project.name}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <Button onClick={applySelection} size="sm" type="button" variant="secondary">
-        Open workspace
-      </Button>
+      <p className="text-xs text-[var(--muted)]">
+        {isPending ? "Updating workspace..." : "Selection is stored in the URL."}
+      </p>
     </div>
   );
 }

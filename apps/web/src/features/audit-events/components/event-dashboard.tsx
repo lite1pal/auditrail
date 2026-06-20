@@ -1,3 +1,4 @@
+import { Badge } from "@/src/components/ui/badge";
 import type {
   EventStatsViewModel,
   EventTimeseriesViewModel
@@ -21,8 +22,8 @@ export function EventDashboard({ stats, timeseries }: EventDashboardProps) {
         <ul className="m-0 grid list-none gap-2 p-0">
           {stats.topEventTypes.map((eventType) => (
             <li className="flex items-center justify-between gap-3" key={eventType.event}>
-              <span>{eventType.event}</span>
-              <strong>{eventType.count}</strong>
+              <Badge>{eventType.event}</Badge>
+              <strong className="text-lg">{eventType.count}</strong>
             </li>
           ))}
         </ul>

@@ -27,7 +27,7 @@ export function WorkspaceSettingsScreen({
   const dashboardHref = toDashboardHref(activeOrganizationId, activeProjectId);
 
   return (
-    <main className="mx-auto grid max-w-[1180px] gap-8 px-4 py-6 md:px-6 md:py-10 xl:grid-cols-[260px_minmax(0,1fr)]">
+    <main className="mx-auto grid max-w-[1240px] gap-8 px-4 py-6 md:px-6 md:py-10 xl:grid-cols-[260px_minmax(0,1fr)]">
       <aside className="self-start xl:sticky xl:top-6">
         <SettingsSectionsNav />
       </aside>

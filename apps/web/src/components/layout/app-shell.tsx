@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 
+import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { logoutAction } from "@/src/features/auth/server/auth-server";
@@ -43,19 +44,22 @@ export function AppShell({
     : ("/members" as Route);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] xl:grid xl:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="border-b border-[var(--border)] bg-[var(--panel)] px-4 py-4 md:px-6 xl:min-h-screen xl:border-b-0 xl:border-r xl:px-5 xl:py-6">
-        <div className="mx-auto grid max-w-[1180px] gap-4 xl:max-w-none xl:grid-rows-[auto_auto_1fr_auto]">
-          <div className="grid gap-1">
-            <strong className="text-lg">AuditTrail</strong>
+    <div className="min-h-screen xl:grid xl:grid-cols-[320px_minmax(0,1fr)]">
+      <aside className="border-b border-[var(--border)] px-4 py-4 md:px-6 xl:min-h-screen xl:border-r xl:border-b-0 xl:px-5 xl:py-6">
+        <div className="mx-auto grid max-w-[1240px] gap-4 xl:max-w-none xl:grid-rows-[auto_auto_1fr_auto]">
+          <Card className="grid gap-4 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.9))]">
+            <div className="grid gap-2">
+              <Badge className="w-fit">Workspace</Badge>
+              <strong className="text-lg">AuditTrail</strong>
+            </div>
             <p className="text-sm text-[var(--muted)]">
               {workspace.activeOrganization?.name ?? "No organization"} ·{" "}
               {workspace.activeProject?.name ?? "No project"}
             </p>
-          </div>
+          </Card>
           <Card className="grid gap-3">
             <div className="grid gap-1">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                 Navigation
               </p>
               <p className="text-sm text-[var(--muted)]">
@@ -66,7 +70,7 @@ export function AppShell({
               <ul className="grid gap-2">
                 <li>
                   <Link
-                    className="block rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2 text-sm font-bold hover:bg-[var(--panel)]"
+                    className="block rounded-xl border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2.5 text-sm font-semibold hover:bg-[var(--panel-strong)]"
                     href={dashboardHref}
                   >
                     Dashboard
@@ -74,7 +78,7 @@ export function AppShell({
                 </li>
                 <li>
                   <Link
-                    className="block rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2 text-sm font-bold hover:bg-[var(--panel)]"
+                    className="block rounded-xl border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2.5 text-sm font-semibold hover:bg-[var(--panel-strong)]"
                     href={settingsHref}
                   >
                     Settings
@@ -82,7 +86,7 @@ export function AppShell({
                 </li>
                 <li>
                   <Link
-                    className="block rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2 text-sm font-bold hover:bg-[var(--panel)]"
+                    className="block rounded-xl border border-[var(--border)] bg-[var(--panel-subtle)] px-3 py-2.5 text-sm font-semibold hover:bg-[var(--panel-strong)]"
                     href={membersHref}
                   >
                     Members

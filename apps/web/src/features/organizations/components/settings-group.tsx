@@ -14,9 +14,13 @@ export function SettingsGroup({
   title
 }: SettingsGroupProps) {
   return (
-    <section aria-labelledby={`${id}-title`} className="grid gap-4 scroll-mt-6" id={id}>
+    <section
+      aria-labelledby={`${id}-title`}
+      className="grid gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--panel)] p-5 scroll-mt-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)]"
+      id={id}
+    >
       <div className="grid gap-1">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
           {title}
         </p>
         <h2 className="text-2xl font-bold" id={`${id}-title`}>
