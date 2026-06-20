@@ -69,4 +69,29 @@ describe("AppShell", () => {
     expect(screen.getByLabelText("Project")).toBeTruthy();
     expect(screen.getByText("Child content")).toBeTruthy();
   });
+
+  it("falls back to root-level links when no workspace is selected", () => {
+    render(
+      <AppShell
+        currentUser={{
+          memberships: [],
+          user: {
+            email: "user@example.com",
+            id: "user-1"
+          }
+        }}
+      >
+        <div>Child content</div>
+      </AppShell>
+    );
+
+    expect(screen.getByText("No organization · No project")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "Settings" }).getAttribute("href")).toBe(
+      "/settings"
+    );
+    expect(screen.getByRole("link", { name: "Members" }).getAttribute("href")).toBe(
+      "/members"
+    );
+  });
 });

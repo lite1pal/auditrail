@@ -2,6 +2,23 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Web UI Coverage Gate For The Dashboard Slice
+
+Changed:
+
+- added a dedicated `pnpm --filter web test:ui` command that enforces 90% coverage for the current dashboard, settings, members, and shell UI slice
+- added branch-focused tests for the sidebar shell, workspace switcher, settings fallback path, and dialog-driven event inspection close path
+
+Why:
+
+- make the new UI work fail fast when coverage drops below the required floor
+- avoid claiming whole-app web coverage that the current repo does not yet meet
+
+Docs updated:
+
+- `docs/04-quality-gates.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Organization Members Page
 
 Changed:

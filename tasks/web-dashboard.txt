@@ -4,26 +4,6 @@ This file tracks web dashboard work items.
 
 ## Queue
 
-- [ ] T-032 Enforce 90 percent coverage for new web UI behavior
-  status: todo
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-20
-  blocked_reason:
-  files:
-    - apps/web/package.json
-    - apps/web/vitest.config.ts
-    - apps/web/src/features/**/*.test.*
-    - docs/04-quality-gates.md
-    - docs/07-change-log.md
-    - tasks/web-dashboard.txt
-  acceptance:
-    - Web test commands enforce at least 90 percent coverage for UI-facing behavior added in this slice
-    - New dashboard and settings UI changes ship with direct tests
-    - Quality-gate documentation states the expected coverage rule for this UI work
-
 - [ ] T-027 Refresh dashboard and settings page UX
   status: todo
   priority: medium
@@ -91,6 +71,29 @@ This file tracks web dashboard work items.
     - `/members` renders a page that lists organization members for the active workspace
     - The page handles an empty member list without breaking navigation
     - Tests cover member list rendering and the empty state
+
+- [x] T-032 Enforce 90 percent coverage for new web UI behavior
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/package.json
+    - apps/web/vitest.config.ts
+    - apps/web/vitest.ui.config.ts
+    - apps/web/src/features/**/*.test.*
+    - apps/web/src/components/layout/__tests__/*
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Web test commands enforce at least 90 percent coverage for UI-facing behavior added in this slice
+    - New dashboard and settings UI changes ship with direct tests
+    - Quality-gate documentation states the expected coverage rule for this UI work
 
 - [x] T-026 Ignore blank event filter inputs in the dashboard query parser
   status: done

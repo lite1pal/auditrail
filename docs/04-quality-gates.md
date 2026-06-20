@@ -139,7 +139,20 @@ pnpm --filter web check:architecture
 pnpm --filter web lint
 pnpm --filter web typecheck
 pnpm --filter web test
+pnpm --filter web test:ui
 ```
+
+`pnpm --filter web test:ui` is the coverage-enforced UI gate for the current
+dashboard, settings, members, and shell slice. It requires at least 90% for:
+
+- statements
+- branches
+- functions
+- lines
+
+The scope is intentionally limited to the UI-facing files added in this slice,
+because the broader web app still contains older unscoped server and API helpers
+that are not yet under the same coverage standard.
 
 ## Platform Module Gates
 

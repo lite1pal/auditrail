@@ -67,4 +67,59 @@ describe("WorkspaceSidebarSwitcher", () => {
 
     expect(push).toHaveBeenCalledWith("/settings?organizationId=org-2&projectId=project-2");
   });
+
+  it("uses a manually selected project in the pushed route", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <WorkspaceSidebarSwitcher
+        activeOrganizationId="org-1"
+        activeProjectId="project-1"
+        memberships={[
+          {
+            organization: {
+              id: "org-1",
+              name: "Acme"
+            },
+            organizationId: "org-1",
+            projectIds: ["project-1", "project-2"],
+            projects: [
+              {
+                id: "project-1",
+                name: "Production",
+                organizationId: "org-1"
+              },
+              {
+                id: "project-2",
+                name: "Billing",
+                organizationId: "org-1"
+              }
+            ],
+            role: "owner"
+          }
+        ]}
+      />
+    );
+
+    await user.selectOptions(screen.getByLabelText("Project"), "project-2");
+    await user.click(screen.getByRole("button", { name: "Open workspace" }));
+
+    expect(push).toHaveBeenCalledWith("/settings?organizationId=org-1&projectId=project-2");
+  });
+
+  it("does not push when no organization can be selected", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <WorkspaceSidebarSwitcher
+        activeOrganizationId=""
+        activeProjectId=""
+        memberships={[]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open workspace" }));
+
+    expect(push).not.toHaveBeenCalled();
+  });
 });

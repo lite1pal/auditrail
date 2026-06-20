@@ -8,6 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:ui": "vitest run --config vitest.ui.config.ts --coverage",
     "test:watch": "vitest",
     "lint": "eslint .",
     "api:types": "openapi-typescript http://localhost:4000/api/v1/openapi.json -o src/lib/api/generated/schema.d.ts",

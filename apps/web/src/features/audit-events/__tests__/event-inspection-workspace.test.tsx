@@ -91,4 +91,34 @@ describe("EventInspectionWorkspace", () => {
     expect(detailPanel.textContent).not.toContain("undefined");
     expect(detailPanel.textContent).not.toContain("null");
   });
+
+  it("clears the selected event when the dialog closes itself", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <EventInspectionWorkspace
+        hasMore={false}
+        nextCursor={null}
+        query={{ limit: 25 }}
+        rows={[
+          {
+            actor: "user-1",
+            createdAt: "Jan 1, 2026, 12:00 AM",
+            event: "user.created",
+            id: "event-1",
+            metadata: "{\"source\":\"test\"}",
+            target: "account-1"
+          }
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Inspect" }));
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByLabelText("Event detail modal")).toBeNull();
+    expect(screen.getByRole("button", { name: "Inspect" }).getAttribute("aria-pressed")).toBe(
+      "false"
+    );
+  });
 });

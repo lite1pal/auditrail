@@ -101,6 +101,25 @@ describe("WorkspaceSettingsScreen", () => {
     ).toBeTruthy();
     expect(screen.getByText("Needs a project")).toBeTruthy();
   });
+
+  it("falls back to the root dashboard link when no organization is selected", () => {
+    render(
+      <WorkspaceSettingsScreen
+        acceptInvitationAction={noopAction}
+        apiKeys={[]}
+        createApiKeyAction={noopAction}
+        createOrganizationAction={noopAction}
+        createProjectAction={noopAction}
+        inviteMemberAction={noopAction}
+        organizations={[]}
+        projects={[]}
+        revokeApiKeyAction={noopAction}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Open dashboard" }).getAttribute("href")).toBe("/");
+    expect(screen.getByText("No organization selected")).toBeTruthy();
+  });
 });
 
 async function noopAction() {}
