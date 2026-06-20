@@ -71,6 +71,7 @@ describe("toEventTimeseriesViewModel", () => {
       points: [{ bucketStart: "2026-01-01T00:00:00.000Z", count: 2 }]
     });
 
+    expect(result.points[0]?.bucketStart).toBe("2026-01-01T00:00:00.000Z");
     expect(result.points[0]?.count).toBe(2);
   });
 });

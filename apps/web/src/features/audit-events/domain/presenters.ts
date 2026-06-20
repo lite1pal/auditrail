@@ -41,7 +41,7 @@ export function toEventTimeseriesViewModel(
 ): EventTimeseriesViewModel {
   return {
     points: response.points.map((point) => ({
-      bucketStart: formatIsoDate(point.bucketStart),
+      bucketStart: point.bucketStart,
       count: point.count
     }))
   };

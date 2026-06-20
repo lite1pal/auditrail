@@ -6,6 +6,26 @@ This file tracks web dashboard work items.
 
 ## Done
 
+- [x] T-041 Add a minimal audit events chart
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/components/*
+    - apps/web/src/features/audit-events/__tests__/*
+    - apps/web/src/features/audit-events/domain/presenters.ts
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The audit events dashboard uses a minimal single-series chart for event volume
+    - The chart keeps the existing workspace and filter-driven data flow
+    - Tests cover the updated chart presentation or the data formatting it depends on
+
 - [x] T-040 Hide restricted settings actions for non-admin workspace roles
   status: done
   priority: high

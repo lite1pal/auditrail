@@ -2,6 +2,22 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Minimal Audit Events Volume Chart
+
+Changed:
+
+- replaced the audit-events timeseries panel with a minimal single-series area chart
+- kept the dashboard data flow unchanged while formatting chart axes and tooltips from the existing timeseries payload
+- added empty-state handling so the chart card stays readable when no activity exists yet
+
+Why:
+
+- the dashboard needs a compact volume view that fits the new minimal visual direction without adding extra controls or chart clutter
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Permission-Aware Settings Actions
 
 Changed:
