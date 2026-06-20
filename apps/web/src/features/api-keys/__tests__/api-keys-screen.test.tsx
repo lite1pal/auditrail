@@ -20,6 +20,7 @@ describe("ApiKeysScreen", () => {
             revoked: false
           }
         ]}
+        canManage
         createApiKeyAction={noopAction}
         currentUserEmail="user@example.com"
         newApiKey={{
@@ -29,7 +30,7 @@ describe("ApiKeysScreen", () => {
         }}
         organizationName="Acme"
         projectName="Production"
-        revokeApiKeyAction={noopAction}
+        revokeApiKeyAction={noopRevokeAction}
       />
     );
 
@@ -60,7 +61,7 @@ describe("ApiKeysScreen", () => {
         apiKeys={[]}
         createApiKeyAction={noopAction}
         currentUserEmail="user@example.com"
-        revokeApiKeyAction={noopAction}
+        revokeApiKeyAction={noopRevokeAction}
       />
     );
 
@@ -68,6 +69,39 @@ describe("ApiKeysScreen", () => {
     expect(screen.getByRole("button", { name: "Generate key" }).getAttribute("disabled")).not.toBeNull();
     expect(screen.getByText("Create and select a project before generating a key.")).toBeTruthy();
   });
+
+  it("hides privileged api key actions for non-admin roles", () => {
+    render(
+      <ApiKeysScreen
+        activeOrganizationId="org-1"
+        activeProjectId="project-1"
+        apiKeys={[
+          {
+            createdAt: "2026-06-18T10:00:00.000Z",
+            id: "key-1",
+            keyPrefix: "atlabc",
+            name: "Production ingest",
+            projectId: "project-1",
+            revoked: false
+          }
+        ]}
+        canManage={false}
+        createApiKeyAction={noopAction}
+        currentUserEmail="user@example.com"
+        organizationName="Acme"
+        projectName="Production"
+        revokeApiKeyAction={noopRevokeAction}
+      />
+    );
+
+    expect(screen.queryByRole("link", { name: "Create a new API key" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Generate key" }).getAttribute("disabled")).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
+    expect(screen.getByText("Only organization owners and admins can create API keys.")).toBeTruthy();
+    expect(screen.getByText("No actions")).toBeTruthy();
+  });
 });
 
 async function noopAction() {}
+
+async function noopRevokeAction() {}

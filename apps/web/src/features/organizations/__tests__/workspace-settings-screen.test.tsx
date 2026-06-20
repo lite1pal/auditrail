@@ -62,9 +62,6 @@ describe("WorkspaceSettingsScreen", () => {
     expect(screen.getByRole("link", { name: /Projects/i }).getAttribute("href")).toBe(
       "#project-settings"
     );
-    expect(screen.getByRole("link", { name: /API keys/i }).getAttribute("href")).toBe(
-      "#api-key-settings"
-    );
     expect(screen.getByText("Workspace snapshot")).toBeTruthy();
     expect(screen.getByText("Selected project: Production")).toBeTruthy();
     expect(screen.getByText("Invitation link")).toBeTruthy();
@@ -93,9 +90,6 @@ describe("WorkspaceSettingsScreen", () => {
     );
 
     expect(screen.getByText("No projects yet. Create one to generate keys and start collecting events.")).toBeTruthy();
-    expect(
-      screen.getByText("No API keys yet. Generate one for the selected project to unlock the ingest command.")
-    ).toBeTruthy();
     expect(
       screen.getByText("Create an invitation to generate a shareable join link for this organization.")
     ).toBeTruthy();

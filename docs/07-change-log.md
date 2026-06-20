@@ -2,6 +2,39 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Permission-Aware API Key Management
+
+Changed:
+
+- passed the active organization role through the shared workspace resolver
+- hid API key create and revoke actions on the dedicated API keys page for member and viewer roles
+- kept listing access intact so lower-privilege users can still view project keys without being offered forbidden actions
+
+Why:
+
+- the API correctly restricts create and revoke to owner/admin roles, so the page must match that permission model instead of surfacing actions that always fail
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
+## 2026-06-20 - API Key Management Moved Off Settings
+
+Changed:
+
+- removed the API keys management section from the settings page and its settings-side sub-navigation entry
+- kept API key management on the dedicated `/api-keys` page only
+- changed API key revoke on the dedicated page to use a bound server action instead of hidden-input form parsing
+
+Why:
+
+- key management now has its own page, so duplicating create and revoke controls inside settings added noise without helping the workflow
+- binding the revoke action directly makes the submit path more explicit and fixes the unreliable revoke click behavior
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Dedicated API Keys Page
 
 Changed:

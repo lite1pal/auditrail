@@ -6,6 +6,48 @@ This file tracks web dashboard work items.
 
 ## Done
 
+- [x] T-039 Hide restricted API key actions for non-admin workspace roles
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/src/features/api-keys/*
+    - apps/web/src/features/organizations/domain/*
+    - apps/web/src/features/organizations/server/*
+    - apps/web/src/features/**/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The API keys page does not offer create or revoke actions to viewer/member roles
+    - Owner/admin roles still see the management actions
+    - Tests cover the permission-aware API key page behavior
+
+- [x] T-038 Move API key management fully onto the dedicated page
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/src/features/api-keys/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/organizations/server/*
+    - apps/web/src/features/**/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The settings page no longer contains the API keys management section
+    - Revoking a key works from the dedicated API keys page
+    - Tests cover the updated settings navigation and API key page behavior
+
 - [x] T-037 Add a dedicated API keys page
   status: done
   priority: high

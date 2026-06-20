@@ -1,10 +1,11 @@
-import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { EmptyState } from "@/src/components/ui/empty-state";
+import { ApiKeyTableRow } from "@/src/features/api-keys/components/api-key-table-row";
 import type { ManagedApiKey } from "@/src/features/api-keys/domain/schemas";
 
 interface ApiKeysTableProps {
   apiKeys: ManagedApiKey[];
+  canManage?: boolean;
   currentUserEmail: string;
   newApiKey?: {
     name: string;
@@ -13,11 +14,17 @@ interface ApiKeysTableProps {
   };
   organizationId?: string;
   projectId?: string;
-  revokeApiKeyAction: (formData: FormData) => Promise<void>;
+  revokeApiKeyAction: (input: {
+    apiKeyId: string;
+    organizationId: string;
+    projectId: string;
+    redirectTo?: "/api-keys" | "/settings";
+  }) => Promise<void>;
 }
 
 export function ApiKeysTable({
   apiKeys,
+  canManage,
   currentUserEmail,
   newApiKey,
   organizationId,
@@ -45,51 +52,18 @@ export function ApiKeysTable({
             </tr>
           </thead>
           <tbody>
-            {apiKeys.map((apiKey) => {
-              const isNewKey =
-                newApiKey?.projectId === apiKey.projectId && newApiKey.name === apiKey.name;
-
-              return (
-                <tr className="align-top hover:bg-[var(--panel-subtle)]" key={apiKey.id}>
-                  <td className="border-b border-[var(--border)] p-4 text-sm font-medium">
-                    {apiKey.name}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {apiKey.revoked ? "Revoked" : "Active"}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-xs">
-                    <code>{apiKey.id}</code>
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {isNewKey ? newApiKey.rawKey : "Hidden after creation"}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {formatDate(apiKey.createdAt)}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {apiKey.lastUsedAt ? formatDate(apiKey.lastUsedAt) : "Never"}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {isNewKey ? currentUserEmail : "Unavailable"}
-                  </td>
-                  <td className="border-b border-[var(--border)] p-4 text-sm">
-                    {!apiKey.revoked && organizationId && projectId ? (
-                      <form action={revokeApiKeyAction}>
-                        <input name="organizationId" type="hidden" value={organizationId} />
-                        <input name="projectId" type="hidden" value={projectId} />
-                        <input name="apiKeyId" type="hidden" value={apiKey.id} />
-                        <input name="redirectTo" type="hidden" value="/api-keys" />
-                        <Button size="sm" type="submit" variant="secondary">
-                          Revoke
-                        </Button>
-                      </form>
-                    ) : (
-                      "No actions"
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+            {apiKeys.map((apiKey) => (
+              <ApiKeyTableRow
+                apiKey={apiKey}
+                canManage={canManage}
+                currentUserEmail={currentUserEmail}
+                key={apiKey.id}
+                newApiKey={newApiKey}
+                organizationId={organizationId}
+                projectId={projectId}
+                revokeApiKeyAction={revokeApiKeyAction}
+              />
+            ))}
           </tbody>
         </table>
       </div>
@@ -107,7 +81,3 @@ const headers = [
   "Created by",
   "Actions"
 ];
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString();
-}

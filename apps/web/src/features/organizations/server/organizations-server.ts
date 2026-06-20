@@ -62,6 +62,7 @@ export async function loadWorkspacePage(
 
   return {
     activeOrganizationId,
+    activeOrganizationRole: workspace.activeOrganizationRole,
     activeProjectId,
     apiKeys,
     ingestCommand: buildIngestCommand({
@@ -193,6 +194,31 @@ export async function revokeApiKeyAction(formData: FormData) {
   revalidatePath(targetPath);
   redirect(
     `${targetPath}?organizationId=${organizationId}&projectId=${projectId}` as Route
+  );
+}
+
+export async function revokeApiKeyActionById(input: {
+  apiKeyId: string;
+  organizationId: string;
+  projectId: string;
+  redirectTo?: "/api-keys" | "/settings";
+}) {
+  "use server";
+
+  await createApiKeysClient(createServerApiClient()).revokeApiKey(
+    input.organizationId,
+    input.projectId,
+    input.apiKeyId
+  );
+
+  revalidatePath("/");
+  revalidatePath("/settings");
+
+  const targetPath = input.redirectTo === "/api-keys" ? "/api-keys" : "/settings";
+
+  revalidatePath(targetPath);
+  redirect(
+    `${targetPath}?organizationId=${input.organizationId}&projectId=${input.projectId}` as Route
   );
 }
 

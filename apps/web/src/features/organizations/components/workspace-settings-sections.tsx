@@ -1,6 +1,3 @@
-import { ApiKeyList } from "@/src/features/api-keys/components/api-key-list";
-import { CreateApiKeyForm } from "@/src/features/api-keys/components/create-api-key-form";
-import { ProjectOnboardingPanel } from "@/src/features/api-keys/components/project-onboarding-panel";
 import { AcceptInvitationForm } from "@/src/features/organizations/components/accept-invitation-form";
 import { CreateOrganizationForm } from "@/src/features/organizations/components/create-organization-form";
 import { CreateProjectForm } from "@/src/features/organizations/components/create-project-form";
@@ -17,16 +14,11 @@ interface WorkspaceSettingsSectionsProps
     | "acceptInvitationAction"
     | "activeOrganizationId"
     | "activeProjectId"
-    | "apiKeys"
-    | "createApiKeyAction"
     | "createOrganizationAction"
     | "createProjectAction"
-    | "ingestCommand"
     | "invitationUrl"
     | "inviteMemberAction"
-    | "newApiKey"
     | "projects"
-    | "revokeApiKeyAction"
   > {
   activeProject?: Project;
 }
@@ -34,18 +26,12 @@ interface WorkspaceSettingsSectionsProps
 export function WorkspaceSettingsSections({
   acceptInvitationAction,
   activeOrganizationId,
-  activeProject,
   activeProjectId,
-  apiKeys,
-  createApiKeyAction,
   createOrganizationAction,
   createProjectAction,
-  ingestCommand,
   invitationUrl,
   inviteMemberAction,
-  newApiKey,
-  projects,
-  revokeApiKeyAction
+  projects
 }: WorkspaceSettingsSectionsProps) {
   return (
     <>
@@ -84,34 +70,6 @@ export function WorkspaceSettingsSections({
             projects={projects}
           />
         </section>
-      </SettingsGroup>
-
-      <SettingsGroup
-        description="Generate project API keys, review existing keys, and copy the first ingest command."
-        id="api-key-settings"
-        title="API keys"
-      >
-        <section className="grid gap-4 lg:grid-cols-2">
-          <CreateApiKeyForm
-            action={createApiKeyAction}
-            organizationId={activeOrganizationId}
-            projectId={activeProjectId}
-          />
-          <ApiKeyList
-            apiKeys={apiKeys}
-            organizationId={activeOrganizationId}
-            projectId={activeProjectId}
-            revokeApiKeyAction={revokeApiKeyAction}
-          />
-        </section>
-        <ProjectOnboardingPanel
-          activeProjectName={activeProject?.name}
-          createdApiKeyName={newApiKey?.name}
-          createdRawKey={
-            newApiKey && newApiKey.projectId === activeProjectId ? newApiKey.rawKey : undefined
-          }
-          ingestCommand={ingestCommand}
-        />
       </SettingsGroup>
     </>
   );

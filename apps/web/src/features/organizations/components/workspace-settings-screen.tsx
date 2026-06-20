@@ -12,16 +12,12 @@ export function WorkspaceSettingsScreen({
   activeOrganizationId,
   activeProjectId,
   apiKeys,
-  createApiKeyAction,
   createOrganizationAction,
   createProjectAction,
-  ingestCommand,
   invitationUrl,
   inviteMemberAction,
-  newApiKey,
   organizations,
-  projects,
-  revokeApiKeyAction
+  projects
 }: WorkspaceSettingsScreenProps) {
   const activeProject = projects.find((project) => project.id === activeProjectId);
   const dashboardHref = toDashboardHref(activeOrganizationId, activeProjectId);
@@ -43,18 +39,12 @@ export function WorkspaceSettingsScreen({
         <WorkspaceSettingsSections
           acceptInvitationAction={acceptInvitationAction}
           activeOrganizationId={activeOrganizationId}
-          activeProject={activeProject}
           activeProjectId={activeProjectId}
-          apiKeys={apiKeys}
-          createApiKeyAction={createApiKeyAction}
           createOrganizationAction={createOrganizationAction}
           createProjectAction={createProjectAction}
-          ingestCommand={ingestCommand}
           invitationUrl={invitationUrl}
           inviteMemberAction={inviteMemberAction}
-          newApiKey={newApiKey}
           projects={projects}
-          revokeApiKeyAction={revokeApiKeyAction}
         />
       </div>
     </main>

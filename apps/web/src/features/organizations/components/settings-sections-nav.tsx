@@ -15,11 +15,6 @@ const sectionLinks = [
     description: "Select or create projects for the current organization.",
     href: "#project-settings",
     label: "Projects"
-  },
-  {
-    description: "Generate and revoke project ingest keys.",
-    href: "#api-key-settings",
-    label: "API keys"
   }
 ];
 
@@ -32,7 +27,7 @@ export function SettingsSectionsNav() {
         </p>
         <h2 className="text-lg font-bold">Jump to the workspace area you need.</h2>
         <p className="text-sm text-[var(--muted)]">
-          Keep organization setup, access management, projects, and keys separated.
+          Keep organization setup, access management, and project work separated.
         </p>
       </div>
       <nav aria-label="Settings sections">

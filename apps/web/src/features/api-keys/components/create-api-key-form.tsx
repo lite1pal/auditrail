@@ -5,6 +5,7 @@ import { Label } from "@/src/components/ui/label";
 
 interface CreateApiKeyFormProps {
   action: (formData: FormData) => Promise<void>;
+  canManage?: boolean;
   organizationId?: string;
   projectId?: string;
   redirectTo?: "/api-keys" | "/settings";
@@ -12,11 +13,12 @@ interface CreateApiKeyFormProps {
 
 export function CreateApiKeyForm({
   action,
+  canManage = true,
   organizationId,
   projectId,
   redirectTo
 }: CreateApiKeyFormProps) {
-  const canCreate = Boolean(organizationId && projectId);
+  const canCreate = Boolean(organizationId && projectId && canManage);
 
   return (
     <Card className="grid gap-4">
@@ -45,7 +47,9 @@ export function CreateApiKeyForm({
       </form>
       {!canCreate ? (
         <p className="text-sm text-[var(--muted)]">
-          Create and select a project before generating a key.
+          {canManage
+            ? "Create and select a project before generating a key."
+            : "Only organization owners and admins can create API keys."}
         </p>
       ) : null}
     </Card>

@@ -10,6 +10,7 @@ interface ApiKeysScreenProps {
   activeOrganizationId?: string;
   activeProjectId?: string;
   apiKeys: ManagedApiKey[];
+  canManage?: boolean;
   createApiKeyAction: (formData: FormData) => Promise<void>;
   currentUserEmail: string;
   newApiKey?: {
@@ -19,13 +20,19 @@ interface ApiKeysScreenProps {
   };
   organizationName?: string;
   projectName?: string;
-  revokeApiKeyAction: (formData: FormData) => Promise<void>;
+  revokeApiKeyAction: (input: {
+    apiKeyId: string;
+    organizationId: string;
+    projectId: string;
+    redirectTo?: "/api-keys" | "/settings";
+  }) => Promise<void>;
 }
 
 export function ApiKeysScreen({
   activeOrganizationId,
   activeProjectId,
   apiKeys,
+  canManage,
   createApiKeyAction,
   currentUserEmail,
   newApiKey,
@@ -42,12 +49,15 @@ export function ApiKeysScreen({
     <PageShell>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <SectionHeader description={description} eyebrow="Security" title="API Keys" />
-        <Button asChild>
-          <a href="#create-api-key">Create a new API key</a>
-        </Button>
+        {canManage ? (
+          <Button asChild>
+            <a href="#create-api-key">Create a new API key</a>
+          </Button>
+        ) : null}
       </div>
       <ApiKeysTable
         apiKeys={apiKeys}
+        canManage={canManage}
         currentUserEmail={currentUserEmail}
         newApiKey={newApiKey}
         organizationId={activeOrganizationId}
@@ -64,6 +74,7 @@ export function ApiKeysScreen({
         </div>
         <CreateApiKeyForm
           action={createApiKeyAction}
+          canManage={canManage}
           organizationId={activeOrganizationId}
           projectId={activeProjectId}
           redirectTo="/api-keys"
