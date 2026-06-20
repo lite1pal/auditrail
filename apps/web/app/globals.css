@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --background-accent: #e2e8f0;
-  --border: #e2e8f0;
+  --background: #f7f7f5;
+  --background-accent: #ecece7;
+  --border: #e5e5df;
   --danger: #b42318;
   --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --font-geist-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --panel: rgba(255, 255, 255, 0.88);
+  --foreground: #1f1f1b;
+  --muted: #6b6b62;
+  --panel: rgba(255, 255, 255, 0.92);
   --panel-strong: #ffffff;
-  --panel-subtle: #f8fafc;
-  --primary: #0f172a;
+  --panel-subtle: #fafaf8;
+  --primary: #1f1f1b;
   --primary-foreground: #ffffff;
   --success: #067647;
 }
@@ -22,9 +22,7 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--background-accent) 90%, white) 0%, transparent 44%),
-    linear-gradient(180deg, #ffffff 0%, var(--background) 100%);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans);
 }

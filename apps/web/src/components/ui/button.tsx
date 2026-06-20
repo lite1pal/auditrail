@@ -21,14 +21,14 @@ export function Button({
   return (
     <Component
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm font-semibold shadow-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--foreground)_15%,white)] disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--foreground)_12%,white)] disabled:cursor-not-allowed disabled:opacity-60",
         size === "sm" ? "min-h-9 px-3 text-sm" : "min-h-10 px-4 text-sm",
         variant === "primary" &&
-          "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-92",
+          "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-95",
         variant === "secondary" &&
           "border-[var(--border)] bg-[var(--panel-strong)] text-[var(--foreground)] hover:bg-[var(--panel-subtle)]",
         variant === "ghost" &&
-          "border-transparent bg-transparent text-[var(--foreground)] shadow-none hover:bg-[var(--panel-subtle)]",
+          "border-transparent bg-transparent text-[var(--foreground)] hover:bg-[var(--panel-subtle)]",
         className
       )}
       {...props}

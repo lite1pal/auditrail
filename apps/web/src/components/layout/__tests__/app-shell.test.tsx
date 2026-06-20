@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/src/components/layout/app-shell";
 
 vi.mock("@/src/features/auth/server/auth-server", () => ({
-  logoutAction: async () => {}
+  logoutAction: async () => {},
 }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
   useRouter: () => ({
-    push: vi.fn()
-  })
+    push: vi.fn(),
+  }),
 }));
 
 describe("AppShell", () => {
@@ -25,7 +25,7 @@ describe("AppShell", () => {
             {
               organization: {
                 id: "org-1",
-                name: "Acme"
+                name: "Acme",
               },
               organizationId: "org-1",
               projectIds: ["project-1", "project-2"],
@@ -33,39 +33,38 @@ describe("AppShell", () => {
                 {
                   id: "project-1",
                   name: "Production",
-                  organizationId: "org-1"
+                  organizationId: "org-1",
                 },
                 {
                   id: "project-2",
                   name: "Billing",
-                  organizationId: "org-1"
-                }
+                  organizationId: "org-1",
+                },
               ],
-              role: "owner"
-            }
+              role: "owner",
+            },
           ],
           user: {
             email: "user@example.com",
-            id: "user-1"
-          }
+            id: "user-1",
+          },
         }}
       >
         <div>Child content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByText("AuditTrail")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("href")).toBe(
-      "/?organizationId=org-1&projectId=project-1"
-    );
-    expect(screen.getByRole("link", { name: "Settings" }).getAttribute("href")).toBe(
-      "/settings?organizationId=org-1&projectId=project-1"
-    );
-    expect(screen.getByRole("link", { name: "Members" }).getAttribute("href")).toBe(
-      "/members?organizationId=org-1&projectId=project-1"
-    );
-    expect(screen.getByText("Workspace switcher")).toBeTruthy();
-    expect(screen.getByText("Selection is stored in the URL.")).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Dashboard" }).getAttribute("href"),
+    ).toBe("/?organizationId=org-1&projectId=project-1");
+    expect(
+      screen.getByRole("link", { name: "Settings" }).getAttribute("href"),
+    ).toBe("/settings?organizationId=org-1&projectId=project-1");
+    expect(
+      screen.getByRole("link", { name: "Members" }).getAttribute("href"),
+    ).toBe("/members?organizationId=org-1&projectId=project-1");
+    expect(screen.getByText("Workspace")).toBeTruthy();
     expect(screen.getByLabelText("Organization")).toBeTruthy();
     expect(screen.getByLabelText("Project")).toBeTruthy();
     expect(screen.getByText("Child content")).toBeTruthy();
@@ -78,21 +77,23 @@ describe("AppShell", () => {
           memberships: [],
           user: {
             email: "user@example.com",
-            id: "user-1"
-          }
+            id: "user-1",
+          },
         }}
       >
         <div>Child content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByText("No organization · No project")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("href")).toBe("/");
-    expect(screen.getByRole("link", { name: "Settings" }).getAttribute("href")).toBe(
-      "/settings"
-    );
-    expect(screen.getByRole("link", { name: "Members" }).getAttribute("href")).toBe(
-      "/members"
-    );
+    expect(
+      screen.getByRole("link", { name: "Dashboard" }).getAttribute("href"),
+    ).toBe("/");
+    expect(
+      screen.getByRole("link", { name: "Settings" }).getAttribute("href"),
+    ).toBe("/settings");
+    expect(
+      screen.getByRole("link", { name: "Members" }).getAttribute("href"),
+    ).toBe("/members");
   });
 });

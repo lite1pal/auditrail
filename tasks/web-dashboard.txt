@@ -4,7 +4,50 @@ This file tracks web dashboard work items.
 
 ## Queue
 
+- [ ] T-036 Make the dashboard sidebar more minimalistic
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/src/components/layout/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/components/layout/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The sidebar uses fewer bordered containers and less explanatory copy
+    - Navigation and workspace controls still remain clear and functional
+    - Existing sidebar tests still pass
+
 ## Done
+
+- [x] T-035 Simplify dashboard styling toward the OpenAI platform dashboard
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/app/globals.css
+    - apps/web/src/components/layout/*
+    - apps/web/src/components/ui/*
+    - apps/web/src/features/audit-events/components/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/components/layout/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The dashboard shell uses quieter borders, flatter surfaces, and less decorative chrome
+    - The main event and settings screens read as simpler operator tools rather than marketing-style cards
+    - Existing web UI tests still pass after the visual simplification
 
 - [x] T-027 Refresh dashboard and settings page UX
   status: done

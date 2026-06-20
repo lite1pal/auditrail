@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { UrlObject } from "url";
 
-import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 
@@ -23,9 +22,11 @@ export function WorkspaceSummaryCard({
   projectCount
 }: WorkspaceSummaryCardProps) {
   return (
-    <Card className="grid gap-5 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.88))]">
+    <Card className="grid gap-5">
       <div className="grid gap-1">
-        <Badge className="w-fit">Workspace snapshot</Badge>
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
+          Workspace snapshot
+        </p>
         <h2 className="text-xl font-bold">
           {activeOrganizationName ?? "No organization selected"}
         </h2>
@@ -55,8 +56,8 @@ export function WorkspaceSummaryCard({
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--panel-strong)] p-3">
-      <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--panel-subtle)] p-3">
+      <dt className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
         {label}
       </dt>
       <dd className="mt-1 text-sm font-bold">{value}</dd>

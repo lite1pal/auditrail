@@ -37,14 +37,14 @@ export function DataTable<TData>({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)] shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--panel)]">
       <table className="w-full border-collapse">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
-                  className="border-b border-[var(--border)] bg-[var(--panel-subtle)] p-4 text-left text-xs font-semibold tracking-[0.16em] text-[var(--muted)] uppercase"
+                  className="border-b border-[var(--border)] bg-[var(--panel-subtle)] p-4 text-left text-xs font-medium tracking-[0.14em] text-[var(--muted)] uppercase"
                   key={header.id}
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
@@ -55,7 +55,7 @@ export function DataTable<TData>({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr className="hover:bg-[color-mix(in_srgb,var(--panel-subtle)_70%,white)]" key={row.id}>
+            <tr className="hover:bg-[var(--panel-subtle)]" key={row.id}>
               {row.getVisibleCells().map((cell) => (
                 <td className="border-b border-[var(--border)] p-4 align-top text-sm" key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

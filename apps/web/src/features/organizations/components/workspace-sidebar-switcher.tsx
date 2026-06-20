@@ -14,7 +14,7 @@ interface WorkspaceSidebarSwitcherProps {
 export function WorkspaceSidebarSwitcher({
   activeOrganizationId,
   activeProjectId,
-  memberships
+  memberships,
 }: WorkspaceSidebarSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -23,8 +23,9 @@ export function WorkspaceSidebarSwitcher({
     activeOrganizationId ?? memberships[0]?.organization.id ?? "";
   const initialProjectId =
     activeProjectId ??
-    memberships.find((membership) => membership.organization.id === initialOrganizationId)?.projects[0]
-      ?.id ??
+    memberships.find(
+      (membership) => membership.organization.id === initialOrganizationId,
+    )?.projects[0]?.id ??
     "";
   const [organizationId, setOrganizationId] = useState(initialOrganizationId);
   const [projectId, setProjectId] = useState(initialProjectId);
@@ -35,7 +36,7 @@ export function WorkspaceSidebarSwitcher({
   }, [initialOrganizationId, initialProjectId]);
 
   const selectedMembership = memberships.find(
-    (membership) => membership.organization.id === organizationId
+    (membership) => membership.organization.id === organizationId,
   );
 
   function openWorkspace(nextOrganizationId: string, nextProjectId: string) {
@@ -44,7 +45,7 @@ export function WorkspaceSidebarSwitcher({
     }
 
     const query = new URLSearchParams({
-      organizationId: nextOrganizationId
+      organizationId: nextOrganizationId,
     });
 
     if (nextProjectId) {
@@ -58,14 +59,9 @@ export function WorkspaceSidebarSwitcher({
 
   return (
     <div aria-busy={isPending} className="grid gap-3">
-      <div className="grid gap-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-          Workspace switcher
-        </p>
-        <p className="text-sm text-[var(--muted)]">
-          Changing either field updates the current page immediately.
-        </p>
-      </div>
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
+        Workspace
+      </p>
       <label className="grid gap-1 text-sm font-semibold">
         <span>Organization</span>
         <Select
@@ -75,7 +71,8 @@ export function WorkspaceSidebarSwitcher({
             const nextOrganizationId = event.target.value;
             const nextProjectId =
               memberships.find(
-                (membership) => membership.organization.id === nextOrganizationId
+                (membership) =>
+                  membership.organization.id === nextOrganizationId,
               )?.projects[0]?.id ?? "";
 
             setOrganizationId(nextOrganizationId);
@@ -85,7 +82,10 @@ export function WorkspaceSidebarSwitcher({
           value={organizationId}
         >
           {memberships.map((membership) => (
-            <option key={membership.organization.id} value={membership.organization.id}>
+            <option
+              key={membership.organization.id}
+              value={membership.organization.id}
+            >
               {membership.organization.name}
             </option>
           ))}
@@ -110,9 +110,6 @@ export function WorkspaceSidebarSwitcher({
           ))}
         </Select>
       </label>
-      <p className="text-xs text-[var(--muted)]">
-        {isPending ? "Updating workspace..." : "Selection is stored in the URL."}
-      </p>
     </div>
   );
 }

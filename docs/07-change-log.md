@@ -2,6 +2,40 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Minimal Sidebar Pass
+
+Changed:
+
+- removed extra sidebar card framing around navigation and workspace controls
+- reduced sidebar copy and tightened the left-rail spacing and typography
+- kept the same route-driven workspace switch behavior while making the rail read more like a utility column
+
+Why:
+
+- the previous shell was still visually heavier than needed for a minimal operator dashboard
+- the sidebar now puts emphasis on navigation and context with fewer decorative layers
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
+## 2026-06-20 - Simplified Dashboard Styling Toward The OpenAI Platform Dashboard
+
+Changed:
+
+- reduced the dashboard shell chrome by flattening cards, removing gradients, and using quieter neutral tokens
+- simplified section headers, filter panels, workspace summary surfaces, and navigation affordances
+- kept the existing workspace behavior and coverage while shifting the interface toward a calmer operator dashboard style
+
+Why:
+
+- the previous refresh added too much decorative weight for a product surface that should feel closer to a restrained control panel
+- the dashboard and settings pages now prioritize hierarchy, spacing, and typography over badges, shadows, and gradients
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Immediate Sidebar Workspace Switching And Shadcn-Style Shell Refresh
 
 Changed:

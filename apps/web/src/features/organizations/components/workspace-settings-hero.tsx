@@ -19,13 +19,13 @@ export function WorkspaceSettingsHero({
   apiKeyCount,
   dashboardHref,
   organizations,
-    projects
+  projects
 }: WorkspaceSettingsHeroProps) {
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_360px]">
-      <div className="grid gap-4 rounded-[28px] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.9))] p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)]">
+      <div className="grid gap-4 rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6">
         <div className="grid gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
             Workspace settings
           </p>
           <h1 className="text-3xl leading-tight font-bold">

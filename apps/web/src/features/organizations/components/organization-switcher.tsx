@@ -24,9 +24,9 @@ export function OrganizationSwitcher({
   }
 
   return (
-      <Card className="grid gap-3">
-        <div className="grid gap-1">
-          <h2 className="text-lg font-bold">Organizations</h2>
+    <Card className="grid gap-3">
+      <div className="grid gap-1">
+        <h2 className="text-lg font-bold">Organizations</h2>
         <p className="text-sm text-[var(--muted)]">
           Switch the workspace that controls projects, invitations, and keys.
         </p>
@@ -40,8 +40,8 @@ export function OrganizationSwitcher({
               aria-current={isActive ? "page" : undefined}
               className={
                 isActive
-                  ? "rounded-xl border border-[var(--foreground)] bg-[var(--foreground)] px-3 py-2 text-sm font-semibold text-[var(--panel-strong)] shadow-sm"
-                  : "rounded-xl border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--panel-subtle)]"
+                  ? "rounded-lg border border-[var(--foreground)] bg-[var(--foreground)] px-3 py-2 text-sm font-medium text-[var(--panel-strong)]"
+                  : "rounded-lg border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--panel-subtle)]"
               }
               href={`/settings?organizationId=${organization.id}`}
               key={organization.id}

@@ -42,7 +42,7 @@ export function AuditEventsScreen({
   return (
     <PageShell>
       <SectionHeader
-        description="Track the active project, inspect a single event on demand, and narrow the stream without leaving the dashboard canvas."
+        description="Track the active project, inspect one event on demand, and filter the stream without leaving this page."
         eyebrow="Audit events"
         title="Event stream"
       />
