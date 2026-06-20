@@ -2,6 +2,23 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-20 - Settings Sub-Navigation For Workspace Management
+
+Changed:
+
+- added an inner settings navigation that jumps between workspace, access, project, and API-key sections
+- regrouped the settings forms and supporting cards so invitations, project setup, and key management are separated by concern
+- added settings-screen tests that cover the new navigation targets and invitation-link empty state
+
+Why:
+
+- reduce scanning on the settings page by turning one long stack into clear management sections
+- make workspace administration tasks easier to find before the broader dashboard shell changes land
+
+Docs updated:
+
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Modal Event Inspection On The Dashboard
 
 Changed:

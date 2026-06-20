@@ -24,25 +24,6 @@ This file tracks web dashboard work items.
     - The sidebar includes the current workspace navigation without regressing existing flows
     - An organization or project switcher renders at the bottom of the sidebar
 
-- [ ] T-030 Add a settings sub-navigation for workspace management
-  status: todo
-  priority: medium
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-20
-  blocked_reason:
-  files:
-    - apps/web/app/settings/*
-    - apps/web/src/features/organizations/components/*
-    - apps/web/src/features/organizations/__tests__/*
-    - docs/07-change-log.md
-    - tasks/web-dashboard.txt
-  acceptance:
-    - The settings page exposes a dedicated inner sidebar or sub-navigation
-    - Organization, invitations, projects, and API keys are grouped into clearer sections
-    - Tests cover the updated settings navigation or grouping behavior
-
 - [ ] T-031 Add an organization members page
   status: todo
   priority: medium
@@ -142,6 +123,26 @@ This file tracks web dashboard work items.
     - The dashboard does not render the event details card before an event is selected
     - Selecting an event opens the inspection UI in a modal instead of an inline card
     - Tests cover opening, rendering, and closing the event details modal
+
+- [x] T-030 Add a settings sub-navigation for workspace management
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-20
+  completed: 2026-06-20
+  blocked_reason:
+  files:
+    - apps/web/app/settings/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/organizations/__tests__/*
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The settings page exposes a dedicated inner sidebar or sub-navigation
+    - Organization, invitations, projects, and API keys are grouped into clearer sections
+    - Tests cover the updated settings navigation or grouping behavior
 
 - [x] T-025 Keep the selected project stable across dashboard reloads
   status: done
