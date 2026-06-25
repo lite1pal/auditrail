@@ -12,6 +12,7 @@ AuditTrail is a multi-tenant audit event platform for SaaS teams. The current MV
 - API-key authenticated `POST /api/v1/events`
 - Authenticated `GET /api/v1/events`
 - Browser-authenticated project API key management
+- Organization-scoped pricing plans with monthly included-event quotas
 - Global API rate limiting, with `/health` exempt
 - API test coverage threshold of 95%
 
@@ -189,7 +190,19 @@ curl -i 'http://localhost:4000/api/v1/events/stats?top=5&from=2026-06-16T12:00:0
 ```
 
 The settings screen now covers the MVP onboarding path: create a project,
-generate or revoke a project API key, and copy the first-event `curl` command.
+generate or revoke a project API key, switch the active organization plan, and
+copy the first-event `curl` command.
+
+Organizations start on the `starter` plan and included events reset on UTC
+calendar month boundaries:
+
+- `starter`: `100_000` events per month
+- `growth`: `1_000_000` events per month
+- `scale`: `10_000_000` events per month
+
+When an organization exhausts its monthly included events, `POST /api/v1/events`
+returns `402 event_quota_exceeded`. Browser dashboard and session-scoped reads
+remain available while over quota.
 
 ## Project Rules
 

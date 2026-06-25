@@ -203,6 +203,55 @@ describe("createPlatformService", () => {
     ]);
   });
 
+  it("allows admins to change organization plans", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-1",
+          organizationId: "org-1",
+          role: "admin",
+          userId: "user-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+
+    await expect(
+      service.changeOrganizationPlanForUser({
+        organizationId: "org-1",
+        planId: "growth",
+        userId: "user-1"
+      })
+    ).resolves.toEqual({
+      organizationId: "org-1",
+      planId: "growth"
+    });
+    await expect(repo.getOrganizationPlanId("org-1")).resolves.toBe("growth");
+  });
+
+  it("rejects plan changes for viewers", async () => {
+    const service = createPlatformService(
+      createInMemoryPlatformRepo({
+        memberships: [
+          {
+            id: "membership-1",
+            organizationId: "org-1",
+            role: "viewer",
+            userId: "user-1"
+          }
+        ]
+      })
+    );
+
+    await expect(
+      service.changeOrganizationPlanForUser({
+        organizationId: "org-1",
+        planId: "growth",
+        userId: "user-1"
+      })
+    ).rejects.toThrow("forbidden");
+  });
+
   it("accepts valid invitations", async () => {
     const repo = createInMemoryPlatformRepo({
       memberships: [
@@ -403,6 +452,9 @@ function createInMemoryPlatformRepo(
   ];
   const invitations: Invitation[] = [];
   const revokedInvitations: string[] = [];
+  const organizationPlans = new Map<string, "starter" | "growth" | "scale">(
+    organizations.map((organization) => [organization.id, "starter"])
+  );
 
   return {
     invitations,
@@ -441,6 +493,9 @@ function createInMemoryPlatformRepo(
           membership.userId === input.userId
       );
     },
+    async getOrganizationPlanId(organizationId) {
+      return organizationPlans.get(organizationId);
+    },
     async findInvitationByTokenHash(tokenHash) {
       return invitations.find(
         (invitation) => "tokenHash" in invitation && invitation.tokenHash === tokenHash
@@ -472,6 +527,9 @@ function createInMemoryPlatformRepo(
     },
     async revokeInvitation(input) {
       revokedInvitations.push(input.invitationId);
+    },
+    async updateOrganizationPlan(input) {
+      organizationPlans.set(input.organizationId, input.planId);
     }
   } as PlatformRepo & {
     invitations: Invitation[];

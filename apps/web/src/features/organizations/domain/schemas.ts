@@ -11,6 +11,18 @@ export const projectSchema = z.object({
   organizationId: z.string()
 });
 
+export const organizationPlanIdSchema = z.enum(["starter", "growth", "scale"]);
+
+export const organizationPlanSummarySchema = z.object({
+  id: organizationPlanIdSchema,
+  name: z.string(),
+  includedEvents: z.number().int(),
+  usedEvents: z.number().int(),
+  remainingEvents: z.number().int(),
+  periodStart: z.string().datetime(),
+  periodEnd: z.string().datetime()
+});
+
 export const membershipSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
@@ -46,7 +58,14 @@ export const organizationMembersResponseSchema = z.object({
   members: z.array(organizationMemberSchema)
 });
 
+export const changeOrganizationPlanResponseSchema = z.object({
+  organizationId: z.string(),
+  planId: organizationPlanIdSchema
+});
+
 export type Organization = z.infer<typeof organizationSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Membership = z.infer<typeof membershipSchema>;
 export type OrganizationMember = z.infer<typeof organizationMemberSchema>;
+export type OrganizationPlanId = z.infer<typeof organizationPlanIdSchema>;
+export type OrganizationPlanSummary = z.infer<typeof organizationPlanSummarySchema>;

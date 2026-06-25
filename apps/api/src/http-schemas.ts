@@ -8,6 +8,8 @@ export const schemaIds = {
   validationIssue: "ValidationIssue",
   validationErrorResponse: "ValidationErrorResponse",
   rateLimitErrorResponse: "RateLimitErrorResponse",
+  pricingPlanSummaryResponse: "PricingPlanSummaryResponse",
+  eventQuotaExceededResponse: "EventQuotaExceededResponse",
   eventAcceptedResponse: "EventAcceptedResponse",
   eventRecordResponse: "EventRecordResponse",
   eventListResponse: "EventListResponse",
@@ -19,8 +21,7 @@ export const schemaIds = {
   listEventsQuery: "ListEventsQuery",
   summarizeEventsQuery: "SummarizeEventsQuery",
   timeseriesEventsQuery: "TimeseriesEventsQuery",
-  openApiDocumentResponse: "OpenApiDocumentResponse"
-  ,
+  openApiDocumentResponse: "OpenApiDocumentResponse",
   requestMagicLinkBody: "RequestMagicLinkBody",
   createSessionBody: "CreateSessionBody",
   authUserResponse: "AuthUserResponse",
@@ -195,7 +196,7 @@ export function registerApiSchemas(app: FastifyInstance) {
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["organizationId", "projectIds", "role"],
+          required: ["organizationId", "plan", "projectIds", "role"],
           properties: {
             organizationId: { type: "string" },
             organization: {
@@ -206,6 +207,9 @@ export function registerApiSchemas(app: FastifyInstance) {
                 id: { type: "string" },
                 name: { type: "string" }
               }
+            },
+            plan: {
+              $ref: `${schemaIds.pricingPlanSummaryResponse}#`
             },
             projectIds: {
               type: "array",
@@ -314,6 +318,63 @@ export function registerApiSchemas(app: FastifyInstance) {
       lastUsedAt: {
         type: "string",
         format: "date-time"
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.pricingPlanSummaryResponse,
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "id",
+      "name",
+      "includedEvents",
+      "usedEvents",
+      "remainingEvents",
+      "periodStart",
+      "periodEnd"
+    ],
+    properties: {
+      id: {
+        type: "string",
+        enum: ["starter", "growth", "scale"]
+      },
+      name: {
+        type: "string"
+      },
+      includedEvents: {
+        type: "integer"
+      },
+      usedEvents: {
+        type: "integer"
+      },
+      remainingEvents: {
+        type: "integer"
+      },
+      periodStart: {
+        type: "string",
+        format: "date-time"
+      },
+      periodEnd: {
+        type: "string",
+        format: "date-time"
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.eventQuotaExceededResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["error", "plan"],
+    properties: {
+      error: {
+        type: "string",
+        enum: ["event_quota_exceeded"]
+      },
+      plan: {
+        $ref: `${schemaIds.pricingPlanSummaryResponse}#`
       }
     }
   });

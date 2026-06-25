@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { PricingPlanId } from "@auditrail/domain/pricing";
 
 import { createOpaqueToken, hashToken, verifyTokenHash } from "../auth/tokens.js";
 
@@ -71,12 +72,17 @@ export interface PlatformRepo {
     organizationId: string;
     userId: string;
   }): Promise<Membership | undefined>;
+  getOrganizationPlanId(organizationId: string): Promise<PricingPlanId | undefined>;
   listOrganizationMembers(organizationId: string): Promise<OrganizationMember[]>;
   listOrganizationsForUser(userId: string): Promise<Organization[]>;
   listProjects(organizationId: string): Promise<Project[]>;
   revokeInvitation(input: {
     invitationId: string;
     revokedAt: string;
+  }): Promise<void>;
+  updateOrganizationPlan(input: {
+    organizationId: string;
+    planId: PricingPlanId;
   }): Promise<void>;
 }
 
@@ -120,7 +126,14 @@ export interface PlatformService {
     organizationId: string;
     userId: string;
   }): Promise<void>;
+  changeOrganizationPlanForUser(input: {
+    organizationId: string;
+    planId: PricingPlanId;
+    userId: string;
+  }): Promise<{ organizationId: string; planId: PricingPlanId }>;
 }
+
+const pricingPlanIdSchema = z.enum(["starter", "growth", "scale"]);
 
 export function createPlatformService(repo: PlatformRepo): PlatformService {
   return {
@@ -261,6 +274,26 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
         invitationId: input.invitationId,
         revokedAt: new Date().toISOString()
       });
+    },
+    async changeOrganizationPlanForUser(input) {
+      const membership = await repo.findMembership({
+        organizationId: input.organizationId,
+        userId: input.userId
+      });
+
+      assertRole(membership, ["owner", "admin"]);
+
+      const planId = pricingPlanIdSchema.parse(input.planId);
+
+      await repo.updateOrganizationPlan({
+        organizationId: input.organizationId,
+        planId
+      });
+
+      return {
+        organizationId: input.organizationId,
+        planId
+      };
     }
   };
 }

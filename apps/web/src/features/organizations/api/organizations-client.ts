@@ -1,7 +1,9 @@
 import type { ApiClient } from "@/src/lib/api/api-client";
 import {
+  changeOrganizationPlanResponseSchema,
   createOrganizationResponseSchema,
   createProjectResponseSchema,
+  type OrganizationPlanId,
   organizationMembersResponseSchema,
   organizationsResponseSchema,
   projectsResponseSchema
@@ -24,6 +26,15 @@ export function createOrganizationsClient(apiClient: ApiClient) {
           body: { name },
           method: "POST",
           path: `/api/v1/organizations/${organizationId}/projects`
+        })
+      );
+    },
+    async changePlan(organizationId: string, planId: OrganizationPlanId) {
+      return changeOrganizationPlanResponseSchema.parse(
+        await apiClient.request({
+          body: { planId },
+          method: "POST",
+          path: `/api/v1/organizations/${organizationId}/plan` as never
         })
       );
     },

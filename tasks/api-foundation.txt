@@ -65,3 +65,28 @@ This file tracks API runtime, platform, and data-safety work items.
     - The scoping guarantee is documented at the API or architecture boundary
 
 ## Done
+
+- [x] T-036 Add organization pricing plans and monthly ingest quotas
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/*
+    - apps/api/src/modules/platform/*
+    - apps/web/src/features/organizations/*
+    - packages/db/src/*
+    - packages/domain/src/pricing/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Organizations default to the code-defined `starter` plan and can be switched to `growth` or `scale` by owners and admins
+    - `/api/v1/me` includes per-organization pricing summaries and the settings UI renders plan and usage state
+    - Public ingest blocks at the monthly included-event limit with `402 event_quota_exceeded` while dashboard reads remain available

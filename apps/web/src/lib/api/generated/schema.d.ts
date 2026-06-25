@@ -127,6 +127,27 @@ export interface paths {
       };
     };
   };
+  [path: `/api/v1/organizations/${string}/plan`]: {
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            planId: "starter" | "growth" | "scale";
+          };
+        };
+      };
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              organizationId: string;
+              planId: "starter" | "growth" | "scale";
+            };
+          };
+        };
+      };
+    };
+  };
   [path: `/api/v1/organizations/${string}/projects/${string}/api-keys`]: {
     get: {
       responses: {
@@ -312,6 +333,7 @@ export interface components {
       memberships: Array<{
         organization: components["schemas"]["Organization"];
         organizationId: string;
+        plan: components["schemas"]["PricingPlanSummary"];
         projectIds: string[];
         projects: components["schemas"]["Project"][];
         role: "owner" | "admin" | "member" | "viewer";
@@ -372,6 +394,15 @@ export interface components {
     Organization: {
       id: string;
       name: string;
+    };
+    PricingPlanSummary: {
+      id: "starter" | "growth" | "scale";
+      includedEvents: number;
+      name: string;
+      periodEnd: string;
+      periodStart: string;
+      remainingEvents: number;
+      usedEvents: number;
     };
     Project: {
       id: string;

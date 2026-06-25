@@ -3,6 +3,7 @@ import { requireCurrentUser } from "@/src/features/auth/server/auth-server";
 import { WorkspaceSettingsScreen } from "@/src/features/organizations/components/workspace-settings-screen";
 import {
   acceptInvitationAction,
+  changeOrganizationPlanAction,
   createApiKeyAction,
   createOrganizationAction,
   createProjectAction,
@@ -30,8 +31,10 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
       <WorkspaceSettingsScreen
         acceptInvitationAction={acceptInvitationAction}
         activeOrganizationId={workspace.activeOrganizationId}
+        activeOrganizationPlan={workspace.activeOrganizationPlan}
         activeOrganizationRole={workspace.activeOrganizationRole}
         activeProjectId={workspace.activeProjectId}
+        changeOrganizationPlanAction={changeOrganizationPlanAction}
         apiKeys={workspace.apiKeys}
         createApiKeyAction={createApiKeyAction}
         createOrganizationAction={createOrganizationAction}

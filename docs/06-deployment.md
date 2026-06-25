@@ -162,6 +162,10 @@ organization memberships and adds a uniqueness guarantee for
 `packages/db/src/migrations/0003_unique_pending_invitations.sql` revokes older
 duplicate pending invitations and adds a uniqueness guarantee for pending
 `organization_id + email` invitations.
+`packages/db/src/migrations/0004_organization_pricing.sql` adds
+`organizations.plan_id` plus the `organization_monthly_usage` table used for
+monthly included-event quota enforcement. Run this migration before enabling the
+pricing-aware ingest path in production.
 
 When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic

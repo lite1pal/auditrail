@@ -9,6 +9,7 @@ export interface WorkspaceSelection {
 export interface WorkspaceContext {
   activeOrganization?: Organization;
   activeOrganizationId?: string;
+  activeOrganizationPlan?: CurrentUserResponse["memberships"][number]["plan"];
   activeOrganizationRole?: CurrentUserResponse["memberships"][number]["role"];
   activeProject?: Project;
   activeProjectId?: string;
@@ -34,6 +35,7 @@ export function resolveWorkspaceContext(
   return {
     activeOrganization: activeMembership?.organization,
     activeOrganizationId: activeMembership?.organization.id,
+    activeOrganizationPlan: activeMembership?.plan,
     activeOrganizationRole: activeMembership?.role,
     activeProject,
     activeProjectId: activeProject?.id,

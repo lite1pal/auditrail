@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import type { PricingPlanId } from "@auditrail/domain/pricing";
 import { z } from "zod";
 
 import { registerApiSchemas } from "../../http-schemas.js";
@@ -20,6 +21,10 @@ const createInvitationBodySchema = z.object({
 
 const acceptInvitationBodySchema = z.object({
   token: z.string().min(1)
+});
+
+const changeOrganizationPlanBodySchema = z.object({
+  planId: z.enum(["starter", "growth", "scale"])
 });
 
 export interface PlatformRoutesOptions {
@@ -188,6 +193,40 @@ export async function registerPlatformRoutes(
       });
 
       return reply.code(201).send(result);
+    } catch (error) {
+      if (error instanceof Error && error.message === "forbidden") {
+        return reply.code(403).send({ error: "forbidden" });
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/organizations/:organizationId/plan", async (request, reply) => {
+    const user = getSessionUser(request);
+    const params = z
+      .object({
+        organizationId: z.string().min(1)
+      })
+      .parse(request.params);
+    const body = changeOrganizationPlanBodySchema.safeParse(request.body);
+
+    if (!user) {
+      return reply.code(401).send({ error: "missing_session" });
+    }
+
+    if (!body.success) {
+      return reply.code(400).send({ error: "invalid_plan_change_request" });
+    }
+
+    try {
+      const result = await options.service.changeOrganizationPlanForUser({
+        organizationId: params.organizationId,
+        planId: body.data.planId as PricingPlanId,
+        userId: user.id
+      });
+
+      return reply.code(200).send(result);
     } catch (error) {
       if (error instanceof Error && error.message === "forbidden") {
         return reply.code(403).send({ error: "forbidden" });

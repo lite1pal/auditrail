@@ -9,7 +9,10 @@ describe("WorkspaceSettingsScreen", () => {
       <WorkspaceSettingsScreen
         acceptInvitationAction={noopAction}
         activeOrganizationId="org-1"
+        activeOrganizationPlan={starterPlan()}
+        activeOrganizationRole="owner"
         activeProjectId="project-1"
+        changeOrganizationPlanAction={noopAction}
         apiKeys={[
           {
             createdAt: "2026-06-18T10:00:00.000Z",
@@ -56,6 +59,9 @@ describe("WorkspaceSettingsScreen", () => {
     expect(screen.getByRole("link", { name: /Workspace/i }).getAttribute("href")).toBe(
       "#workspace-settings"
     );
+    expect(screen.getByRole("link", { name: /Plan & usage/i }).getAttribute("href")).toBe(
+      "#plan-settings"
+    );
     expect(screen.getByRole("link", { name: /Access/i }).getAttribute("href")).toBe(
       "#access-settings"
     );
@@ -64,6 +70,8 @@ describe("WorkspaceSettingsScreen", () => {
     );
     expect(screen.getByText("Workspace snapshot")).toBeTruthy();
     expect(screen.getByText("Selected project: Production")).toBeTruthy();
+    expect(screen.getByText("Used this month")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Starter selected" })).toBeTruthy();
     expect(screen.getByText("Invitation link")).toBeTruthy();
     expect(screen.getByText("Selected")).toBeTruthy();
   });
@@ -73,7 +81,10 @@ describe("WorkspaceSettingsScreen", () => {
       <WorkspaceSettingsScreen
         acceptInvitationAction={noopAction}
         activeOrganizationId="org-1"
+        activeOrganizationPlan={starterPlan()}
+        activeOrganizationRole="owner"
         apiKeys={[]}
+        changeOrganizationPlanAction={noopAction}
         createApiKeyAction={noopAction}
         createOrganizationAction={noopAction}
         createProjectAction={noopAction}
@@ -101,8 +112,10 @@ describe("WorkspaceSettingsScreen", () => {
       <WorkspaceSettingsScreen
         acceptInvitationAction={noopAction}
         activeOrganizationId="org-1"
+        activeOrganizationPlan={starterPlan()}
         activeOrganizationRole="viewer"
         apiKeys={[]}
+        changeOrganizationPlanAction={noopAction}
         createApiKeyAction={noopAction}
         createOrganizationAction={noopAction}
         createProjectAction={noopAction}
@@ -122,6 +135,7 @@ describe("WorkspaceSettingsScreen", () => {
     expect(screen.getByRole("button", { name: "Create invitation" }).getAttribute("disabled")).not.toBeNull();
     expect(screen.getByText("Only organization owners and admins can create projects.")).toBeTruthy();
     expect(screen.getByText("Only organization owners and admins can invite members.")).toBeTruthy();
+    expect(screen.getByText("Only organization owners and admins can change plans.")).toBeTruthy();
   });
 
   it("falls back to the root dashboard link when no organization is selected", () => {
@@ -129,6 +143,7 @@ describe("WorkspaceSettingsScreen", () => {
       <WorkspaceSettingsScreen
         acceptInvitationAction={noopAction}
         apiKeys={[]}
+        changeOrganizationPlanAction={noopAction}
         createApiKeyAction={noopAction}
         createOrganizationAction={noopAction}
         createProjectAction={noopAction}
@@ -141,7 +156,22 @@ describe("WorkspaceSettingsScreen", () => {
 
     expect(screen.getByRole("link", { name: "Open dashboard" }).getAttribute("href")).toBe("/");
     expect(screen.getByText("No organization selected")).toBeTruthy();
+    expect(
+      screen.getByText("Select an organization to review its current plan and monthly event usage.")
+    ).toBeTruthy();
   });
 });
 
 async function noopAction() {}
+
+function starterPlan() {
+  return {
+    id: "starter" as const,
+    includedEvents: 100000,
+    name: "Starter",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 99999,
+    usedEvents: 1
+  };
+}

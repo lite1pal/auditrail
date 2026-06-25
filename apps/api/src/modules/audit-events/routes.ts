@@ -30,6 +30,7 @@ import {
 import { createInMemoryAuditEventRepo } from "./repo.js";
 import {
   createAuditEventService,
+  EventQuotaExceededError,
   type AuditEventService
 } from "./service.js";
 
@@ -73,16 +74,27 @@ export async function registerEventRoutes(
       schema: ingestEventRouteSchema
     },
     async (request, reply) => {
-      const principal = getRequestPrincipal(request);
-      const event = await service.ingest(
-        {
-          organizationId: principal.organizationId,
-          projectId: principal.projectId
-        },
-        normalizeIngestInput(request.body as NormalizableRequestBody)
-      );
+      try {
+        const principal = getRequestPrincipal(request);
+        const event = await service.ingest(
+          {
+            organizationId: principal.organizationId,
+            projectId: principal.projectId
+          },
+          normalizeIngestInput(request.body as NormalizableRequestBody)
+        );
 
-      return reply.code(202).send(toAcceptedResponse(event));
+        return reply.code(202).send(toAcceptedResponse(event));
+      } catch (error) {
+        if (error instanceof EventQuotaExceededError) {
+          return reply.code(402).send({
+            error: "event_quota_exceeded",
+            plan: error.plan
+          });
+        }
+
+        throw error;
+      }
     }
   );
 

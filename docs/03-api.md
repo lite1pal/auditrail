@@ -93,6 +93,7 @@ Its event reads are scoped by the selected organization and project through:
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events/stats`
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events/timeseries`
 - `GET /api/v1/organizations/:organizationId/members`
+- `POST /api/v1/organizations/:organizationId/plan`
 
 ## Session Workspace Routes
 
@@ -210,9 +211,105 @@ Errors:
 - `400 invalid_event_payload`
 - `401 missing_api_key`
 - `401 invalid_api_key`
+- `402 event_quota_exceeded`
 - `429 Too Many Requests`
 
 Response schema is explicit in the OpenAPI document.
+
+Quota-exceeded response:
+
+```json
+{
+  "error": "event_quota_exceeded",
+  "plan": {
+    "id": "starter",
+    "name": "Starter",
+    "includedEvents": 100000,
+    "usedEvents": 100000,
+    "remainingEvents": 0,
+    "periodStart": "2026-06-01T00:00:00.000Z",
+    "periodEnd": "2026-07-01T00:00:00.000Z"
+  }
+}
+```
+
+Included events reset on UTC calendar month boundaries. Quota enforcement
+applies only to `POST /api/v1/events`; dashboard and session-scoped reads remain
+available while an organization is over quota.
+
+## `GET /api/v1/me`
+
+Returns the signed-in browser user and their workspace memberships.
+
+Each membership now includes a pricing summary for the organization:
+
+```json
+{
+  "user": {
+    "id": "user-1",
+    "email": "owner@example.com"
+  },
+  "memberships": [
+    {
+      "organizationId": "org-1",
+      "role": "owner",
+      "plan": {
+        "id": "starter",
+        "name": "Starter",
+        "includedEvents": 100000,
+        "usedEvents": 42,
+        "remainingEvents": 99958,
+        "periodStart": "2026-06-01T00:00:00.000Z",
+        "periodEnd": "2026-07-01T00:00:00.000Z"
+      },
+      "organization": {
+        "id": "org-1",
+        "name": "Acme"
+      },
+      "projectIds": ["project-1"],
+      "projects": [
+        {
+          "id": "project-1",
+          "organizationId": "org-1",
+          "name": "Production"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## `POST /api/v1/organizations/:organizationId/plan`
+
+Changes the selected pricing plan for an organization.
+
+Allowed roles:
+
+- `owner`
+- `admin`
+
+Request:
+
+```json
+{
+  "planId": "growth"
+}
+```
+
+Response:
+
+```json
+{
+  "organizationId": "org-1",
+  "planId": "growth"
+}
+```
+
+Errors:
+
+- `400 invalid_plan_change_request`
+- `401 missing_session`
+- `403 forbidden`
 
 ## `GET /api/v1/events`
 

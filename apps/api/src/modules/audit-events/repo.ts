@@ -1,4 +1,12 @@
-import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
+import { type IngestAuditEventInput } from "@auditrail/domain/audit-events";
+import {
+  getUtcMonthWindow,
+  summarizePricingUsage
+} from "@auditrail/domain/pricing";
+import type {
+  PricingPlanId,
+  PricingUsageSummary
+} from "@auditrail/domain/pricing";
 import { randomUUID } from "node:crypto";
 
 import { decodeAuditEventCursor } from "./cursor.js";
@@ -10,6 +18,11 @@ export interface AuditEventRecord {
   targetId?: string;
   metadata: Record<string, unknown>;
   createdAt: string;
+}
+
+interface StoredAuditEventRecord extends AuditEventRecord {
+  organizationId: string;
+  projectId: string;
 }
 
 export interface AuditEventTenant {
@@ -54,6 +67,8 @@ export interface AuditEventTimeseriesPoint {
 
 export interface InMemoryAuditEventRepoOptions {
   now?: () => string;
+  planByOrganizationId?: Record<string, PricingPlanId>;
+  usageByKey?: Record<string, number>;
 }
 
 export interface AuditEventRepo {
@@ -75,29 +90,61 @@ export interface AuditEventRepo {
   ): Promise<AuditEventTimeseriesPoint[]>;
 }
 
+export class EventQuotaExceededError extends Error {
+  readonly plan: PricingUsageSummary;
+
+  constructor(plan: PricingUsageSummary) {
+    super("event_quota_exceeded");
+    this.name = "EventQuotaExceededError";
+    this.plan = plan;
+  }
+}
+
 export function createInMemoryAuditEventRepo(
   options: InMemoryAuditEventRepoOptions = {}
 ): AuditEventRepo {
-  const events: AuditEventRecord[] = [];
+  const events: StoredAuditEventRecord[] = [];
   const now = options.now ?? (() => new Date().toISOString());
+  const organizationPlans = new Map<string, PricingPlanId>(
+    Object.entries(options.planByOrganizationId ?? {})
+  );
+  const monthlyUsage = new Map<string, number>(Object.entries(options.usageByKey ?? {}));
 
   return {
-    async append(_tenant, input) {
+    async append(tenant, input) {
+      const currentTime = new Date(now());
+      const window = getUtcMonthWindow(currentTime);
+      const usageKey = `${tenant.organizationId}:${window.periodStart}`;
+      const usedEvents = monthlyUsage.get(usageKey) ?? 0;
+      const plan = summarizePricingUsage({
+        now: currentTime,
+        planId: organizationPlans.get(tenant.organizationId) ?? "starter",
+        usedEvents
+      });
+
+      if (plan.remainingEvents <= 0) {
+        throw new EventQuotaExceededError(plan);
+      }
+
       const record = {
         id: randomUUID(),
+        organizationId: tenant.organizationId,
+        projectId: tenant.projectId,
         eventType: input.event,
         actorId: input.actor,
         targetId: input.target,
         metadata: input.metadata,
-        createdAt: now()
+        createdAt: currentTime.toISOString()
       };
 
       events.push(record);
+      monthlyUsage.set(usageKey, usedEvents + 1);
 
       return record;
     },
-    async list(_tenant, filters) {
+    async list(tenant, filters) {
       return [...events]
+        .filter((event) => matchesTenant(event, tenant))
         .filter((event) => matchesEventFilters(event, filters))
         .sort(compareAuditEventsDesc)
         .filter((event) => {
@@ -117,12 +164,13 @@ export function createInMemoryAuditEventRepo(
 
           return event.id < cursor.id;
         })
-        .slice(0, filters.limit);
+        .slice(0, filters.limit)
+        .map(toAuditEventRecord);
     },
-    async summarize(_tenant, filters) {
-      const filteredEvents = events.filter((event) =>
-        matchesEventFilters(event, filters)
-      );
+    async summarize(tenant, filters) {
+      const filteredEvents = events
+        .filter((event) => matchesTenant(event, tenant))
+        .filter((event) => matchesEventFilters(event, filters));
       const eventCounts = new Map<string, number>();
 
       for (const event of filteredEvents) {
@@ -146,10 +194,10 @@ export function createInMemoryAuditEventRepo(
           .slice(0, filters.top)
       };
     },
-    async timeseries(_tenant, filters) {
-      const filteredEvents = events.filter((event) =>
-        matchesEventFilters(event, filters)
-      );
+    async timeseries(tenant, filters) {
+      const filteredEvents = events
+        .filter((event) => matchesTenant(event, tenant))
+        .filter((event) => matchesEventFilters(event, filters));
       const counts = new Map<string, number>();
 
       for (const event of filteredEvents) {
@@ -173,6 +221,27 @@ function compareAuditEventsDesc(left: AuditEventRecord, right: AuditEventRecord)
   }
 
   return right.createdAt.localeCompare(left.createdAt);
+}
+
+function toAuditEventRecord(event: StoredAuditEventRecord): AuditEventRecord {
+  return {
+    actorId: event.actorId,
+    createdAt: event.createdAt,
+    eventType: event.eventType,
+    id: event.id,
+    metadata: event.metadata,
+    targetId: event.targetId
+  };
+}
+
+function matchesTenant(
+  event: StoredAuditEventRecord,
+  tenant: AuditEventTenant
+) {
+  return (
+    event.organizationId === tenant.organizationId &&
+    event.projectId === tenant.projectId
+  );
 }
 
 function matchesEventFilters(

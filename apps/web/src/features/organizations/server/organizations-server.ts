@@ -62,6 +62,7 @@ export async function loadWorkspacePage(
 
   return {
     activeOrganizationId,
+    activeOrganizationPlan: workspace.activeOrganizationPlan,
     activeOrganizationRole: workspace.activeOrganizationRole,
     activeProjectId,
     apiKeys,
@@ -127,6 +128,25 @@ export async function createProjectAction(formData: FormData) {
   await createOrganizationsClient(createServerApiClient()).createProject(
     organizationId,
     name
+  );
+
+  revalidatePath("/");
+  revalidatePath("/settings");
+  redirect(`/settings?organizationId=${organizationId}`);
+}
+
+export async function changeOrganizationPlanAction(formData: FormData) {
+  "use server";
+
+  const organizationId = String(formData.get("organizationId") ?? "");
+  const planId = String(formData.get("planId") ?? "") as
+    | "starter"
+    | "growth"
+    | "scale";
+
+  await createOrganizationsClient(createServerApiClient()).changePlan(
+    organizationId,
+    planId
   );
 
   revalidatePath("/");

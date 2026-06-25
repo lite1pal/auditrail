@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  integer,
   jsonb,
   index,
   pgTable,
@@ -13,6 +14,7 @@ import {
 export const organizations = pgTable("organizations", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
+  planId: text("plan_id").notNull().default("starter"),
   createdAt: timestamp("created_at", {
     withTimezone: true
   })
@@ -227,5 +229,38 @@ export const exportJobs = pgTable(
   (table) => [
     index("export_jobs_project_id_idx").on(table.projectId),
     index("export_jobs_status_idx").on(table.status)
+  ]
+);
+
+export const organizationMonthlyUsage = pgTable(
+  "organization_monthly_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    monthStart: timestamp("month_start", {
+      withTimezone: true
+    }).notNull(),
+    eventCount: integer("event_count").notNull().default(0),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("organization_monthly_usage_organization_id_idx").on(
+      table.organizationId
+    ),
+    uniqueIndex("organization_monthly_usage_org_month_unique").on(
+      table.organizationId,
+      table.monthStart
+    )
   ]
 );

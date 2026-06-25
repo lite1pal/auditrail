@@ -36,6 +36,42 @@ describe("audit event routes", () => {
     await app.close();
   });
 
+  it("returns 402 when the organization quota is exhausted", async () => {
+    const organizationId = "00000000-0000-0000-0000-000000000000";
+    const app = await buildEventRouteTestApp(["2026-06-16T12:00:00.000Z"], {
+      planByOrganizationId: {
+        [organizationId]: "starter"
+      },
+      usageByKey: {
+        [`${organizationId}:2026-06-01T00:00:00.000Z`]: 100_000
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      payload: {
+        event: "user.deleted"
+      }
+    });
+
+    expect(response.statusCode).toBe(402);
+    expect(response.json()).toEqual({
+      error: "event_quota_exceeded",
+      plan: {
+        id: "starter",
+        includedEvents: 100000,
+        name: "Starter",
+        periodEnd: "2026-07-01T00:00:00.000Z",
+        periodStart: "2026-06-01T00:00:00.000Z",
+        remainingEvents: 0,
+        usedEvents: 100000
+      }
+    });
+
+    await app.close();
+  });
+
   it("lists recent event payloads", async () => {
     const app = await buildEventRouteTestApp([
       "2026-06-16T12:00:00.000Z",
@@ -1103,9 +1139,13 @@ describe("audit event routes", () => {
   });
 });
 
-async function buildEventRouteTestApp(createdAtValues: string[]) {
+async function buildEventRouteTestApp(
+  createdAtValues: string[],
+  repoOptions: Parameters<typeof createInMemoryAuditEventRepo>[0] = {}
+) {
   let index = 0;
   const repo = createInMemoryAuditEventRepo({
+    ...repoOptions,
     now: () => createdAtValues[index++] ?? "2026-06-16T12:59:59.000Z"
   });
   const service = createAuditEventService(repo);

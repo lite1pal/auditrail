@@ -2,6 +2,36 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-25 - Organization Pricing And Monthly Event Quotas
+
+Changed:
+
+- added a pure pricing catalog in `packages/domain` with the `starter`,
+  `growth`, and `scale` plans plus UTC month-window helpers
+- persisted organization-selected plan ids in `organizations.plan_id` and
+  monthly usage counters in `organization_monthly_usage`
+- extended `/api/v1/me` with per-organization pricing summaries and added a
+  session-protected plan-change route for owners and admins
+- enforced monthly included-event quotas only on public ingest, returning
+  `402 event_quota_exceeded` while leaving dashboard and session-scoped reads available
+- added a Plan & usage section to workspace settings with read-only visibility
+  for members and viewers and manual plan switching for owners and admins
+
+Why:
+
+- pricing policy needs to live in code while usage state stays cheap to read and
+  update at the Postgres boundary
+- quota enforcement must be atomic on ingest without degrading normal dashboard
+  reads or requiring raw-event recounts on every request
+
+Docs updated:
+
+- `README.md`
+- `docs/02-architecture.md`
+- `docs/03-api.md`
+- `docs/06-deployment.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-20 - Minimal Audit Events Volume Chart
 
 Changed:

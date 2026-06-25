@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { apiKeys, auditEvents, organizations, projects } from "../index.js";
+import {
+  apiKeys,
+  auditEvents,
+  organizationMonthlyUsage,
+  organizations,
+  projects
+} from "../index.js";
 
 describe("database schema exports", () => {
   it("exports initial tenant and audit tables", () => {
@@ -8,5 +14,6 @@ describe("database schema exports", () => {
     expect(projects).toBeDefined();
     expect(apiKeys).toBeDefined();
     expect(auditEvents).toBeDefined();
+    expect(organizationMonthlyUsage).toBeDefined();
   });
 });

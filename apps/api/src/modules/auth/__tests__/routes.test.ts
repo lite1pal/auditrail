@@ -349,13 +349,24 @@ describe("registerAuthRoutes", () => {
                   id: "org-1",
                   name: "Acme"
                 },
+                plan: {
+                  id: "starter",
+                  includedEvents: 100000,
+                  name: "Starter",
+                  periodEnd: "2026-07-01T00:00:00.000Z",
+                  periodStart: "2026-06-01T00:00:00.000Z",
+                  remainingEvents: 99999,
+                  usedEvents: 1
+                },
+                planId: "starter",
                 projects: [
                   {
                     id: "project-1",
                     name: "Production",
                     organizationId: "org-1"
                   }
-                ]
+                ],
+                usedEvents: 1
               }
             ],
             user
@@ -391,6 +402,15 @@ describe("registerAuthRoutes", () => {
             name: "Acme"
           },
           organizationId: "org-1",
+          plan: {
+            id: "starter",
+            includedEvents: 100000,
+            name: "Starter",
+            periodEnd: "2026-07-01T00:00:00.000Z",
+            periodStart: "2026-06-01T00:00:00.000Z",
+            remainingEvents: 99999,
+            usedEvents: 1
+          },
           projectIds: ["project-1"],
           projects: [
             {

@@ -3,6 +3,7 @@ import { CreateOrganizationForm } from "@/src/features/organizations/components/
 import { CreateProjectForm } from "@/src/features/organizations/components/create-project-form";
 import { InvitationLinkCard } from "@/src/features/organizations/components/invitation-link-card";
 import { InviteMemberForm } from "@/src/features/organizations/components/invite-member-form";
+import { OrganizationPlanUsageCard } from "@/src/features/organizations/components/organization-plan-usage-card";
 import { ProjectList } from "@/src/features/organizations/components/project-list";
 import { SettingsGroup } from "@/src/features/organizations/components/settings-group";
 import type { Project } from "@/src/features/organizations/domain/schemas";
@@ -13,8 +14,10 @@ interface WorkspaceSettingsSectionsProps
     WorkspaceSettingsScreenProps,
     | "acceptInvitationAction"
     | "activeOrganizationId"
+    | "activeOrganizationPlan"
     | "activeOrganizationRole"
     | "activeProjectId"
+    | "changeOrganizationPlanAction"
     | "createOrganizationAction"
     | "createProjectAction"
     | "invitationUrl"
@@ -27,8 +30,10 @@ interface WorkspaceSettingsSectionsProps
 export function WorkspaceSettingsSections({
   acceptInvitationAction,
   activeOrganizationId,
+  activeOrganizationPlan,
   activeOrganizationRole,
   activeProjectId,
+  changeOrganizationPlanAction,
   createOrganizationAction,
   createProjectAction,
   invitationUrl,
@@ -49,6 +54,19 @@ export function WorkspaceSettingsSections({
           <CreateOrganizationForm action={createOrganizationAction} />
           <AcceptInvitationForm action={acceptInvitationAction} />
         </section>
+      </SettingsGroup>
+
+      <SettingsGroup
+        description="Review the current monthly quota, the UTC reset window, and switch plans when your workspace needs more capacity."
+        id="plan-settings"
+        title="Plan & usage"
+      >
+        <OrganizationPlanUsageCard
+          action={changeOrganizationPlanAction}
+          organizationId={activeOrganizationId}
+          plan={activeOrganizationPlan}
+          role={activeOrganizationRole}
+        />
       </SettingsGroup>
 
       <SettingsGroup

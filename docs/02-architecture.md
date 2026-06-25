@@ -19,6 +19,10 @@ AuditTrail uses a TypeScript monorepo with small deployable apps and narrow shar
 
 `packages/domain` contains pure schemas and domain types. It must not import framework, database, filesystem, queue, or env code.
 
+Pricing policy also lives in `packages/domain`. The pricing catalog, plan ids,
+and UTC month-window helpers are code-defined so both API adapters and tests can
+share one pure source of truth for quotas.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/db` contains Drizzle schema, database client creation, migrations, and seed helpers.
@@ -52,10 +56,14 @@ Client
   -> Zod payload validation
   -> Audit event service
   -> Postgres repo
+  -> organization_monthly_usage quota update
   -> audit_events table
 ```
 
 The read path uses the same API key principal to scope events to the authenticated project.
+Quota enforcement happens only on the public ingest path. Event reads, stats,
+and timeseries remain available after a workspace reaches its monthly included
+event limit.
 
 ## Web Frontend Architecture
 
@@ -153,7 +161,10 @@ service boundary.
 Platform persistence lives in `packages/db` and is exposed to API modules
 through repository adapters. The schema includes users, magic links, sessions,
 organization memberships, organization invitations, projects, API keys, and
-audit events. API services must continue to depend on repository interfaces
+audit events. Organization pricing state stores only the selected
+`organizations.plan_id`, while monthly counters are persisted in
+`organization_monthly_usage` keyed by `organization_id + month_start`.
+API services must continue to depend on repository interfaces
 rather than Drizzle directly.
 
 Browser session principal resolution is separate from machine API-key auth.
@@ -161,7 +172,7 @@ Browser session principal resolution is separate from machine API-key auth.
 for browser routes. The existing API-key auth plugin remains responsible for
 machine ingestion routes and continues to set `request.apiKeyPrincipal`.
 The `/me` response is composed through the platform context service and includes
-user, membership, organization, and project context.
+user, membership, organization, project, and current monthly plan-usage context.
 
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 Zod-validated Fastify API clients, TanStack Table for data grids, Recharts for

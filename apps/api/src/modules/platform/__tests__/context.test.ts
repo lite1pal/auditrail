@@ -20,16 +20,20 @@ describe("createCurrentUserContextService", () => {
               id: "org-1",
               name: "Acme"
             },
+            planId: "starter",
             projects: [
               {
                 id: "project-1",
                 name: "Production",
                 organizationId: "org-1"
               }
-            ]
+            ],
+            usedEvents: 42
           }
         ];
       }
+    }, {
+      now: () => new Date("2026-06-25T12:00:00.000Z")
     });
 
     await expect(
@@ -42,6 +46,15 @@ describe("createCurrentUserContextService", () => {
         {
           organization: {
             name: "Acme"
+          },
+          plan: {
+            id: "starter",
+            includedEvents: 100000,
+            name: "Starter",
+            periodEnd: "2026-07-01T00:00:00.000Z",
+            periodStart: "2026-06-01T00:00:00.000Z",
+            remainingEvents: 99958,
+            usedEvents: 42
           }
         }
       ]

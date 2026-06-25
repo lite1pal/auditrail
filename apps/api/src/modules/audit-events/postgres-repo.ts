@@ -1,5 +1,15 @@
-import { auditEvents } from "@auditrail/db/schema";
+import {
+  auditEvents,
+  organizationMonthlyUsage,
+  organizations
+} from "@auditrail/db/schema";
 import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
+import {
+  getPricingPlan,
+  getUtcMonthWindow,
+  summarizePricingUsage,
+  type PricingPlanId
+} from "@auditrail/domain/pricing";
 import {
   and,
   count,
@@ -23,37 +33,117 @@ import type {
 } from "./repo.js";
 import type { AppDatabase } from "../../plugins/database.js";
 import { decodeAuditEventCursor } from "./cursor.js";
+import { EventQuotaExceededError } from "./repo.js";
 
-export function createPostgresAuditEventRepo(db: AppDatabase): AuditEventRepo {
+export function createPostgresAuditEventRepo(
+  db: AppDatabase,
+  options: {
+    now?: () => Date;
+  } = {}
+): AuditEventRepo {
+  const now = options.now ?? (() => new Date());
+
   return {
     async append(tenant: AuditEventTenant, input: IngestAuditEventInput) {
-      const [record] = await db
-        .insert(auditEvents)
-        .values({
-          organizationId: tenant.organizationId,
-          projectId: tenant.projectId,
-          eventType: input.event,
-          actorId: input.actor,
-          targetId: input.target,
-          metadata: input.metadata
-        })
-        .returning({
-          id: auditEvents.id,
-          eventType: auditEvents.eventType,
-          actorId: auditEvents.actorId,
-          targetId: auditEvents.targetId,
-          metadata: auditEvents.metadata,
-          createdAt: auditEvents.createdAt
-        });
+      const currentTime = now();
+      const window = getUtcMonthWindow(currentTime);
 
-      return {
-        id: record.id,
-        eventType: record.eventType,
-        actorId: record.actorId ?? undefined,
-        targetId: record.targetId ?? undefined,
-        metadata: record.metadata as Record<string, unknown>,
-        createdAt: record.createdAt.toISOString()
-      } satisfies AuditEventRecord;
+      return db.transaction(async (tx) => {
+        const [organizationRecord] = await tx
+          .select({
+            planId: organizations.planId
+          })
+          .from(organizations)
+          .where(eq(organizations.id, tenant.organizationId))
+          .limit(1);
+
+        const planId = (organizationRecord?.planId ?? "starter") as PricingPlanId;
+        const plan = getPricingPlan(planId);
+        const monthStart = new Date(window.periodStart);
+
+        await tx
+          .insert(organizationMonthlyUsage)
+          .values({
+            eventCount: 0,
+            monthStart,
+            organizationId: tenant.organizationId,
+            updatedAt: currentTime
+          })
+          .onConflictDoNothing({
+            target: [
+              organizationMonthlyUsage.organizationId,
+              organizationMonthlyUsage.monthStart
+            ]
+          });
+
+        const [usageRecord] = await tx
+          .update(organizationMonthlyUsage)
+          .set({
+            eventCount: sql`${organizationMonthlyUsage.eventCount} + 1`,
+            updatedAt: currentTime
+          })
+          .where(
+            and(
+              eq(organizationMonthlyUsage.organizationId, tenant.organizationId),
+              eq(organizationMonthlyUsage.monthStart, monthStart),
+              sql`${organizationMonthlyUsage.eventCount} < ${plan.includedEvents}`
+            )
+          )
+          .returning({
+            eventCount: organizationMonthlyUsage.eventCount
+          });
+
+        if (!usageRecord) {
+          const [currentUsageRecord] = await tx
+            .select({
+              eventCount: organizationMonthlyUsage.eventCount
+            })
+            .from(organizationMonthlyUsage)
+            .where(
+              and(
+                eq(organizationMonthlyUsage.organizationId, tenant.organizationId),
+                eq(organizationMonthlyUsage.monthStart, monthStart)
+              )
+            )
+            .limit(1);
+
+          throw new EventQuotaExceededError(
+            summarizePricingUsage({
+              now: currentTime,
+              planId,
+              usedEvents: currentUsageRecord?.eventCount ?? plan.includedEvents
+            })
+          );
+        }
+
+        const [record] = await tx
+          .insert(auditEvents)
+          .values({
+            organizationId: tenant.organizationId,
+            projectId: tenant.projectId,
+            eventType: input.event,
+            actorId: input.actor,
+            targetId: input.target,
+            metadata: input.metadata
+          })
+          .returning({
+            id: auditEvents.id,
+            eventType: auditEvents.eventType,
+            actorId: auditEvents.actorId,
+            targetId: auditEvents.targetId,
+            metadata: auditEvents.metadata,
+            createdAt: auditEvents.createdAt
+          });
+
+        return {
+          id: record.id,
+          eventType: record.eventType,
+          actorId: record.actorId ?? undefined,
+          targetId: record.targetId ?? undefined,
+          metadata: record.metadata as Record<string, unknown>,
+          createdAt: record.createdAt.toISOString()
+        } satisfies AuditEventRecord;
+      });
     },
     async list(tenant: AuditEventTenant, filters: AuditEventListFilters) {
       const cursor = filters.cursor

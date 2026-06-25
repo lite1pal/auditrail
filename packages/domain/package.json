@@ -11,6 +11,10 @@
     "./audit-events": {
       "types": "./src/audit-events/index.ts",
       "import": "./src/audit-events/index.ts"
+    },
+    "./pricing": {
+      "types": "./src/pricing/index.ts",
+      "import": "./src/pricing/index.ts"
     }
   },
   "scripts": {

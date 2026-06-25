@@ -13,6 +13,7 @@ describe("toWorkspaceViewModel", () => {
             name: "Acme"
           },
           organizationId: "org-1",
+          plan: starterPlan(),
           projectIds: ["project-1"],
           projects: [
             {
@@ -45,6 +46,7 @@ describe("toWorkspaceViewModel", () => {
               name: "Acme"
             },
             organizationId: "org-1",
+            plan: starterPlan(),
             projectIds: ["project-1"],
             projects: [
               {
@@ -61,6 +63,7 @@ describe("toWorkspaceViewModel", () => {
               name: "Beta"
             },
             organizationId: "org-2",
+            plan: growthPlan(),
             projectIds: ["project-2"],
             projects: [
               {
@@ -99,6 +102,7 @@ describe("resolveWorkspaceContext", () => {
               name: "Acme"
             },
             organizationId: "org-1",
+            plan: starterPlan(),
             projectIds: ["project-1"],
             projects: [
               {
@@ -115,6 +119,7 @@ describe("resolveWorkspaceContext", () => {
               name: "Beta"
             },
             organizationId: "org-2",
+            plan: growthPlan(),
             projectIds: ["project-2"],
             projects: [
               {
@@ -146,5 +151,30 @@ describe("resolveWorkspaceContext", () => {
         organizationId: "org-2"
       }
     ]);
+    expect(workspace.activeOrganizationPlan?.id).toBe("growth");
   });
 });
+
+function starterPlan() {
+  return {
+    id: "starter" as const,
+    includedEvents: 100000,
+    name: "Starter",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 99999,
+    usedEvents: 1
+  };
+}
+
+function growthPlan() {
+  return {
+    id: "growth" as const,
+    includedEvents: 1000000,
+    name: "Growth",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 999000,
+    usedEvents: 1000
+  };
+}

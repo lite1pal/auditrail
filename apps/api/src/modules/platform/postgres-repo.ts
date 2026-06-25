@@ -1,14 +1,17 @@
 import {
+  organizationMonthlyUsage,
   organizationInvitations,
   organizationMemberships,
   organizations,
   projects,
   users
 } from "@auditrail/db/schema";
+import { getUtcMonthWindow } from "@auditrail/domain/pricing";
+import type { PricingPlanId } from "@auditrail/domain/pricing";
 import { and, eq, isNull } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
-import type { UserContextRepo, UserMembershipContext } from "./context.js";
+import type { UserContextRepo, UserMembershipContextRecord } from "./context.js";
 import type {
   Invitation,
   Membership,
@@ -19,8 +22,13 @@ import type {
 } from "./service.js";
 
 export function createPostgresPlatformRepo(
-  db: AppDatabase
+  db: AppDatabase,
+  options: {
+    now?: () => Date;
+  } = {}
 ): PlatformRepo & UserContextRepo {
+  const now = options.now ?? (() => new Date());
+
   return {
     async acceptInvitation(input) {
       await db
@@ -79,6 +87,17 @@ export function createPostgresPlatformRepo(
       }
 
       return toMembership(record);
+    },
+    async getOrganizationPlanId(organizationId) {
+      const [record] = await db
+        .select({
+          planId: organizations.planId
+        })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+
+      return record?.planId as PricingPlanId | undefined;
     },
     async findInvitationByTokenHash(tokenHash) {
       const [record] = await db
@@ -145,6 +164,7 @@ export function createPostgresPlatformRepo(
       return records.map(toProject);
     },
     async listUserMembershipContexts(userId) {
+      const currentWindow = getUtcMonthWindow(now());
       const records = await db
         .select({
           membership: organizationMemberships,
@@ -156,7 +176,7 @@ export function createPostgresPlatformRepo(
           eq(organizations.id, organizationMemberships.organizationId)
         )
         .where(eq(organizationMemberships.userId, userId));
-      const contexts: UserMembershipContext[] = [];
+      const contexts: UserMembershipContextRecord[] = [];
       const seenOrganizations = new Set<string>();
 
       for (const record of records) {
@@ -170,11 +190,28 @@ export function createPostgresPlatformRepo(
           .select()
           .from(projects)
           .where(eq(projects.organizationId, record.organization.id));
+        const [usageRecord] = await db
+          .select({
+            eventCount: organizationMonthlyUsage.eventCount
+          })
+          .from(organizationMonthlyUsage)
+          .where(
+            and(
+              eq(organizationMonthlyUsage.organizationId, record.organization.id),
+              eq(
+                organizationMonthlyUsage.monthStart,
+                new Date(currentWindow.periodStart)
+              )
+            )
+          )
+          .limit(1);
 
         contexts.push({
           membership: toMembership(record.membership),
           organization: toOrganization(record.organization),
-          projects: projectRecords.map(toProject)
+          planId: record.organization.planId as PricingPlanId,
+          projects: projectRecords.map(toProject),
+          usedEvents: usageRecord?.eventCount ?? 0
         });
       }
 
@@ -187,6 +224,14 @@ export function createPostgresPlatformRepo(
           revokedAt: new Date(input.revokedAt)
         })
         .where(eq(organizationInvitations.id, input.invitationId));
+    },
+    async updateOrganizationPlan(input) {
+      await db
+        .update(organizations)
+        .set({
+          planId: input.planId
+        })
+        .where(eq(organizations.id, input.organizationId));
     }
   };
 }

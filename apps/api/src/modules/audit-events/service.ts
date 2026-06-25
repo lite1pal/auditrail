@@ -30,6 +30,8 @@ export interface AuditEventService {
   ): Promise<AuditEventTimeseriesPoint[]>;
 }
 
+export { EventQuotaExceededError } from "./repo.js";
+
 export function createAuditEventService(repo: AuditEventRepo): AuditEventService {
   return {
     ingest(tenant, input) {

@@ -92,6 +92,54 @@ describe("in-memory audit event repo", () => {
       }
     ]);
   });
+
+  it("rolls usage over on a new UTC month", async () => {
+    const repo = createInMemoryAuditEventRepo({
+      now: sequentialNow([
+        "2026-06-30T23:59:59.000Z",
+        "2026-07-01T00:00:00.000Z"
+      ]),
+      planByOrganizationId: {
+        [tenant.organizationId]: "starter"
+      }
+    });
+
+    await expect(
+      repo.append(tenant, { event: "user.created", metadata: {} })
+    ).resolves.toMatchObject({
+      eventType: "user.created"
+    });
+    await expect(
+      repo.append(tenant, { event: "user.deleted", metadata: {} })
+    ).resolves.toMatchObject({
+      eventType: "user.deleted"
+    });
+  });
+
+  it("rejects ingests once the plan quota is exhausted", async () => {
+    const monthKey = `${tenant.organizationId}:2026-06-01T00:00:00.000Z`;
+    const repo = createInMemoryAuditEventRepo({
+      now: sequentialNow(["2026-06-16T12:00:00.000Z"]),
+      planByOrganizationId: {
+        [tenant.organizationId]: "starter"
+      },
+      usageByKey: {
+        [monthKey]: 100_000
+      }
+    });
+
+    await expect(
+      repo.append(tenant, { event: "user.deleted", metadata: {} })
+    ).rejects.toMatchObject({
+      message: "event_quota_exceeded",
+      plan: expect.objectContaining({
+        id: "starter",
+        includedEvents: 100_000,
+        remainingEvents: 0,
+        usedEvents: 100_000
+      })
+    });
+  });
 });
 
 function sequentialNow(values: string[]) {

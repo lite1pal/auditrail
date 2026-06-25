@@ -313,6 +313,71 @@ describe("registerPlatformRoutes", () => {
     expect(response.json().token).toBe("token");
   });
 
+  it("changes organization plans for owners and admins", async () => {
+    const app = buildTestApp({
+      async changeOrganizationPlanForUser(input) {
+        expect(input).toEqual({
+          organizationId: "org-1",
+          planId: "growth",
+          userId: "user-1"
+        });
+
+        return {
+          organizationId: "org-1",
+          planId: "growth"
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        planId: "growth"
+      },
+      url: "/organizations/org-1/plan"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      organizationId: "org-1",
+      planId: "growth"
+    });
+  });
+
+  it("rejects invalid plan change bodies", async () => {
+    const app = buildTestApp({});
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        planId: "enterprise"
+      },
+      url: "/organizations/org-1/plan"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({ error: "invalid_plan_change_request" });
+  });
+
+  it("maps forbidden plan changes to 403", async () => {
+    const app = buildTestApp({
+      async changeOrganizationPlanForUser() {
+        throw new Error("forbidden");
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        planId: "growth"
+      },
+      url: "/organizations/org-1/plan"
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toEqual({ error: "forbidden" });
+  });
+
   it("requires a session when creating invitations", async () => {
     const app = buildTestApp({}, { session: false });
 
@@ -549,6 +614,9 @@ function createPlatformServiceStub(
       throw new Error("not implemented");
     },
     async inviteMember() {
+      throw new Error("not implemented");
+    },
+    async changeOrganizationPlanForUser() {
       throw new Error("not implemented");
     },
     async listOrganizationMembersForUser() {

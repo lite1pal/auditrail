@@ -30,6 +30,7 @@ describe("AppShell", () => {
                 name: "Acme",
               },
               organizationId: "org-1",
+              plan: starterPlan(),
               projectIds: ["project-1", "project-2"],
               projects: [
                 {
@@ -109,3 +110,15 @@ describe("AppShell", () => {
     ).toBe("/members");
   });
 });
+
+function starterPlan() {
+  return {
+    id: "starter" as const,
+    includedEvents: 100000,
+    name: "Starter",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 99999,
+    usedEvents: 1,
+  };
+}

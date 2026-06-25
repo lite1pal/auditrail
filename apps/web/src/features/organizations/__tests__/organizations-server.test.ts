@@ -21,6 +21,7 @@ describe("loadWorkspacePage", () => {
                 name: "Acme"
               },
               organizationId: "org-1",
+              plan: starterPlan(),
               projectIds: ["project-1", "project-2"],
               projects: [
                 {
@@ -87,6 +88,7 @@ describe("loadWorkspacePage", () => {
     );
 
     expect(result.activeProjectId).toBe("project-2");
+    expect(result.activeOrganizationPlan?.id).toBe("starter");
     expect(result.apiKeys).toHaveLength(1);
     expect(result.newApiKey?.rawKey).toBe("atlabc_secret");
     expect(result.ingestCommand).toContain("authorization: Bearer atlabc_secret");
@@ -107,6 +109,7 @@ describe("loadWorkspacePage", () => {
                 name: "Acme"
               },
               organizationId: "org-1",
+              plan: starterPlan(),
               projectIds: ["project-1", "project-2"],
               projects: [
                 {
@@ -128,6 +131,7 @@ describe("loadWorkspacePage", () => {
                 name: "Beta"
               },
               organizationId: "org-2",
+              plan: growthPlan(),
               projectIds: ["project-9"],
               projects: [
                 {
@@ -199,6 +203,7 @@ describe("loadOrganizationMembersPage", () => {
                 name: "Acme"
               },
               organizationId: "org-1",
+              plan: starterPlan(),
               projectIds: ["project-1"],
               projects: [
                 {
@@ -212,6 +217,9 @@ describe("loadOrganizationMembersPage", () => {
           ]
         }),
         organizationsClient: {
+          async changePlan() {
+            throw new Error("not used");
+          },
           async createOrganization() {
             throw new Error("not used");
           },
@@ -260,6 +268,15 @@ function createCurrentUser(
         name: string;
       };
       organizationId: string;
+      plan: {
+        id: "starter" | "growth" | "scale";
+        includedEvents: number;
+        name: string;
+        periodEnd: string;
+        periodStart: string;
+        remainingEvents: number;
+        usedEvents: number;
+      };
       projectIds: string[];
       projects: Array<{
         id: string;
@@ -276,5 +293,29 @@ function createCurrentUser(
       email: "user@example.com",
       id: "user-1"
     }
+  };
+}
+
+function starterPlan() {
+  return {
+    id: "starter" as const,
+    includedEvents: 100000,
+    name: "Starter",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 99999,
+    usedEvents: 1
+  };
+}
+
+function growthPlan() {
+  return {
+    id: "growth" as const,
+    includedEvents: 1000000,
+    name: "Growth",
+    periodEnd: "2026-07-01T00:00:00.000Z",
+    periodStart: "2026-06-01T00:00:00.000Z",
+    remainingEvents: 999000,
+    usedEvents: 1000
   };
 }

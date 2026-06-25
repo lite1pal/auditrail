@@ -6,7 +6,7 @@ import { createPostgresPlatformRepo } from "../postgres-repo.js";
 describe("createPostgresPlatformRepo", () => {
   it("creates platform records", async () => {
     const db = createFakeDb([
-      { id: "org-1", name: "Acme" },
+      { id: "org-1", name: "Acme", planId: "starter" },
       { id: "project-1", name: "Production", organizationId: "org-1" },
       {
         id: "membership-1",
@@ -68,6 +68,24 @@ describe("createPostgresPlatformRepo", () => {
     });
   });
 
+  it("reads and updates organization plans", async () => {
+    const db = createFakeDb([], {
+      planRows: [{ planId: "starter" }]
+    });
+    const repo = createPostgresPlatformRepo(db);
+
+    await expect(repo.getOrganizationPlanId("org-1")).resolves.toBe("starter");
+
+    await repo.updateOrganizationPlan({
+      organizationId: "org-1",
+      planId: "growth"
+    });
+
+    expect(db.updates).toContainEqual({
+      planId: "growth"
+    });
+  });
+
   it("loads user membership contexts", async () => {
     const db = createFakeDb([], {
       contextRows: [
@@ -80,10 +98,12 @@ describe("createPostgresPlatformRepo", () => {
           },
           organization: {
             id: "org-1",
-            name: "Acme"
+            name: "Acme",
+            planId: "starter"
           }
         }
       ],
+      usageRows: [{ eventCount: 12 }],
       projectRows: [
         {
           id: "project-1",
@@ -106,13 +126,15 @@ describe("createPostgresPlatformRepo", () => {
           id: "org-1",
           name: "Acme"
         },
+        planId: "starter",
         projects: [
           {
             id: "project-1",
             name: "Production",
             organizationId: "org-1"
           }
-        ]
+        ],
+        usedEvents: 12
       }
     ]);
   });
@@ -129,7 +151,8 @@ describe("createPostgresPlatformRepo", () => {
           },
           organization: {
             id: "org-1",
-            name: "Acme"
+            name: "Acme",
+            planId: "starter"
           }
         },
         {
@@ -141,10 +164,12 @@ describe("createPostgresPlatformRepo", () => {
           },
           organization: {
             id: "org-1",
-            name: "Acme"
+            name: "Acme",
+            planId: "starter"
           }
         }
       ],
+      usageRows: [{ eventCount: 0 }],
       projectRows: [
         {
           id: "project-1",
@@ -324,13 +349,16 @@ function createFakeDb(
     memberRows?: unknown[];
     membershipRows?: unknown[];
     organizationRows?: unknown[];
+    planRows?: unknown[];
     projectRows?: unknown[];
+    usageRows?: unknown[];
   } = {}
 ): AppDatabase & { updates: unknown[] } {
   const results = [...insertResults];
   const updates: unknown[] = [];
   const contextRows = [...(selectResults.contextRows ?? [])];
   const invitationRows = [...(selectResults.invitationRows ?? [])];
+  const planRows = [...(selectResults.planRows ?? [])];
   const selectQueue = [
     selectResults.invitationRows ? { kind: "limit", rows: invitationRows } : undefined,
     selectResults.invitationRows
@@ -339,12 +367,16 @@ function createFakeDb(
     selectResults.membershipRows
       ? { kind: "limit", rows: selectResults.membershipRows }
       : undefined,
+    selectResults.planRows ? { kind: "limit", rows: planRows } : undefined,
     selectResults.organizationRows
       ? { kind: "join", rows: selectResults.organizationRows }
       : undefined,
     selectResults.contextRows ? { kind: "join", rows: contextRows } : undefined,
     selectResults.projectRows
       ? { kind: "where", rows: selectResults.projectRows }
+      : undefined,
+    selectResults.usageRows
+      ? { kind: "limit", rows: selectResults.usageRows }
       : undefined,
     selectResults.memberRows
       ? { kind: "join", rows: selectResults.memberRows }

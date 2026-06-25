@@ -17,6 +17,9 @@ export const ingestEventRouteSchema = {
     401: {
       $ref: `${schemaIds.simpleErrorResponse}#`
     },
+    402: {
+      $ref: `${schemaIds.eventQuotaExceededResponse}#`
+    },
     429: {
       $ref: `${schemaIds.rateLimitErrorResponse}#`
     }
