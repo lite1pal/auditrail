@@ -4,6 +4,73 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Queue
 
+- [ ] T-037 Replace product-shaped usage counters with a generic meter model
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/*
+    - apps/api/src/modules/audit-events/*
+    - packages/db/src/*
+    - packages/domain/src/pricing/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Usage state is modeled as a generic meter or entitlement concept instead of audit-specific event volume
+    - Billing and quota code can depend on the generic meter model without assuming audit events are the only usage unit
+    - The docs explain which parts are product-neutral and which parts remain audit-specific
+
+- [ ] T-038 Enforce organization scoping across platform data access paths
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/*
+    - packages/db/src/*
+    - apps/api/src/**/__tests__/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Every platform and product repository read/write path requires explicit organization scope or fails safely
+    - Tests cover the highest-risk read and write paths for missing or mismatched organization scope
+    - The architecture docs explain the tenant-isolation guarantees expected from the boilerplate
+
+- [ ] T-039 Add subscription and billing domain scaffolding
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/*
+    - apps/web/src/features/organizations/*
+    - packages/domain/src/*
+    - packages/db/src/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Plans, subscriptions, and billing status have a reusable domain shape that is not tied to audit events
+    - The repo can express checkout, renewal, and payment-failure states even before a payment provider is wired in
+    - The docs describe the intended boundary for future Stripe or billing-provider integration
+
 - [ ] T-033 Evaluate the default Fastify rate limiter strategy
   status: todo
   priority: medium

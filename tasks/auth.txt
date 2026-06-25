@@ -4,6 +4,29 @@ This file tracks auth and sign-in work items.
 
 ## Queue
 
+- [ ] T-022 Add session management and MFA foundations
+  status: todo
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/*
+    - apps/web/src/features/auth/*
+    - apps/web/src/components/layout/*
+    - apps/api/src/**/__tests__/*
+    - apps/web/src/**/__tests__/*
+    - docs/03-api.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/auth.txt
+  acceptance:
+    - Users can inspect active sessions and revoke them from a dedicated account surface
+    - The auth model has a clear path for MFA enrollment and challenge handling
+    - Recovery and session lifecycle behavior is documented at the API and deployment boundaries
+
 ## Done
 
 - [x] T-021 Accept browser form posts for auth confirm and logout redirects
