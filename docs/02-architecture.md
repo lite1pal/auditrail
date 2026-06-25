@@ -228,7 +228,7 @@ Current `platform-core` responsibilities in this repo:
 - browser session auth and magic-link flows
 - users, organizations, memberships, and invitations
 - workspace selection and current-user context
-- onboarding framework, dismissal state, and progress summary shape
+- onboarding framework, dismissal state, and generic progress summary shape
 - API key management as a generic machine-credential admin flow
 - shared dashboard shell, settings shell, and UI primitives
 
@@ -270,12 +270,16 @@ Stay in the audit product repo:
 
 - `apps/api/src/modules/audit-events/*`
 - `apps/web/src/features/audit-events/*`
-- audit-specific onboarding milestone definitions
+- audit-specific onboarding milestone definitions and milestone-to-step mapping
 - audit-specific pricing or quota enforcement that assumes event volume is the primary meter
 
 Needs refactor before extraction:
 
-- generic and audit-specific logic currently mixed inside `packages/domain`
 - generic and audit-specific persistence currently mixed inside `packages/db`
 - `organization_monthly_usage`, which is currently product-shaped and should become a generic meter model in a future boilerplate
-- onboarding milestone ids, which should move behind product-defined configuration if a second product is ever introduced
+- onboarding UI copy and CTA targets, which still live inside the audit app and should move behind product-defined configuration if a second product is introduced
+
+Recent progress toward extraction:
+
+- `packages/domain/src/onboarding/*` now contains only generic step definitions, progress summarization, and dismissal handling
+- `packages/domain/src/audit-events/onboarding.ts` owns the current audit-product milestone ids and raw milestone-to-step mapping

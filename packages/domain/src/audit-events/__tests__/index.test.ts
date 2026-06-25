@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { ingestAuditEventSchema } from "../index.js";
+import {
+  auditOnboardingSteps,
+  ingestAuditEventSchema,
+  toAuditOnboardingCompletedAtByStep
+} from "../index.js";
 
 describe("audit event schemas", () => {
   it("accepts the MVP ingestion shape", () => {
@@ -40,5 +44,42 @@ describe("audit event schemas", () => {
         event: " "
       })
     ).toThrow();
+  });
+
+  it("exposes the audit onboarding milestone catalog", () => {
+    expect(auditOnboardingSteps).toEqual([
+      {
+        id: "project_created",
+        required: true
+      },
+      {
+        id: "api_key_created",
+        required: true
+      },
+      {
+        id: "first_event_ingested",
+        required: true
+      },
+      {
+        id: "member_invited",
+        required: false
+      }
+    ]);
+  });
+
+  it("maps audit milestones into generic onboarding facts", () => {
+    expect(
+      toAuditOnboardingCompletedAtByStep({
+        apiKeyCreatedAt: "2026-06-25T12:01:00.000Z",
+        firstEventIngestedAt: "2026-06-25T12:02:00.000Z",
+        memberInvitedAt: "2026-06-25T12:03:00.000Z",
+        projectCreatedAt: "2026-06-25T12:00:00.000Z"
+      })
+    ).toEqual({
+      api_key_created: "2026-06-25T12:01:00.000Z",
+      first_event_ingested: "2026-06-25T12:02:00.000Z",
+      member_invited: "2026-06-25T12:03:00.000Z",
+      project_created: "2026-06-25T12:00:00.000Z"
+    });
   });
 });

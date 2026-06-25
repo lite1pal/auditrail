@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { auditOnboardingStepIds } from "@auditrail/domain/audit-events";
 
 export const schemaIds = {
   apiDescriptorResponse: "ApiDescriptorResponse",
@@ -193,12 +194,7 @@ export function registerApiSchemas(app: FastifyInstance) {
     properties: {
       id: {
         type: "string",
-        enum: [
-          "project_created",
-          "api_key_created",
-          "first_event_ingested",
-          "member_invited"
-        ]
+        enum: [...auditOnboardingStepIds]
       },
       required: {
         type: "boolean"

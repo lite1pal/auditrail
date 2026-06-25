@@ -1,54 +1,43 @@
-export const onboardingStepIds = [
-  "project_created",
-  "api_key_created",
-  "first_event_ingested",
-  "member_invited"
-] as const;
-
-export type OnboardingStepId = (typeof onboardingStepIds)[number];
-
 export type OnboardingStepStatus = "complete" | "pending";
 
-export interface OnboardingStepSummary {
+export interface OnboardingStepDefinition<TStepId extends string = string> {
+  id: TStepId;
+  required: boolean;
+}
+
+export interface OnboardingStepSummary<TStepId extends string = string> {
   completedAt?: string;
-  id: OnboardingStepId;
+  id: TStepId;
   required: boolean;
   status: OnboardingStepStatus;
 }
 
-export interface OnboardingSummary {
+export interface OnboardingSummary<TStepId extends string = string> {
   completedRequiredSteps: number;
   dismissedAt?: string;
   isComplete: boolean;
   isDismissed: boolean;
-  steps: OnboardingStepSummary[];
+  steps: OnboardingStepSummary<TStepId>[];
   totalRequiredSteps: number;
 }
 
-export interface OnboardingProgressFacts {
-  apiKeyCreatedAt?: string;
+export interface OnboardingProgressFacts<TStepId extends string = string> {
+  completedAtByStep?: Partial<Record<TStepId, string>>;
   dismissedAt?: string;
-  firstEventIngestedAt?: string;
-  memberInvitedAt?: string;
-  projectCreatedAt?: string;
+  steps: readonly OnboardingStepDefinition<TStepId>[];
 }
 
-const requiredSteps = new Set<OnboardingStepId>([
-  "project_created",
-  "api_key_created",
-  "first_event_ingested"
-]);
-
-export function isRequiredOnboardingStep(stepId: OnboardingStepId) {
-  return requiredSteps.has(stepId);
+export function isRequiredOnboardingStep<TStepId extends string>(
+  stepId: TStepId,
+  steps: readonly OnboardingStepDefinition<TStepId>[]
+) {
+  return steps.some((step) => step.id === stepId && step.required);
 }
 
-export function summarizeOnboardingProgress(
-  facts: OnboardingProgressFacts
-): OnboardingSummary {
-  const steps = onboardingStepIds.map((stepId) =>
-    toStepSummary(stepId, facts)
-  );
+export function summarizeOnboardingProgress<TStepId extends string>(
+  facts: OnboardingProgressFacts<TStepId>
+): OnboardingSummary<TStepId> {
+  const steps = facts.steps.map((step) => toStepSummary(step, facts));
   const totalRequiredSteps = steps.filter((step) => step.required).length;
   const completedRequiredSteps = steps.filter(
     (step) => step.required && step.status === "complete"
@@ -65,32 +54,16 @@ export function summarizeOnboardingProgress(
   };
 }
 
-function toStepSummary(
-  stepId: OnboardingStepId,
-  facts: OnboardingProgressFacts
-): OnboardingStepSummary {
-  const completedAt = getStepCompletedAt(stepId, facts);
+function toStepSummary<TStepId extends string>(
+  step: OnboardingStepDefinition<TStepId>,
+  facts: OnboardingProgressFacts<TStepId>
+): OnboardingStepSummary<TStepId> {
+  const completedAt = facts.completedAtByStep?.[step.id];
 
   return {
     completedAt,
-    id: stepId,
-    required: isRequiredOnboardingStep(stepId),
+    id: step.id,
+    required: step.required,
     status: completedAt ? "complete" : "pending"
   };
-}
-
-function getStepCompletedAt(
-  stepId: OnboardingStepId,
-  facts: OnboardingProgressFacts
-) {
-  switch (stepId) {
-    case "project_created":
-      return facts.projectCreatedAt;
-    case "api_key_created":
-      return facts.apiKeyCreatedAt;
-    case "first_event_ingested":
-      return facts.firstEventIngestedAt;
-    case "member_invited":
-      return facts.memberInvitedAt;
-  }
 }

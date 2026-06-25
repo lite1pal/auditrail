@@ -3,6 +3,7 @@ import type {
   PricingPlanId,
   PricingUsageSummary
 } from "@auditrail/domain/pricing";
+import type { AuditOnboardingStepId } from "@auditrail/domain/audit-events";
 import type { OnboardingSummary } from "@auditrail/domain";
 
 import type { AuthUser } from "../auth/service.js";
@@ -10,14 +11,14 @@ import type { Membership, Organization, Project } from "./service.js";
 
 export interface UserMembershipContext {
   membership: Membership;
-  onboarding: OnboardingSummary;
+  onboarding: OnboardingSummary<AuditOnboardingStepId>;
   organization: Organization;
   plan: PricingUsageSummary;
   projects: Project[];
 }
 
 export interface UserMembershipContextRecord {
-  onboarding: OnboardingSummary;
+  onboarding: OnboardingSummary<AuditOnboardingStepId>;
   membership: Membership;
   organization: Organization;
   planId: PricingPlanId;

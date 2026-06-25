@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export * from "./onboarding.js";
+
 export const auditEventMetadataSchema = z
   .record(z.string(), z.unknown())
   .default({});

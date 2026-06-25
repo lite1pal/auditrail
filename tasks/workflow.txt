@@ -25,6 +25,29 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-044 Extract audit-specific onboarding milestone definitions from reusable domain logic
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  completed: 2026-06-25
+  blocked_reason:
+  files:
+    - packages/domain/src/onboarding/*
+    - packages/domain/src/audit-events/*
+    - apps/api/src/modules/platform/context.ts
+    - apps/api/src/modules/platform/postgres-repo.ts
+    - apps/api/src/http-schemas.ts
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - reusable onboarding progress logic no longer hardcodes audit-product step ids or milestone fields
+    - audit-product onboarding step definitions live behind an audit-specific domain surface
+    - API typing and schema registration still expose the current audit onboarding contract without behavior changes
+
 - [x] T-043 Document platform-vs-product boundaries for future boilerplate extraction
   status: done
   priority: medium

@@ -5,13 +5,35 @@ import {
   summarizeOnboardingProgress
 } from "../index.js";
 
+const auditSteps = [
+  {
+    id: "project_created",
+    required: true
+  },
+  {
+    id: "api_key_created",
+    required: true
+  },
+  {
+    id: "first_event_ingested",
+    required: true
+  },
+  {
+    id: "member_invited",
+    required: false
+  }
+] as const;
+
 describe("summarizeOnboardingProgress", () => {
   it("counts required progress without treating optional steps as blocking", () => {
     expect(
       summarizeOnboardingProgress({
-        apiKeyCreatedAt: "2026-06-25T12:01:00.000Z",
-        firstEventIngestedAt: "2026-06-25T12:02:00.000Z",
-        projectCreatedAt: "2026-06-25T12:00:00.000Z"
+        completedAtByStep: {
+          api_key_created: "2026-06-25T12:01:00.000Z",
+          first_event_ingested: "2026-06-25T12:02:00.000Z",
+          project_created: "2026-06-25T12:00:00.000Z"
+        },
+        steps: auditSteps
       })
     ).toEqual({
       completedRequiredSteps: 3,
@@ -52,7 +74,10 @@ describe("summarizeOnboardingProgress", () => {
     expect(
       summarizeOnboardingProgress({
         dismissedAt: "2026-06-25T13:00:00.000Z",
-        projectCreatedAt: "2026-06-25T12:00:00.000Z"
+        completedAtByStep: {
+          project_created: "2026-06-25T12:00:00.000Z"
+        },
+        steps: auditSteps
       })
     ).toMatchObject({
       completedRequiredSteps: 1,
@@ -65,9 +90,9 @@ describe("summarizeOnboardingProgress", () => {
 
 describe("isRequiredOnboardingStep", () => {
   it("marks only invite as optional", () => {
-    expect(isRequiredOnboardingStep("project_created")).toBe(true);
-    expect(isRequiredOnboardingStep("api_key_created")).toBe(true);
-    expect(isRequiredOnboardingStep("first_event_ingested")).toBe(true);
-    expect(isRequiredOnboardingStep("member_invited")).toBe(false);
+    expect(isRequiredOnboardingStep("project_created", auditSteps)).toBe(true);
+    expect(isRequiredOnboardingStep("api_key_created", auditSteps)).toBe(true);
+    expect(isRequiredOnboardingStep("first_event_ingested", auditSteps)).toBe(true);
+    expect(isRequiredOnboardingStep("member_invited", auditSteps)).toBe(false);
   });
 });

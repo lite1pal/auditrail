@@ -2,6 +2,24 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-25 - Split Generic Onboarding Logic From Audit Milestones
+
+Changed:
+
+- refactored `packages/domain/src/onboarding/*` so the reusable onboarding helper now works from caller-provided step definitions and completed-at maps instead of hardcoded audit milestone ids
+- moved the current `project_created`, `api_key_created`, `first_event_ingested`, and `member_invited` definitions into `packages/domain/src/audit-events/onboarding.ts`
+- rewired the platform repo and API schema registration to consume the audit-specific onboarding catalog while keeping the public `/api/v1/me` response shape unchanged
+
+Why:
+
+- a future SaaS boilerplate cannot have audit-product milestone names embedded in its generic domain layer
+- this keeps today’s audit product behavior intact while creating a clean product-owned seam for later extraction
+
+Docs updated:
+
+- `docs/02-architecture.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-25 - Mark Repo Boundaries For Future Boilerplate Extraction
 
 Changed:
