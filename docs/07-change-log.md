@@ -674,6 +674,22 @@ duplicate rows.
 Hardened database behavior for invitations and exports. Pending invitations are
 now unique per organization/email, invitation acceptance verifies the signed-in
 user email, and export listing/worker pickup uses deterministic ordering.
+## 2026-06-25 - Browser Form Compatibility For Auth Redirect Routes
+
+Changed:
+
+- taught the auth route adapter to accept `application/x-www-form-urlencoded` browser form posts
+- added route tests that cover real browser-style confirm and logout submissions
+
+Why:
+
+- prevent logout and callback confirmation from failing with `415 Unsupported Media Type`
+- keep the API-owned auth redirect flow compatible with normal HTML forms
+
+Docs updated:
+
+- `docs/03-api.md`
+
 ## 2026-06-25 - Shared-Domain Auth Cookie Redirect Flow
 
 Changed:

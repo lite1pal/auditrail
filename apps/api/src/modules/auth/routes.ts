@@ -64,6 +64,16 @@ export async function registerAuthRoutes(
 ) {
   registerApiSchemas(app);
 
+  if (!app.hasContentTypeParser("application/x-www-form-urlencoded")) {
+    app.addContentTypeParser(
+      "application/x-www-form-urlencoded",
+      { parseAs: "string" },
+      (_request, body, done) => {
+        done(null, parseFormBody(body));
+      }
+    );
+  }
+
   const cookie: ResolvedAuthCookieOptions = {
     maxAgeSeconds: 60 * 60 * 24 * 30,
     name: "auditrail_session",
@@ -287,4 +297,14 @@ function toSafeRedirectPath(value: string | undefined) {
   }
 
   return value;
+}
+
+function parseFormBody(body: string | Buffer) {
+  const text = typeof body === "string" ? body : body.toString("utf8");
+
+  if (!text) {
+    return {};
+  }
+
+  return Object.fromEntries(new URLSearchParams(text));
 }

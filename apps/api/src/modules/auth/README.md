@@ -25,6 +25,7 @@ Owns browser-session authentication for the API.
 - session tokens are hashed before storage
 - route handlers stay thin and delegate to the service
 - browser confirmation and sign-out redirects own session cookie writes in production flows
+- browser auth redirect routes must accept standard HTML form posts
 - standard runtime startup must use a provider-backed sender
 - local fake delivery is reserved for tests and the explicit dev-only auth harness
 

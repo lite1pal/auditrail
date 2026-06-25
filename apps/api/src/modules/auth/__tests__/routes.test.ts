@@ -170,6 +170,48 @@ describe("registerAuthRoutes", () => {
     );
   });
 
+  it("accepts browser form posts for confirmation redirects", async () => {
+    const app = buildTestApp({
+      cookie: {
+        secure: false
+      },
+      service: createAuthServiceStub({
+        async createSessionFromMagicLink(token, email) {
+          expect(token).toBe("magic-token");
+          expect(email).toBe("user@example.com");
+
+          return {
+            session: {
+              expiresAt: "2026-01-02T00:00:00.000Z",
+              id: "session-1",
+              tokenHash: "hash",
+              userId: "user-1"
+            },
+            sessionToken: "session-token",
+            user: {
+              email: "user@example.com",
+              id: "user-1"
+            }
+          };
+        }
+      }),
+      webPublicUrl: "https://app.example.com"
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      method: "POST",
+      payload: "",
+      url: "/auth/sessions/confirm?email=user%40example.com&token=magic-token&redirectTo=%2F"
+    });
+
+    expect(response.statusCode).toBe(303);
+    expect(response.headers.location).toBe("https://app.example.com/");
+    expect(response.headers["set-cookie"]).toContain("auditrail_session=session-token");
+  });
+
   it("redirects invalid confirmation attempts to sign-in", async () => {
     const app = buildTestApp({
       service: createAuthServiceStub({
@@ -446,6 +488,33 @@ describe("registerAuthRoutes", () => {
     expect(response.statusCode).toBe(303);
     expect(response.headers.location).toBe("https://app.example.com/auth/sign-in");
     expect(response.headers["set-cookie"]).toContain("Domain=example.com");
+    expect(response.headers["set-cookie"]).toContain("Max-Age=0");
+    expect(revokedTokens).toEqual(["session-token"]);
+  });
+
+  it("accepts browser form posts for logout redirects", async () => {
+    const revokedTokens: string[] = [];
+    const app = buildTestApp({
+      service: createAuthServiceStub({
+        async revokeSession(sessionToken) {
+          revokedTokens.push(sessionToken);
+        }
+      }),
+      webPublicUrl: "https://app.example.com"
+    });
+
+    const response = await app.inject({
+      headers: {
+        cookie: "auditrail_session=session-token",
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      method: "POST",
+      payload: "",
+      url: "/auth/sessions/current/logout?redirectTo=%2Fauth%2Fsign-in"
+    });
+
+    expect(response.statusCode).toBe(303);
+    expect(response.headers.location).toBe("https://app.example.com/auth/sign-in");
     expect(response.headers["set-cookie"]).toContain("Max-Age=0");
     expect(revokedTokens).toEqual(["session-token"]);
   });

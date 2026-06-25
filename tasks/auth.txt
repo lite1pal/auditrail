@@ -6,6 +6,27 @@ This file tracks auth and sign-in work items.
 
 ## Done
 
+- [x] T-021 Accept browser form posts for auth confirm and logout redirects
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  completed: 2026-06-25
+  blocked_reason:
+  files:
+    - apps/api/src/modules/auth/routes.ts
+    - apps/api/src/modules/auth/__tests__/*
+    - apps/api/src/modules/auth/README.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/auth.txt
+  acceptance:
+    - Browser form posts to auth confirm and logout routes do not return 415
+    - Auth route tests cover real `application/x-www-form-urlencoded` browser requests
+    - Auth redirect flow remains API-owned and cookie-based in production
+
 - [x] T-020 Replace mirrored auth cookies with shared-domain browser redirects
   status: done
   priority: high
