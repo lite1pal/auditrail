@@ -15,6 +15,7 @@ COPY packages/db/package.json packages/db/package.json
 COPY packages/domain/package.json packages/domain/package.json
 COPY packages/testkit/package.json packages/testkit/package.json
 
+RUN pnpm config set dangerouslyAllowAllBuilds true
 RUN pnpm install --no-frozen-lockfile
 
 COPY . .
