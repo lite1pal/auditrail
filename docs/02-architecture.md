@@ -145,7 +145,8 @@ pattern as audit events: Zod at boundaries, pure services, repository
 interfaces, and tests before Fastify routes.
 
 The web app mirrors those platform capabilities with feature boundaries under
-`apps/web/src/features/auth`, `organizations`, `invitations`, and `api-keys`.
+`apps/web/src/features/auth`, `organizations`, `invitations`, `api-keys`, and
+`onboarding`.
 
 The organization/project UI lives under `apps/web/src/features/organizations`
 and the protected `/settings` route. It uses server actions only as direct
@@ -163,7 +164,11 @@ through repository adapters. The schema includes users, magic links, sessions,
 organization memberships, organization invitations, projects, API keys, and
 audit events. Organization pricing state stores only the selected
 `organizations.plan_id`, while monthly counters are persisted in
-`organization_monthly_usage` keyed by `organization_id + month_start`.
+`organization_monthly_usage` keyed by `organization_id + month_start`. Browser
+onboarding dismissal state is persisted separately in
+`user_organization_onboarding_states` keyed by `organization_id + user_id`,
+while milestone completion stays derived from projects, API keys, invitations,
+and audit events instead of being duplicated into its own status table.
 API services must continue to depend on repository interfaces
 rather than Drizzle directly.
 
@@ -172,7 +177,8 @@ Browser session principal resolution is separate from machine API-key auth.
 for browser routes. The existing API-key auth plugin remains responsible for
 machine ingestion routes and continues to set `request.apiKeyPrincipal`.
 The `/me` response is composed through the platform context service and includes
-user, membership, organization, project, and current monthly plan-usage context.
+user, membership, organization, project, onboarding, and current monthly
+plan-usage context.
 
 The web library baseline is Radix UI and shadcn-style local primitives for UI,
 Zod-validated Fastify API clients, TanStack Table for data grids, Recharts for

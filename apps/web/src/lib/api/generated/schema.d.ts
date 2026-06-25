@@ -148,6 +148,26 @@ export interface paths {
       };
     };
   };
+  [path: `/api/v1/organizations/${string}/onboarding-state`]: {
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            dismissed: boolean;
+          };
+        };
+      };
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              onboardingState: components["schemas"]["OrganizationOnboardingState"];
+            };
+          };
+        };
+      };
+    };
+  };
   [path: `/api/v1/organizations/${string}/projects/${string}/api-keys`]: {
     get: {
       responses: {
@@ -331,6 +351,7 @@ export interface components {
     };
     CurrentUserResponse: {
       memberships: Array<{
+        onboarding: components["schemas"]["OnboardingSummary"];
         organization: components["schemas"]["Organization"];
         organizationId: string;
         plan: components["schemas"]["PricingPlanSummary"];
@@ -339,6 +360,25 @@ export interface components {
         role: "owner" | "admin" | "member" | "viewer";
       }>;
       user: components["schemas"]["AuthUser"];
+    };
+    OnboardingStep: {
+      completedAt?: string;
+      id: "project_created" | "api_key_created" | "first_event_ingested" | "member_invited";
+      required: boolean;
+      status: "complete" | "pending";
+    };
+    OnboardingSummary: {
+      completedRequiredSteps: number;
+      dismissedAt?: string;
+      isComplete: boolean;
+      isDismissed: boolean;
+      steps: components["schemas"]["OnboardingStep"][];
+      totalRequiredSteps: number;
+    };
+    OrganizationOnboardingState: {
+      dismissedAt?: string;
+      organizationId: string;
+      userId: string;
     };
     ManagedApiKey: {
       createdAt: string;

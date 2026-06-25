@@ -282,7 +282,13 @@ function createPlatformServiceStub(): PlatformService {
     async listProjectsForUser() {
       return [];
     },
-    async revokeInvitation() {}
+    async revokeInvitation() {},
+    async updateOnboardingStateForUser() {
+      return {
+        organizationId: "org-1",
+        userId: "user-1"
+      };
+    }
   };
 }
 

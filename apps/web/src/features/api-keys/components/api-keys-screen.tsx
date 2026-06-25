@@ -64,6 +64,17 @@ export function ApiKeysScreen({
         projectId={activeProjectId}
         revokeApiKeyAction={revokeApiKeyAction}
       />
+      {activeOrganizationId ? (
+        <div>
+          <Button asChild variant="secondary">
+            <a
+              href={`/getting-started?organizationId=${activeOrganizationId}${activeProjectId ? `&projectId=${activeProjectId}` : ""}`}
+            >
+              Open getting started
+            </a>
+          </Button>
+        </div>
+      ) : null}
       <Card className="grid gap-3" id="create-api-key">
         <div className="grid gap-1">
           <h2 className="text-lg font-bold">Create a new API key</h2>

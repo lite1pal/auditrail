@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Button } from "@/src/components/ui/button";
 import { EmptyState } from "@/src/components/ui/empty-state";
 import { PageShell } from "@/src/components/ui/page-shell";
@@ -56,15 +54,15 @@ export function AuditEventsScreen({
           <EmptyState label="No audit events yet. Create a project key in Settings, send one test event, and come back to see the stream and metrics fill in." />
           <div>
             <Button asChild variant="secondary">
-              <Link
+              <a
                 href={
                   workspace?.organizationId
-                    ? `/settings?organizationId=${workspace.organizationId}${workspace.projectId ? `&projectId=${workspace.projectId}` : ""}`
-                    : "/settings"
+                    ? `/getting-started?organizationId=${workspace.organizationId}${workspace.projectId ? `&projectId=${workspace.projectId}` : ""}`
+                    : "/getting-started"
                 }
               >
-                Open settings
-              </Link>
+                Open getting started
+              </a>
             </Button>
           </div>
         </section>

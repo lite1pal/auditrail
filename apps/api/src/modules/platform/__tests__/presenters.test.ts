@@ -14,22 +14,23 @@ describe("toCurrentUserResponse", () => {
               role: "admin",
               userId: "user-1"
             },
-          organization: {
-            id: "org-1",
-            name: "Acme"
-          },
-          plan: {
-            id: "starter",
-            includedEvents: 100000,
-            name: "Starter",
-            periodEnd: "2026-07-01T00:00:00.000Z",
-            periodStart: "2026-06-01T00:00:00.000Z",
-            remainingEvents: 99999,
-            usedEvents: 1
-          },
-          projects: [
-            {
-              id: "project-1",
+            onboarding: emptyOnboarding(),
+            organization: {
+              id: "org-1",
+              name: "Acme"
+            },
+            plan: {
+              id: "starter",
+              includedEvents: 100000,
+              name: "Starter",
+              periodEnd: "2026-07-01T00:00:00.000Z",
+              periodStart: "2026-06-01T00:00:00.000Z",
+              remainingEvents: 99999,
+              usedEvents: 1
+            },
+            projects: [
+              {
+                id: "project-1",
                 name: "Production",
                 organizationId: "org-1"
               }
@@ -44,6 +45,7 @@ describe("toCurrentUserResponse", () => {
     ).toEqual({
       memberships: [
         {
+          onboarding: emptyOnboarding(),
           organization: {
             id: "org-1",
             name: "Acme"
@@ -76,3 +78,22 @@ describe("toCurrentUserResponse", () => {
     });
   });
 });
+
+function emptyOnboarding() {
+  return {
+    completedRequiredSteps: 0,
+    isComplete: false,
+    isDismissed: false,
+    steps: [
+      { id: "project_created" as const, required: true, status: "pending" as const },
+      { id: "api_key_created" as const, required: true, status: "pending" as const },
+      {
+        id: "first_event_ingested" as const,
+        required: true,
+        status: "pending" as const
+      },
+      { id: "member_invited" as const, required: false, status: "pending" as const }
+    ],
+    totalRequiredSteps: 3
+  };
+}

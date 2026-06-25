@@ -2,6 +2,28 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-25 - Dedicated Getting-Started Onboarding Slice
+
+Changed:
+
+- added a reusable onboarding progress model in `packages/domain` and used it to extend `/api/v1/me` membership context with derived setup progress
+- persisted only per-user per-organization dismissal state in `user_organization_onboarding_states`, while keeping milestone completion derived from existing projects, API keys, invitations, and audit events
+- added `POST /api/v1/organizations/:organizationId/onboarding-state` for signed-in members to dismiss or restore the sidebar entry
+- added a dedicated `/getting-started` page and onboarding feature in the web app, reusing existing settings and API-key flows instead of duplicating setup forms
+- updated the dashboard shell and setup-related empty states to prefer the onboarding route when required setup is still incomplete
+
+Why:
+
+- the boilerplate needs one reusable operator-facing setup path instead of scattering the first-run journey across settings and empty states
+- onboarding progress should remain cheap, deterministic, and analytics-friendly by deriving timestamps from real product milestones rather than persisting duplicated step state
+
+Docs updated:
+
+- `README.md`
+- `docs/02-architecture.md`
+- `docs/03-api.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-25 - Organization Pricing And Monthly Event Quotas
 
 Changed:

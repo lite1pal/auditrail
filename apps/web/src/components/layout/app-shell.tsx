@@ -47,6 +47,13 @@ export function AppShell({
   const membersHref = workspaceSuffix
     ? (`/members${workspaceSuffix}` as Route)
     : ("/members" as Route);
+  const gettingStartedHref = workspaceSuffix
+    ? (`/getting-started${workspaceSuffix}` as Route)
+    : ("/getting-started" as Route);
+  const showGettingStarted =
+    Boolean(workspace.activeOrganization) &&
+    !workspace.activeOrganizationOnboarding?.isComplete &&
+    !workspace.activeOrganizationOnboarding?.isDismissed;
   const logoutAction = buildAuthActionUrl(
     loadPublicConfig().NEXT_PUBLIC_API_BASE_URL,
     "/api/v1/auth/sessions/current/logout",
@@ -76,6 +83,16 @@ export function AppShell({
                   Events
                 </Link>
               </li>
+              {showGettingStarted ? (
+                <li>
+                  <Link
+                    className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--panel-subtle)]"
+                    href={gettingStartedHref}
+                  >
+                    Getting started
+                  </Link>
+                </li>
+              ) : null}
               <li>
                 <Link
                   className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--panel-subtle)]"

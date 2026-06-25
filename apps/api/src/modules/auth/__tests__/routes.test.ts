@@ -345,6 +345,34 @@ describe("registerAuthRoutes", () => {
                   role: "owner",
                   userId: user.id
                 },
+                onboarding: {
+                  completedRequiredSteps: 0,
+                  isComplete: false,
+                  isDismissed: false,
+                  steps: [
+                    {
+                      id: "project_created",
+                      required: true,
+                      status: "pending"
+                    },
+                    {
+                      id: "api_key_created",
+                      required: true,
+                      status: "pending"
+                    },
+                    {
+                      id: "first_event_ingested",
+                      required: true,
+                      status: "pending"
+                    },
+                    {
+                      id: "member_invited",
+                      required: false,
+                      status: "pending"
+                    }
+                  ],
+                  totalRequiredSteps: 3
+                },
                 organization: {
                   id: "org-1",
                   name: "Acme"
@@ -397,6 +425,34 @@ describe("registerAuthRoutes", () => {
     expect(response.json()).toEqual({
       memberships: [
         {
+          onboarding: {
+            completedRequiredSteps: 0,
+            isComplete: false,
+            isDismissed: false,
+            steps: [
+              {
+                id: "project_created",
+                required: true,
+                status: "pending"
+              },
+              {
+                id: "api_key_created",
+                required: true,
+                status: "pending"
+              },
+              {
+                id: "first_event_ingested",
+                required: true,
+                status: "pending"
+              },
+              {
+                id: "member_invited",
+                required: false,
+                status: "pending"
+              }
+            ],
+            totalRequiredSteps: 3
+          },
           organization: {
             id: "org-1",
             name: "Acme"

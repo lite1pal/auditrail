@@ -3,6 +3,7 @@ import type { CurrentUserContext } from "./context.js";
 export function toCurrentUserResponse(context: CurrentUserContext) {
   return {
     memberships: context.memberships.map((item) => ({
+      onboarding: item.onboarding,
       organization: item.organization,
       organizationId: item.organization.id,
       plan: item.plan,

@@ -4,6 +4,7 @@ import {
   apiKeys,
   auditEvents,
   organizationMonthlyUsage,
+  userOrganizationOnboardingStates,
   organizations,
   projects
 } from "../index.js";
@@ -15,5 +16,6 @@ describe("database schema exports", () => {
     expect(apiKeys).toBeDefined();
     expect(auditEvents).toBeDefined();
     expect(organizationMonthlyUsage).toBeDefined();
+    expect(userOrganizationOnboardingStates).toBeDefined();
   });
 });

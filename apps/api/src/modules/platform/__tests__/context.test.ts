@@ -16,6 +16,34 @@ describe("createCurrentUserContextService", () => {
               role: "owner",
               userId
             },
+            onboarding: {
+              completedRequiredSteps: 0,
+              isComplete: false,
+              isDismissed: false,
+              steps: [
+                {
+                  id: "project_created",
+                  required: true,
+                  status: "pending"
+                },
+                {
+                  id: "api_key_created",
+                  required: true,
+                  status: "pending"
+                },
+                {
+                  id: "first_event_ingested",
+                  required: true,
+                  status: "pending"
+                },
+                {
+                  id: "member_invited",
+                  required: false,
+                  status: "pending"
+                }
+              ],
+              totalRequiredSteps: 3
+            },
             organization: {
               id: "org-1",
               name: "Acme"
@@ -46,6 +74,10 @@ describe("createCurrentUserContextService", () => {
         {
           organization: {
             name: "Acme"
+          },
+          onboarding: {
+            completedRequiredSteps: 0,
+            totalRequiredSteps: 3
           },
           plan: {
             id: "starter",

@@ -29,6 +29,7 @@ describe("AppShell", () => {
                 id: "org-1",
                 name: "Acme",
               },
+              onboarding: incompleteOnboarding(),
               organizationId: "org-1",
               plan: starterPlan(),
               projectIds: ["project-1", "project-2"],
@@ -67,6 +68,9 @@ describe("AppShell", () => {
     expect(
       screen.getByRole("link", { name: "API Keys" }).getAttribute("href"),
     ).toBe("/api-keys?organizationId=org-1&projectId=project-1");
+    expect(
+      screen.getByRole("link", { name: "Getting started" }).getAttribute("href"),
+    ).toBe("/getting-started?organizationId=org-1&projectId=project-1");
     expect(
       screen.getByRole("link", { name: "Members" }).getAttribute("href"),
     ).toBe("/members?organizationId=org-1&projectId=project-1");
@@ -120,5 +124,24 @@ function starterPlan() {
     periodStart: "2026-06-01T00:00:00.000Z",
     remainingEvents: 99999,
     usedEvents: 1,
+  };
+}
+
+function incompleteOnboarding() {
+  return {
+    completedRequiredSteps: 0,
+    isComplete: false,
+    isDismissed: false,
+    steps: [
+      { id: "project_created" as const, required: true, status: "pending" as const },
+      { id: "api_key_created" as const, required: true, status: "pending" as const },
+      {
+        id: "first_event_ingested" as const,
+        required: true,
+        status: "pending" as const,
+      },
+      { id: "member_invited" as const, required: false, status: "pending" as const },
+    ],
+    totalRequiredSteps: 3,
   };
 }

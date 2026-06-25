@@ -6,6 +6,39 @@ This file tracks web dashboard work items.
 
 ## Done
 
+- [x] T-042 Add a dedicated getting-started onboarding flow
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  completed: 2026-06-25
+  blocked_reason:
+  files:
+    - packages/domain/src/*
+    - packages/db/src/*
+    - apps/api/src/modules/auth/*
+    - apps/api/src/modules/platform/*
+    - apps/api/src/modules/**/__tests__/*
+    - apps/web/app/getting-started/*
+    - apps/web/src/components/layout/*
+    - apps/web/src/features/onboarding/*
+    - apps/web/src/features/api-keys/*
+    - apps/web/src/features/audit-events/*
+    - apps/web/src/features/auth/*
+    - apps/web/src/features/organizations/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - A dedicated `/getting-started` page renders org-scoped onboarding progress and CTA links into existing setup flows
+    - `/api/v1/me` membership objects include a derived onboarding summary and org members can dismiss or restore onboarding state through a protected route
+    - Sidebar and empty-state navigation prefer the onboarding route when setup is incomplete and not dismissed
+    - Tests cover onboarding domain logic, API behavior, and the main web rendering and navigation states
+
 - [x] T-041 Add a minimal audit events chart
   status: done
   priority: medium

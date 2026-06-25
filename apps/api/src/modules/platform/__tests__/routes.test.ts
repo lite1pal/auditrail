@@ -572,6 +572,126 @@ describe("registerPlatformRoutes", () => {
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({ error: "invalid_invitation" });
   });
+
+  it("surfaces unexpected invitation acceptance failures as 500 responses", async () => {
+    const app = buildTestApp({
+      async acceptInvitation() {
+        throw new Error("boom");
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        token: "ok-token"
+      },
+      url: "/invitations/accept"
+    });
+
+    expect(response.statusCode).toBe(500);
+  });
+
+  it("updates onboarding state for organization members", async () => {
+    const app = buildTestApp({
+      async updateOnboardingStateForUser(input) {
+        expect(input).toEqual({
+          dismissed: true,
+          organizationId: "org-1",
+          userId: "user-1"
+        });
+
+        return {
+          dismissedAt: "2026-06-25T12:00:00.000Z",
+          organizationId: "org-1",
+          userId: "user-1"
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        dismissed: true
+      },
+      url: "/organizations/org-1/onboarding-state"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      onboardingState: {
+        dismissedAt: "2026-06-25T12:00:00.000Z",
+        organizationId: "org-1",
+        userId: "user-1"
+      }
+    });
+  });
+
+  it("requires a session when updating onboarding state", async () => {
+    const app = buildTestApp({}, { session: false });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        dismissed: true
+      },
+      url: "/organizations/org-1/onboarding-state"
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: "missing_session" });
+  });
+
+  it("maps forbidden onboarding state updates to 403", async () => {
+    const app = buildTestApp({
+      async updateOnboardingStateForUser() {
+        throw new Error("forbidden");
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        dismissed: false
+      },
+      url: "/organizations/org-1/onboarding-state"
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toEqual({ error: "forbidden" });
+  });
+
+  it("rejects invalid onboarding state bodies", async () => {
+    const app = buildTestApp({});
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {},
+      url: "/organizations/org-1/onboarding-state"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      error: "invalid_onboarding_state_request"
+    });
+  });
+
+  it("surfaces unexpected onboarding state failures as 500 responses", async () => {
+    const app = buildTestApp({
+      async updateOnboardingStateForUser() {
+        throw new Error("boom");
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      payload: {
+        dismissed: true
+      },
+      url: "/organizations/org-1/onboarding-state"
+    });
+
+    expect(response.statusCode).toBe(500);
+  });
 });
 
 function buildTestApp(
@@ -629,6 +749,12 @@ function createPlatformServiceStub(
       return [];
     },
     async revokeInvitation() {},
+    async updateOnboardingStateForUser() {
+      return {
+        organizationId: "org-1",
+        userId: "user-1"
+      };
+    },
     ...overrides
   };
 }

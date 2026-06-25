@@ -3,18 +3,21 @@ import type {
   PricingPlanId,
   PricingUsageSummary
 } from "@auditrail/domain/pricing";
+import type { OnboardingSummary } from "@auditrail/domain";
 
 import type { AuthUser } from "../auth/service.js";
 import type { Membership, Organization, Project } from "./service.js";
 
 export interface UserMembershipContext {
   membership: Membership;
+  onboarding: OnboardingSummary;
   organization: Organization;
   plan: PricingUsageSummary;
   projects: Project[];
 }
 
 export interface UserMembershipContextRecord {
+  onboarding: OnboardingSummary;
   membership: Membership;
   organization: Organization;
   planId: PricingPlanId;
@@ -51,6 +54,7 @@ export function createCurrentUserContextService(
       return {
         memberships: memberships.map((membership) => ({
           membership: membership.membership,
+          onboarding: membership.onboarding,
           organization: membership.organization,
           plan: summarizePricingUsage({
             now: currentDate,

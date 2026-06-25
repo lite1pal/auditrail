@@ -24,8 +24,10 @@ export function toWorkspaceViewModel(
 
   return {
     activeOrganization: workspace.activeOrganization,
+    activeOrganizationOnboarding: workspace.activeOrganizationOnboarding,
     activeProject: workspace.activeProject,
     memberships: currentUser.memberships.map((membership) => ({
+      onboarding: membership.onboarding,
       organization: membership.organization,
       projects: membership.projects,
       role: membership.role

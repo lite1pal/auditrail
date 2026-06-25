@@ -252,6 +252,31 @@ describe("createPlatformService", () => {
     ).rejects.toThrow("forbidden");
   });
 
+  it("stores onboarding dismissal state for organization members", async () => {
+    const repo = createInMemoryPlatformRepo({
+      memberships: [
+        {
+          id: "membership-1",
+          organizationId: "org-1",
+          role: "member",
+          userId: "user-1"
+        }
+      ]
+    });
+    const service = createPlatformService(repo);
+
+    await expect(
+      service.updateOnboardingStateForUser({
+        dismissed: true,
+        organizationId: "org-1",
+        userId: "user-1"
+      })
+    ).resolves.toMatchObject({
+      organizationId: "org-1",
+      userId: "user-1"
+    });
+  });
+
   it("accepts valid invitations", async () => {
     const repo = createInMemoryPlatformRepo({
       memberships: [
@@ -495,6 +520,13 @@ function createInMemoryPlatformRepo(
     },
     async getOrganizationPlanId(organizationId) {
       return organizationPlans.get(organizationId);
+    },
+    async saveOrganizationOnboardingState(input) {
+      return {
+        dismissedAt: input.dismissedAt,
+        organizationId: input.organizationId,
+        userId: input.userId
+      };
     },
     async findInvitationByTokenHash(tokenHash) {
       return invitations.find(

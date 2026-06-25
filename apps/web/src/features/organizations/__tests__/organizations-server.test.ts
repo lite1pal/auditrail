@@ -284,11 +284,15 @@ function createCurrentUser(
         organizationId: string;
       }>;
       role: "owner" | "admin" | "member" | "viewer";
+      onboarding?: ReturnType<typeof incompleteOnboarding>;
     }>;
   }> = {}
 ) {
   return {
-    memberships: overrides.memberships ?? [],
+    memberships: (overrides.memberships ?? []).map((membership) => ({
+      ...membership,
+      onboarding: membership.onboarding ?? incompleteOnboarding()
+    })),
     user: {
       email: "user@example.com",
       id: "user-1"
@@ -317,5 +321,24 @@ function growthPlan() {
     periodStart: "2026-06-01T00:00:00.000Z",
     remainingEvents: 999000,
     usedEvents: 1000
+  };
+}
+
+function incompleteOnboarding() {
+  return {
+    completedRequiredSteps: 0,
+    isComplete: false,
+    isDismissed: false,
+    steps: [
+      { id: "project_created" as const, required: true, status: "pending" as const },
+      { id: "api_key_created" as const, required: true, status: "pending" as const },
+      {
+        id: "first_event_ingested" as const,
+        required: true,
+        status: "pending" as const
+      },
+      { id: "member_invited" as const, required: false, status: "pending" as const }
+    ],
+    totalRequiredSteps: 3
   };
 }

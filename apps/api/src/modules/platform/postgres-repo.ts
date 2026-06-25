@@ -1,14 +1,18 @@
 import {
+  apiKeys,
+  auditEvents,
   organizationMonthlyUsage,
   organizationInvitations,
   organizationMemberships,
   organizations,
   projects,
+  userOrganizationOnboardingStates,
   users
 } from "@auditrail/db/schema";
+import { summarizeOnboardingProgress } from "@auditrail/domain";
 import { getUtcMonthWindow } from "@auditrail/domain/pricing";
 import type { PricingPlanId } from "@auditrail/domain/pricing";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
 import type { UserContextRepo, UserMembershipContextRecord } from "./context.js";
@@ -98,6 +102,33 @@ export function createPostgresPlatformRepo(
         .limit(1);
 
       return record?.planId as PricingPlanId | undefined;
+    },
+    async saveOrganizationOnboardingState(input) {
+      const [record] = await db
+        .insert(userOrganizationOnboardingStates)
+        .values({
+          dismissedAt: input.dismissedAt ? new Date(input.dismissedAt) : null,
+          organizationId: input.organizationId,
+          updatedAt: new Date(),
+          userId: input.userId
+        })
+        .onConflictDoUpdate({
+          set: {
+            dismissedAt: input.dismissedAt ? new Date(input.dismissedAt) : null,
+            updatedAt: new Date()
+          },
+          target: [
+            userOrganizationOnboardingStates.organizationId,
+            userOrganizationOnboardingStates.userId
+          ]
+        })
+        .returning();
+
+      return {
+        dismissedAt: record.dismissedAt?.toISOString(),
+        organizationId: record.organizationId,
+        userId: record.userId
+      };
     },
     async findInvitationByTokenHash(tokenHash) {
       const [record] = await db
@@ -205,9 +236,67 @@ export function createPostgresPlatformRepo(
             )
           )
           .limit(1);
+        const [firstProjectRecord] = await db
+          .select({
+            createdAt: projects.createdAt
+          })
+          .from(projects)
+          .where(eq(projects.organizationId, record.organization.id))
+          .orderBy(asc(projects.createdAt), asc(projects.id))
+          .limit(1);
+        const [firstApiKeyRecord] = await db
+          .select({
+            createdAt: apiKeys.createdAt
+          })
+          .from(apiKeys)
+          .innerJoin(projects, eq(projects.id, apiKeys.projectId))
+          .where(eq(projects.organizationId, record.organization.id))
+          .orderBy(asc(apiKeys.createdAt), asc(apiKeys.id))
+          .limit(1);
+        const [firstEventRecord] = await db
+          .select({
+            createdAt: auditEvents.createdAt
+          })
+          .from(auditEvents)
+          .where(eq(auditEvents.organizationId, record.organization.id))
+          .orderBy(asc(auditEvents.createdAt), asc(auditEvents.id))
+          .limit(1);
+        const [firstInvitationRecord] = await db
+          .select({
+            createdAt: organizationInvitations.createdAt
+          })
+          .from(organizationInvitations)
+          .where(eq(organizationInvitations.organizationId, record.organization.id))
+          .orderBy(
+            asc(organizationInvitations.createdAt),
+            asc(organizationInvitations.id)
+          )
+          .limit(1);
+        const [onboardingStateRecord] = await db
+          .select({
+            dismissedAt: userOrganizationOnboardingStates.dismissedAt
+          })
+          .from(userOrganizationOnboardingStates)
+          .where(
+            and(
+              eq(
+                userOrganizationOnboardingStates.organizationId,
+                record.organization.id
+              ),
+              eq(userOrganizationOnboardingStates.userId, userId)
+            )
+          )
+          .limit(1);
 
         contexts.push({
           membership: toMembership(record.membership),
+          onboarding: summarizeOnboardingProgress({
+            apiKeyCreatedAt: firstApiKeyRecord?.createdAt?.toISOString(),
+            dismissedAt: onboardingStateRecord?.dismissedAt?.toISOString(),
+            firstEventIngestedAt: firstEventRecord?.createdAt?.toISOString(),
+            memberInvitedAt: firstInvitationRecord?.createdAt?.toISOString(),
+            projectCreatedAt: firstProjectRecord?.createdAt?.toISOString()
+          }),
           organization: toOrganization(record.organization),
           planId: record.organization.planId as PricingPlanId,
           projects: projectRecords.map(toProject),

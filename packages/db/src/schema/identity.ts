@@ -200,6 +200,40 @@ export const organizationInvitations = pgTable(
   ]
 );
 
+export const userOrganizationOnboardingStates = pgTable(
+  "user_organization_onboarding_states",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    dismissedAt: timestamp("dismissed_at", {
+      withTimezone: true
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true
+    })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    index("user_org_onboarding_states_org_id_idx").on(table.organizationId),
+    index("user_org_onboarding_states_user_id_idx").on(table.userId),
+    uniqueIndex("user_org_onboarding_states_org_user_unique").on(
+      table.organizationId,
+      table.userId
+    )
+  ]
+);
+
 export const exportJobs = pgTable(
   "export_jobs",
   {

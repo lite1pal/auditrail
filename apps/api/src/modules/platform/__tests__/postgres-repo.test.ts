@@ -88,6 +88,7 @@ describe("createPostgresPlatformRepo", () => {
 
   it("loads user membership contexts", async () => {
     const db = createFakeDb([], {
+      apiKeyRows: [{ createdAt: new Date("2026-06-25T12:01:00.000Z") }],
       contextRows: [
         {
           membership: {
@@ -103,9 +104,14 @@ describe("createPostgresPlatformRepo", () => {
           }
         }
       ],
+      eventRows: [{ createdAt: new Date("2026-06-25T12:02:00.000Z") }],
+      onboardingStateRows: [{ dismissedAt: new Date("2026-06-25T12:03:00.000Z") }],
+      projectMilestoneRows: [{ createdAt: new Date("2026-06-25T12:00:00.000Z") }],
       usageRows: [{ eventCount: 12 }],
+      onboardingInvitationRows: [{ createdAt: new Date("2026-06-25T12:04:00.000Z") }],
       projectRows: [
         {
+          createdAt: new Date("2026-06-25T12:00:00.000Z"),
           id: "project-1",
           name: "Production",
           organizationId: "org-1"
@@ -121,6 +127,39 @@ describe("createPostgresPlatformRepo", () => {
           organizationId: "org-1",
           role: "owner",
           userId: "user-1"
+        },
+        onboarding: {
+          completedRequiredSteps: 3,
+          dismissedAt: "2026-06-25T12:03:00.000Z",
+          isComplete: true,
+          isDismissed: true,
+          steps: [
+            {
+              completedAt: "2026-06-25T12:00:00.000Z",
+              id: "project_created",
+              required: true,
+              status: "complete"
+            },
+            {
+              completedAt: "2026-06-25T12:01:00.000Z",
+              id: "api_key_created",
+              required: true,
+              status: "complete"
+            },
+            {
+              completedAt: "2026-06-25T12:02:00.000Z",
+              id: "first_event_ingested",
+              required: true,
+              status: "complete"
+            },
+            {
+              completedAt: "2026-06-25T12:04:00.000Z",
+              id: "member_invited",
+              required: false,
+              status: "complete"
+            }
+          ],
+          totalRequiredSteps: 3
         },
         organization: {
           id: "org-1",
@@ -339,18 +378,46 @@ describe("createPostgresPlatformRepo", () => {
       repo.findMembership({ organizationId: "org-1", userId: "user-1" })
     ).resolves.toBeUndefined();
   });
+
+  it("stores per-user onboarding dismissal state", async () => {
+    const db = createFakeDb([
+      {
+        dismissedAt: new Date("2026-06-25T12:00:00.000Z"),
+        organizationId: "org-1",
+        userId: "user-1"
+      }
+    ]);
+    const repo = createPostgresPlatformRepo(db);
+
+    await expect(
+      repo.saveOrganizationOnboardingState({
+        dismissedAt: "2026-06-25T12:00:00.000Z",
+        organizationId: "org-1",
+        userId: "user-1"
+      })
+    ).resolves.toEqual({
+      dismissedAt: "2026-06-25T12:00:00.000Z",
+      organizationId: "org-1",
+      userId: "user-1"
+    });
+  });
 });
 
 function createFakeDb(
   insertResults: unknown[],
   selectResults: {
     contextRows?: unknown[];
+    eventRows?: unknown[];
     invitationRows?: unknown[];
     memberRows?: unknown[];
     membershipRows?: unknown[];
+    onboardingStateRows?: unknown[];
     organizationRows?: unknown[];
+    onboardingInvitationRows?: unknown[];
     planRows?: unknown[];
     projectRows?: unknown[];
+    projectMilestoneRows?: unknown[];
+    apiKeyRows?: unknown[];
     usageRows?: unknown[];
   } = {}
 ): AppDatabase & { updates: unknown[] } {
@@ -375,9 +442,34 @@ function createFakeDb(
     selectResults.projectRows
       ? { kind: "where", rows: selectResults.projectRows }
       : undefined,
-    selectResults.usageRows
+    selectResults.contextRows && selectResults.usageRows
       ? { kind: "limit", rows: selectResults.usageRows }
       : undefined,
+    selectResults.contextRows && selectResults.projectMilestoneRows
+      ? { kind: "ordered", rows: selectResults.projectMilestoneRows }
+      : selectResults.contextRows
+        ? { kind: "ordered", rows: [] }
+        : undefined,
+    selectResults.contextRows && selectResults.apiKeyRows
+      ? { kind: "orderedJoin", rows: selectResults.apiKeyRows }
+      : selectResults.contextRows
+        ? { kind: "orderedJoin", rows: [] }
+        : undefined,
+    selectResults.contextRows && selectResults.eventRows
+      ? { kind: "ordered", rows: selectResults.eventRows }
+      : selectResults.contextRows
+        ? { kind: "ordered", rows: [] }
+        : undefined,
+    selectResults.contextRows && selectResults.onboardingInvitationRows
+      ? { kind: "ordered", rows: selectResults.onboardingInvitationRows }
+      : selectResults.contextRows
+        ? { kind: "ordered", rows: [] }
+        : undefined,
+    selectResults.contextRows && selectResults.onboardingStateRows
+      ? { kind: "limit", rows: selectResults.onboardingStateRows }
+      : selectResults.contextRows
+        ? { kind: "limit", rows: [] }
+        : undefined,
     selectResults.memberRows
       ? { kind: "join", rows: selectResults.memberRows }
       : undefined
@@ -385,7 +477,7 @@ function createFakeDb(
     (
       item
     ): item is {
-      kind: "join" | "limit" | "where";
+      kind: "join" | "limit" | "ordered" | "orderedJoin" | "where";
       rows: unknown[];
     } => Boolean(item)
   );
@@ -396,6 +488,13 @@ function createFakeDb(
       return {
         values() {
           return {
+            onConflictDoUpdate() {
+              return {
+                async returning() {
+                  return [results.shift()];
+                }
+              };
+            },
             async returning() {
               return [results.shift()];
             }
@@ -405,44 +504,34 @@ function createFakeDb(
     },
     select() {
       const next = selectQueue.shift() ?? { kind: "where", rows: [] };
-
-      if (next.kind === "limit") {
-        return {
-          from() {
-            return {
-              where() {
-                return {
-                  async limit() {
-                    return next.rows;
-                  }
-                };
-              }
-            };
-          }
-        };
-      }
-
-      if (next.kind === "join") {
-        return {
-          from() {
-            return {
-              innerJoin() {
-                return {
-                  async where() {
-                    return next.rows;
-                  }
-                };
-              }
-            };
-          }
-        };
-      }
+      const buildScopedQuery = () => ({
+        async limit() {
+          return next.rows;
+        },
+        orderBy() {
+          return {
+            async limit() {
+              return next.rows;
+            }
+          };
+        },
+        then(resolve: (value: unknown[]) => unknown) {
+          return Promise.resolve(resolve(next.rows));
+        }
+      });
 
       return {
         from() {
           return {
-            async where() {
-              return next.rows;
+            innerJoin() {
+              return {
+                where() {
+                  return buildScopedQuery();
+                }
+              };
+            },
+            where() {
+              return buildScopedQuery();
             }
           };
         }

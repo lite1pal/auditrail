@@ -94,6 +94,7 @@ Its event reads are scoped by the selected organization and project through:
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events/timeseries`
 - `GET /api/v1/organizations/:organizationId/members`
 - `POST /api/v1/organizations/:organizationId/plan`
+- `POST /api/v1/organizations/:organizationId/onboarding-state`
 
 ## Session Workspace Routes
 
@@ -105,6 +106,7 @@ These browser-session routes use the signed-in user membership instead of a bear
 - `POST /api/v1/organizations`
 - `POST /api/v1/organizations/:organizationId/projects`
 - `POST /api/v1/organizations/:organizationId/invitations`
+- `POST /api/v1/organizations/:organizationId/onboarding-state`
 - `POST /api/v1/invitations/accept`
 - `POST /api/v1/invitations/:invitationId/revoke`
 
@@ -241,7 +243,7 @@ available while an organization is over quota.
 
 Returns the signed-in browser user and their workspace memberships.
 
-Each membership now includes a pricing summary for the organization:
+Each membership now includes pricing and onboarding summaries for the organization:
 
 ```json
 {
@@ -253,6 +255,35 @@ Each membership now includes a pricing summary for the organization:
     {
       "organizationId": "org-1",
       "role": "owner",
+      "onboarding": {
+        "isComplete": false,
+        "isDismissed": false,
+        "completedRequiredSteps": 1,
+        "totalRequiredSteps": 3,
+        "steps": [
+          {
+            "id": "project_created",
+            "required": true,
+            "status": "complete",
+            "completedAt": "2026-06-25T12:00:00.000Z"
+          },
+          {
+            "id": "api_key_created",
+            "required": true,
+            "status": "pending"
+          },
+          {
+            "id": "first_event_ingested",
+            "required": true,
+            "status": "pending"
+          },
+          {
+            "id": "member_invited",
+            "required": false,
+            "status": "pending"
+          }
+        ]
+      },
       "plan": {
         "id": "starter",
         "name": "Starter",
@@ -278,6 +309,46 @@ Each membership now includes a pricing summary for the organization:
   ]
 }
 ```
+
+Onboarding uses derived organization milestones:
+
+- `project_created`: first project exists
+- `api_key_created`: any API key has been created for any project in the organization
+- `first_event_ingested`: any audit event exists for the organization
+- `member_invited`: any invitation exists for the organization
+
+Required steps are `project_created`, `api_key_created`, and
+`first_event_ingested`. `member_invited` is optional. Dismissal state is
+per-user per-organization and does not change completion.
+
+## `POST /api/v1/organizations/:organizationId/onboarding-state`
+
+Stores the signed-in member's onboarding sidebar dismissal state for one organization.
+
+Request:
+
+```json
+{
+  "dismissed": true
+}
+```
+
+Response:
+
+```json
+{
+  "onboardingState": {
+    "organizationId": "org-1",
+    "userId": "user-1",
+    "dismissedAt": "2026-06-25T12:05:00.000Z"
+  }
+}
+```
+
+Errors:
+
+- `401 missing_session`
+- `403 forbidden`
 
 ## `POST /api/v1/organizations/:organizationId/plan`
 

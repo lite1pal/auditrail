@@ -27,6 +27,10 @@ const changeOrganizationPlanBodySchema = z.object({
   planId: z.enum(["starter", "growth", "scale"])
 });
 
+const updateOnboardingStateBodySchema = z.object({
+  dismissed: z.boolean()
+});
+
 export interface PlatformRoutesOptions {
   service: PlatformService;
   invitationTokenSecret?: string;
@@ -227,6 +231,40 @@ export async function registerPlatformRoutes(
       });
 
       return reply.code(200).send(result);
+    } catch (error) {
+      if (error instanceof Error && error.message === "forbidden") {
+        return reply.code(403).send({ error: "forbidden" });
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/organizations/:organizationId/onboarding-state", async (request, reply) => {
+    const user = getSessionUser(request);
+    const params = z
+      .object({
+        organizationId: z.string().min(1)
+      })
+      .parse(request.params);
+    const body = updateOnboardingStateBodySchema.safeParse(request.body);
+
+    if (!user) {
+      return reply.code(401).send({ error: "missing_session" });
+    }
+
+    if (!body.success) {
+      return reply.code(400).send({ error: "invalid_onboarding_state_request" });
+    }
+
+    try {
+      const state = await options.service.updateOnboardingStateForUser({
+        dismissed: body.data.dismissed,
+        organizationId: params.organizationId,
+        userId: user.id
+      });
+
+      return reply.code(200).send({ onboardingState: state });
     } catch (error) {
       if (error instanceof Error && error.message === "forbidden") {
         return reply.code(403).send({ error: "forbidden" });

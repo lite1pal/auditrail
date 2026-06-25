@@ -1,8 +1,30 @@
 import { z } from "zod";
 
+const onboardingStepSchema = z.object({
+  completedAt: z.string().datetime().optional(),
+  id: z.enum([
+    "project_created",
+    "api_key_created",
+    "first_event_ingested",
+    "member_invited"
+  ]),
+  required: z.boolean(),
+  status: z.enum(["complete", "pending"])
+});
+
+const onboardingSummarySchema = z.object({
+  completedRequiredSteps: z.number().int(),
+  dismissedAt: z.string().datetime().optional(),
+  isComplete: z.boolean(),
+  isDismissed: z.boolean(),
+  steps: z.array(onboardingStepSchema),
+  totalRequiredSteps: z.number().int()
+});
+
 export const currentUserResponseSchema = z.object({
   memberships: z.array(
     z.object({
+      onboarding: onboardingSummarySchema,
       organization: z.object({
         id: z.string(),
         name: z.string()

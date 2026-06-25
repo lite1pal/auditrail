@@ -27,6 +27,9 @@ export const schemaIds = {
   authUserResponse: "AuthUserResponse",
   sessionCreatedResponse: "SessionCreatedResponse",
   currentUserResponse: "CurrentUserResponse",
+  onboardingStepResponse: "OnboardingStepResponse",
+  onboardingSummaryResponse: "OnboardingSummaryResponse",
+  onboardingStateResponse: "OnboardingStateResponse",
   organizationMemberResponse: "OrganizationMemberResponse",
   listOrganizationMembersResponse: "ListOrganizationMembersResponse",
   createApiKeyBody: "CreateApiKeyBody",
@@ -183,6 +186,79 @@ export function registerApiSchemas(app: FastifyInstance) {
   });
 
   addSchemaIfMissing(app, {
+    $id: schemaIds.onboardingStepResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["id", "required", "status"],
+    properties: {
+      id: {
+        type: "string",
+        enum: [
+          "project_created",
+          "api_key_created",
+          "first_event_ingested",
+          "member_invited"
+        ]
+      },
+      required: {
+        type: "boolean"
+      },
+      status: {
+        type: "string",
+        enum: ["complete", "pending"]
+      },
+      completedAt: {
+        type: "string",
+        format: "date-time"
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.onboardingSummaryResponse,
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "isComplete",
+      "isDismissed",
+      "completedRequiredSteps",
+      "totalRequiredSteps",
+      "steps"
+    ],
+    properties: {
+      isComplete: { type: "boolean" },
+      isDismissed: { type: "boolean" },
+      dismissedAt: {
+        type: "string",
+        format: "date-time"
+      },
+      completedRequiredSteps: { type: "number" },
+      totalRequiredSteps: { type: "number" },
+      steps: {
+        type: "array",
+        items: {
+          $ref: `${schemaIds.onboardingStepResponse}#`
+        }
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
+    $id: schemaIds.onboardingStateResponse,
+    type: "object",
+    additionalProperties: false,
+    required: ["organizationId", "userId"],
+    properties: {
+      organizationId: { type: "string" },
+      userId: { type: "string" },
+      dismissedAt: {
+        type: "string",
+        format: "date-time"
+      }
+    }
+  });
+
+  addSchemaIfMissing(app, {
     $id: schemaIds.currentUserResponse,
     type: "object",
     additionalProperties: false,
@@ -196,7 +272,15 @@ export function registerApiSchemas(app: FastifyInstance) {
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["organizationId", "plan", "projectIds", "role"],
+          required: [
+            "organizationId",
+            "organization",
+            "plan",
+            "onboarding",
+            "projectIds",
+            "projects",
+            "role"
+          ],
           properties: {
             organizationId: { type: "string" },
             organization: {
@@ -210,6 +294,9 @@ export function registerApiSchemas(app: FastifyInstance) {
             },
             plan: {
               $ref: `${schemaIds.pricingPlanSummaryResponse}#`
+            },
+            onboarding: {
+              $ref: `${schemaIds.onboardingSummaryResponse}#`
             },
             projectIds: {
               type: "array",

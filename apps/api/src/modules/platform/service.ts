@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { PricingPlanId } from "@auditrail/domain/pricing";
-
 import { createOpaqueToken, hashToken, verifyTokenHash } from "../auth/tokens.js";
 
 const nameSchema = z.string().trim().min(1).max(120);
@@ -44,6 +43,12 @@ export interface Invitation {
   revokedAt?: string;
 }
 
+export interface OrganizationOnboardingState {
+  dismissedAt?: string;
+  organizationId: string;
+  userId: string;
+}
+
 export interface PlatformRepo {
   createOrganization(input: { name: string }): Promise<Organization>;
   createProject(input: { organizationId: string; name: string }): Promise<Project>;
@@ -72,6 +77,11 @@ export interface PlatformRepo {
     organizationId: string;
     userId: string;
   }): Promise<Membership | undefined>;
+  saveOrganizationOnboardingState(input: {
+    dismissedAt?: string;
+    organizationId: string;
+    userId: string;
+  }): Promise<OrganizationOnboardingState>;
   getOrganizationPlanId(organizationId: string): Promise<PricingPlanId | undefined>;
   listOrganizationMembers(organizationId: string): Promise<OrganizationMember[]>;
   listOrganizationsForUser(userId: string): Promise<Organization[]>;
@@ -131,6 +141,11 @@ export interface PlatformService {
     planId: PricingPlanId;
     userId: string;
   }): Promise<{ organizationId: string; planId: PricingPlanId }>;
+  updateOnboardingStateForUser(input: {
+    dismissed: boolean;
+    organizationId: string;
+    userId: string;
+  }): Promise<OrganizationOnboardingState>;
 }
 
 const pricingPlanIdSchema = z.enum(["starter", "growth", "scale"]);
@@ -294,6 +309,20 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
         organizationId: input.organizationId,
         planId
       };
+    },
+    async updateOnboardingStateForUser(input) {
+      const membership = await repo.findMembership({
+        organizationId: input.organizationId,
+        userId: input.userId
+      });
+
+      assertRole(membership, ["owner", "admin", "member", "viewer"]);
+
+      return repo.saveOrganizationOnboardingState({
+        dismissedAt: input.dismissed ? new Date().toISOString() : undefined,
+        organizationId: input.organizationId,
+        userId: input.userId
+      });
     }
   };
 }

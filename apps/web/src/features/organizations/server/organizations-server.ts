@@ -115,6 +115,7 @@ export async function createOrganizationAction(formData: FormData) {
   ).createOrganization(name);
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   redirect(`/settings?organizationId=${result.organization.id}`);
 }
@@ -131,6 +132,7 @@ export async function createProjectAction(formData: FormData) {
   );
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   redirect(`/settings?organizationId=${organizationId}`);
 }
@@ -150,6 +152,7 @@ export async function changeOrganizationPlanAction(formData: FormData) {
   );
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   redirect(`/settings?organizationId=${organizationId}`);
 }
@@ -185,6 +188,7 @@ export async function createApiKeyAction(formData: FormData) {
   );
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   const targetPath = getWorkspaceRedirectTarget(formData);
 
@@ -208,6 +212,7 @@ export async function revokeApiKeyAction(formData: FormData) {
   );
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   const targetPath = getWorkspaceRedirectTarget(formData);
 
@@ -232,6 +237,7 @@ export async function revokeApiKeyActionById(input: {
   );
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
 
   const targetPath = input.redirectTo === "/api-keys" ? "/api-keys" : "/settings";
@@ -257,6 +263,7 @@ export async function inviteMemberAction(formData: FormData) {
     role
   });
 
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   redirect(
     `/settings?organizationId=${organizationId}&invitationToken=${result.token}`
@@ -270,6 +277,7 @@ export async function acceptInvitationAction(formData: FormData) {
   await createInvitationsClient(createServerApiClient()).acceptInvitation(token);
 
   revalidatePath("/");
+  revalidatePath("/getting-started");
   revalidatePath("/settings");
   redirect("/settings");
 }

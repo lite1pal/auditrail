@@ -19,6 +19,7 @@ const memberships = [
       id: "org-1",
       name: "Acme"
     },
+    onboarding: incompleteOnboarding(),
     organizationId: "org-1",
     plan: starterPlan(),
     projectIds: ["project-1", "project-2"],
@@ -41,6 +42,7 @@ const memberships = [
       id: "org-2",
       name: "Beta"
     },
+    onboarding: incompleteOnboarding(),
     organizationId: "org-2",
     plan: growthPlan(),
     projectIds: ["project-3"],
@@ -148,5 +150,24 @@ function growthPlan() {
     periodStart: "2026-06-01T00:00:00.000Z",
     remainingEvents: 999000,
     usedEvents: 1000
+  };
+}
+
+function incompleteOnboarding() {
+  return {
+    completedRequiredSteps: 0,
+    isComplete: false,
+    isDismissed: false,
+    steps: [
+      { id: "project_created" as const, required: true, status: "pending" as const },
+      { id: "api_key_created" as const, required: true, status: "pending" as const },
+      {
+        id: "first_event_ingested" as const,
+        required: true,
+        status: "pending" as const
+      },
+      { id: "member_invited" as const, required: false, status: "pending" as const }
+    ],
+    totalRequiredSteps: 3
   };
 }
