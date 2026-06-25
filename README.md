@@ -122,9 +122,9 @@ That path is the shortest repo-native way to find the right feature files and co
 
 For Coolify deployment, the repo now includes:
 
-- a root `Dockerfile` reused by `web` and `api`
+- a root multi-stage `Dockerfile` with separate `web-runtime` and `api-runtime` targets
 - `docker-compose.coolify.yml` for a single Coolify stack containing `web`, `api`, and `postgres`
-- the web image prebuilds the Next.js app and the runtime command only serves the compiled output
+- the web target prebuilds the Next.js app and the api target skips web compilation entirely
 
 See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1) for the required env vars and the stack setup.
 

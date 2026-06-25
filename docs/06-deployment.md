@@ -74,9 +74,8 @@ Docker build so the browser bundle points at the deployed API origin.
 
 ## Stack behavior
 
-- `web` builds from the root `Dockerfile`, compiles during image build, and
-  runs `pnpm start:web:container`
-- `api` builds from the root `Dockerfile`
+- `web` builds from the root `Dockerfile` `web-runtime` target, compiles during image build, and runs `pnpm start:web:container`
+- `api` builds from the root `Dockerfile` `api-runtime` target and skips the web compilation step
 - `postgres` uses `postgres:17-alpine`
 - Postgres data is persisted in `postgres-data`
 - `api` waits for healthy Postgres before starting
@@ -103,7 +102,7 @@ docker compose -f docker-compose.coolify.yml up --build
 
 `pnpm build:web:container` validates the prebuilt web artifact path, and the
 Compose command exercises the same stack definition Coolify uses in hosted
-deployments.
+deployments, including the separate web and api image targets.
 
 ## Health check
 
