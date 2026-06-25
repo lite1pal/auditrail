@@ -2,6 +2,21 @@
 
 AuditTrail uses a TypeScript monorepo with small deployable apps and narrow shared packages.
 
+## Extraction Posture
+
+This repository is intentionally an audit-log product, not a generic SaaS
+boilerplate. The code should still be shaped so later extraction into a
+separate boilerplate repo is mechanical.
+
+Use these labels when changing architecture:
+
+- `platform-core`: would exist in almost any multi-tenant SaaS
+- `platform-extension`: reusable SaaS capability that this repo may add later
+- `audit-product`: specific to AuditTrail's event-ingest and event-read product
+
+The rule is strict: `platform-*` code must not depend on `audit-product` code.
+Audit-specific modules may depend on platform modules, but never the reverse.
+
 ## Apps
 
 `apps/api` owns HTTP behavior:
@@ -14,6 +29,11 @@ AuditTrail uses a TypeScript monorepo with small deployable apps and narrow shar
 - API-specific tests and coverage gates
 
 `apps/web` owns the hosted MVP user journey. It should call the API instead of importing API internals.
+
+Current classification:
+
+- `apps/api`: mixed `platform-core` and `audit-product`, with boundaries kept at the module level
+- `apps/web`: mixed `platform-core` and `audit-product`, with boundaries kept at the feature level
 
 ## Packages
 
@@ -28,6 +48,13 @@ share one pure source of truth for quotas.
 `packages/db` contains Drizzle schema, database client creation, migrations, and seed helpers.
 
 `packages/testkit` contains reusable test helpers only.
+
+Current classification:
+
+- `packages/config`: `platform-core`
+- `packages/db`: mixed infrastructure for both platform and audit modules
+- `packages/domain`: mixed pure platform and audit domain helpers, which should stay separated by folder and import direction
+- `packages/testkit`: `platform-core`
 
 ## API Module Shape
 
@@ -47,6 +74,12 @@ module/
 
 Routes should depend on services. Services should depend on repo interfaces. Tests can inject fake or in-memory services to avoid slow infrastructure.
 
+For future extraction, module shape should also preserve domain ownership:
+
+- `platform-core` modules may depend on shared packages and other platform modules
+- `audit-product` modules may depend on platform modules
+- platform modules must never import audit services, audit schemas, or audit repos
+
 ## Current Event Flow
 
 ```text
@@ -64,6 +97,8 @@ The read path uses the same API key principal to scope events to the authenticat
 Quota enforcement happens only on the public ingest path. Event reads, stats,
 and timeseries remain available after a workspace reaches its monthly included
 event limit.
+
+This entire event flow is `audit-product`.
 
 ## Web Frontend Architecture
 
@@ -185,3 +220,62 @@ Zod-validated Fastify API clients, TanStack Table for data grids, Recharts for
 dashboard charts, and custom Fastify magic-link/session auth. OpenAPI types
 must be generated from `apps/api`'s `/api/v1/openapi.json`; `apps/web` must not
 become a second API contract source.
+
+### Platform Core vs Audit Product
+
+Current `platform-core` responsibilities in this repo:
+
+- browser session auth and magic-link flows
+- users, organizations, memberships, and invitations
+- workspace selection and current-user context
+- onboarding framework, dismissal state, and progress summary shape
+- API key management as a generic machine-credential admin flow
+- shared dashboard shell, settings shell, and UI primitives
+
+Current `audit-product` responsibilities in this repo:
+
+- audit-event ingestion
+- audit-event reads, stats, and timeseries
+- event-specific empty states and event inspection UI
+- event-shaped usage metering through `organization_monthly_usage.event_count`
+- audit-specific onboarding milestones such as `first_event_ingested`
+
+Current `platform-extension` candidates that should stay generic when added:
+
+- billing and subscriptions
+- entitlements and generic usage meters
+- background jobs and scheduling
+- notifications and outbound webhooks
+- exports and delivery infrastructure
+- admin/support controls
+- MFA, SSO, and enterprise auth controls
+
+### Extraction Map
+
+If this codebase later seeds a generic SaaS boilerplate, the intended split is:
+
+Move to the future boilerplate repo:
+
+- `apps/api/src/modules/auth/*`
+- generic parts of `apps/api/src/modules/platform/*`
+- generic parts of `apps/api/src/modules/api-keys/*`
+- generic parts of `apps/web/src/features/auth/*`
+- generic parts of `apps/web/src/features/organizations/*`
+- generic parts of `apps/web/src/features/api-keys/*`
+- `apps/web/src/features/onboarding/*` framework and shells
+- shared UI primitives and API-client infrastructure
+- reusable domain, config, db, and testkit utilities
+
+Stay in the audit product repo:
+
+- `apps/api/src/modules/audit-events/*`
+- `apps/web/src/features/audit-events/*`
+- audit-specific onboarding milestone definitions
+- audit-specific pricing or quota enforcement that assumes event volume is the primary meter
+
+Needs refactor before extraction:
+
+- generic and audit-specific logic currently mixed inside `packages/domain`
+- generic and audit-specific persistence currently mixed inside `packages/db`
+- `organization_monthly_usage`, which is currently product-shaped and should become a generic meter model in a future boilerplate
+- onboarding milestone ids, which should move behind product-defined configuration if a second product is ever introduced

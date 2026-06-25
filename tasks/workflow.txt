@@ -25,6 +25,24 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-043 Document platform-vs-product boundaries for future boilerplate extraction
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-25
+  completed: 2026-06-25
+  blocked_reason:
+  files:
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The architecture docs classify current modules as platform-core, platform-extension, or audit-product
+    - The docs include an explicit extraction map for what should move to a future SaaS boilerplate repo
+    - Mixed areas that still need refactor before extraction are called out explicitly
+
 - [x] T-026 Simplify repo to the core MVP product slice
   status: done
   priority: high

@@ -2,6 +2,24 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-25 - Mark Repo Boundaries For Future Boilerplate Extraction
+
+Changed:
+
+- added an explicit `platform-core`, `platform-extension`, and `audit-product` classification to the architecture docs
+- documented which current modules are intended to move into a future SaaS boilerplate repo and which should remain audit-specific
+- called out current mixed areas such as `packages/domain`, `packages/db`, event-shaped usage metering, and onboarding milestone definitions as refactor targets before extraction
+
+Why:
+
+- the project should remain a focused audit product today while still being shaped so later extraction into a generic SaaS boilerplate is deliberate and low-risk
+- making the intended split explicit now prevents accidental audit-specific dependencies from leaking into reusable platform layers
+
+Docs updated:
+
+- `docs/02-architecture.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-25 - Dedicated Getting-Started Onboarding Slice
 
 Changed:
