@@ -1,5 +1,12 @@
 # Change Log
 
+## 2026-06-26
+
+- Added a generic `packages/domain/src/product` seam for product-definition
+  types and pure validation schemas so future product-specific configuration can
+  be made explicit without leaking AuditTrail details into reusable platform
+  modules.
+
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
 ## 2026-06-26 - Add Boundary Scanner To Normal Repo Verification

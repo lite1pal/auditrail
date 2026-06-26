@@ -52,6 +52,11 @@ Pricing policy also lives in `packages/domain`. The pricing catalog, plan ids,
 and UTC month-window helpers are code-defined so both API adapters and tests can
 share one pure source of truth for quotas.
 
+Generic product-definition types also live in `packages/domain/src/product`.
+That module defines the reusable shape for product nav items, usage meters,
+empty-state copy, and onboarding-step composition without creating the
+AuditTrail-specific product config yet.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/architecture-boundaries` contains typed source-root boundary metadata

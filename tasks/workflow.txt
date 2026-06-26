@@ -25,6 +25,27 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-051 Add generic product definition types
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/product-definition-types
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/product/*
+    - packages/domain/src/index.ts
+    - packages/domain/package.json
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - `packages/domain` exposes a generic product definition seam without adding an AuditTrail-specific product config
+    - Existing onboarding step types are reused rather than duplicated
+    - The new module stays pure, typechecks, and does not change runtime behavior
+
 - [x] T-048 Wire boundary scanner into repo checks
   status: done
   priority: medium

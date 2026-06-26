@@ -15,6 +15,10 @@
     "./pricing": {
       "types": "./src/pricing/index.ts",
       "import": "./src/pricing/index.ts"
+    },
+    "./product": {
+      "types": "./src/product/index.ts",
+      "import": "./src/product/index.ts"
     }
   },
   "scripts": {
