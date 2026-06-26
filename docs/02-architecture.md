@@ -170,12 +170,15 @@ Client
   -> Postgres repo
   -> organization_monthly_usage quota update
   -> audit_events table
+  -> job_outbox audit-event.created enqueue
 ```
 
 The read path uses the same API key principal to scope events to the authenticated project.
 Quota enforcement happens only on the public ingest path. Event reads, stats,
 and timeseries remain available after a workspace reaches its monthly included
-event limit.
+event limit. Successful ingest now also writes a generic `audit-event.created`
+outbox job in the same audit-owned persistence slice so future worker-driven
+side effects can be triggered from durable intent instead of inline API work.
 
 This entire event flow is `audit-product`.
 

@@ -2,6 +2,17 @@
 
 ## 2026-06-26
 
+- Connected audit-event ingest to the generic outbox by enqueueing a durable
+  `audit-event.created` job after successful event persistence.
+
+- Kept the enqueue payload audit-owned and minimal, currently
+  `organizationId`, `projectId`, `eventId`, and `createdAt`, while leaving the
+  shared outbox repo and worker registry product-neutral.
+
+- Made the failure policy explicit: if outbox enqueue fails, ingest fails and
+  the event write is rolled back so the audit event and async intent cannot
+  drift.
+
 - Added `apps/worker` as a generic `platform-extension` app boundary with its
   own package metadata, env validation, no-op job-handler registry, and
   graceful startup/shutdown wiring.

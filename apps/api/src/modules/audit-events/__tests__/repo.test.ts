@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createInMemoryAuditEventRepo,
@@ -11,6 +11,54 @@ const tenant: AuditEventTenant = {
 };
 
 describe("in-memory audit event repo", () => {
+  it("enqueues audit-event.created jobs after a successful ingest", async () => {
+    const enqueuedJobs: Array<{
+      name: string;
+      payload: unknown;
+    }> = [];
+    const repo = createInMemoryAuditEventRepo({
+      enqueueJob(job) {
+        enqueuedJobs.push(job);
+      },
+      now: sequentialNow(["2026-06-16T12:00:00.000Z"])
+    });
+
+    const record = await repo.append(tenant, {
+      event: "user.deleted",
+      metadata: {}
+    });
+
+    expect(enqueuedJobs).toEqual([
+      {
+        name: "audit-event.created",
+        payload: {
+          createdAt: record.createdAt,
+          eventId: record.id,
+          organizationId: tenant.organizationId,
+          projectId: tenant.projectId
+        }
+      }
+    ]);
+  });
+
+  it("does not persist an event when the enqueue step fails", async () => {
+    const repo = createInMemoryAuditEventRepo({
+      enqueueJob() {
+        throw new Error("enqueue_failed");
+      },
+      now: sequentialNow(["2026-06-16T12:00:00.000Z"])
+    });
+
+    await expect(
+      repo.append(tenant, { event: "user.deleted", metadata: {} })
+    ).rejects.toThrow("enqueue_failed");
+    await expect(
+      repo.list(tenant, {
+        limit: 10
+      })
+    ).resolves.toEqual([]);
+  });
+
   it("summarizes top event types with stable tie ordering", async () => {
     const repo = createInMemoryAuditEventRepo({
       now: sequentialNow([
@@ -118,7 +166,9 @@ describe("in-memory audit event repo", () => {
 
   it("rejects ingests once the plan quota is exhausted", async () => {
     const monthKey = `${tenant.organizationId}:2026-06-01T00:00:00.000Z`;
+    const enqueueJob = vi.fn();
     const repo = createInMemoryAuditEventRepo({
+      enqueueJob,
       now: sequentialNow(["2026-06-16T12:00:00.000Z"]),
       planByOrganizationId: {
         [tenant.organizationId]: "starter"
@@ -139,6 +189,7 @@ describe("in-memory audit event repo", () => {
         usedEvents: 100_000
       })
     });
+    expect(enqueueJob).not.toHaveBeenCalled();
   });
 });
 

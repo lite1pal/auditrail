@@ -33,6 +33,9 @@ pnpm --filter @auditrail/api test:integration
 ```
 
 `TEST_DATABASE_URL` must point to a separate database. Integration tests truncate and reseed their database on each run and must never share the same database as local development.
+When a workflow now records durable outbox intent, integration coverage should
+assert both the primary write and the expected `job_outbox` side effect for the
+success and failure paths that matter.
 
 ## API Coverage
 

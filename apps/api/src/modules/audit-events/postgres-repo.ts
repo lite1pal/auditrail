@@ -1,5 +1,6 @@
 import {
   auditEvents,
+  jobOutbox,
   organizationMonthlyUsage,
   organizations
 } from "@auditrail/db/schema";
@@ -33,6 +34,7 @@ import type {
 } from "./repo.js";
 import type { AppDatabase } from "../../plugins/database.js";
 import { decodeAuditEventCursor } from "./cursor.js";
+import { createAuditEventCreatedJob } from "./jobs.js";
 import { EventQuotaExceededError } from "./repo.js";
 
 export function createPostgresAuditEventRepo(
@@ -140,7 +142,7 @@ export function createPostgresAuditEventRepo(
             createdAt: auditEvents.createdAt
           });
 
-        return {
+        const eventRecord = {
           id: record.id,
           eventType: record.eventType,
           actorId: record.actorId ?? undefined,
@@ -148,6 +150,15 @@ export function createPostgresAuditEventRepo(
           metadata: record.metadata as Record<string, unknown>,
           createdAt: record.createdAt.toISOString()
         } satisfies AuditEventRecord;
+
+        await tx.insert(jobOutbox).values(
+          createAuditEventCreatedJob({
+            event: eventRecord,
+            tenant
+          })
+        );
+
+        return eventRecord;
       });
     },
     async list(tenant: AuditEventTenant, filters: AuditEventListFilters) {

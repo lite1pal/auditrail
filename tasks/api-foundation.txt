@@ -110,6 +110,29 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-043 Enqueue audit-event.created after ingest
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/audit-event-created-outbox
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/jobs.ts
+    - apps/api/src/modules/audit-events/repo.ts
+    - apps/api/src/modules/audit-events/postgres-repo.ts
+    - apps/api/src/modules/audit-events/__tests__/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Successful audit event ingest enqueues a durable generic `audit-event.created` outbox job
+    - Quota, auth, validation, and enqueue-failure paths do not produce drift between audit events and outbox intent
+    - The outbox seam stays generic and docs explain the first audit-owned enqueue point
+
 - [x] T-042 Add worker app skeleton
   status: done
   priority: high

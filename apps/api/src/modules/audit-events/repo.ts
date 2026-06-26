@@ -9,6 +9,7 @@ import type {
 } from "@auditrail/domain/pricing";
 import { randomUUID } from "node:crypto";
 
+import { createAuditEventCreatedJob, type AuditEventCreatedJob } from "./jobs.js";
 import { decodeAuditEventCursor } from "./cursor.js";
 
 export interface AuditEventRecord {
@@ -66,6 +67,7 @@ export interface AuditEventTimeseriesPoint {
 }
 
 export interface InMemoryAuditEventRepoOptions {
+  enqueueJob?: (job: AuditEventCreatedJob) => Promise<void> | void;
   now?: () => string;
   planByOrganizationId?: Record<string, PricingPlanId>;
   usageByKey?: Record<string, number>;
@@ -136,6 +138,13 @@ export function createInMemoryAuditEventRepo(
         metadata: input.metadata,
         createdAt: currentTime.toISOString()
       };
+
+      await options.enqueueJob?.(
+        createAuditEventCreatedJob({
+          event: record,
+          tenant
+        })
+      );
 
       events.push(record);
       monthlyUsage.set(usageKey, usedEvents + 1);

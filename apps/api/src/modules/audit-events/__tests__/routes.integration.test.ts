@@ -79,6 +79,18 @@ describe("event API integration", () => {
     });
 
     expect(ingestResponse.statusCode).toBe(202);
+    await expect(selectOutboxJobs()).resolves.toEqual([
+      {
+        name: "audit-event.created",
+        payload: {
+          createdAt: expect.any(String),
+          eventId: ingestResponse.json().id,
+          organizationId: expect.any(String),
+          projectId: expect.any(String)
+        },
+        status: "pending"
+      }
+    ]);
 
     const listResponse = await app.inject({
       method: "GET",
@@ -161,11 +173,63 @@ describe("event API integration", () => {
     expect(invalidAuthResponse.json()).toEqual({
       error: "invalid_api_key"
     });
+    await expect(countOutboxJobs()).resolves.toBe(0);
+  });
+
+  it("does not enqueue an outbox job when ingest is rejected by quota", async () => {
+    const currentMonthStart = new Date();
+
+    currentMonthStart.setUTCDate(1);
+    currentMonthStart.setUTCHours(0, 0, 0, 0);
+
+    await pool.query(
+      `insert into "organization_monthly_usage"
+         ("organization_id", "month_start", "meter_key", "quantity", "created_at", "updated_at")
+       select "id", $1, 'events', 100000, now(), now()
+       from "organizations"
+       limit 1`,
+      [currentMonthStart.toISOString()]
+    );
+
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: `Bearer ${apiKey}`
+      },
+      payload: {
+        event: "user.deleted",
+        metadata: {}
+      }
+    });
+
+    expect(response.statusCode).toBe(402);
+    await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
   async function truncateAll() {
     await pool.query(
-      "TRUNCATE TABLE audit_events, api_keys, projects, organizations RESTART IDENTITY CASCADE"
+      'TRUNCATE TABLE "job_outbox", audit_events, api_keys, projects, organizations RESTART IDENTITY CASCADE'
     );
+  }
+
+  async function countOutboxJobs() {
+    const result = await pool.query<{ count: string }>(
+      'select cast(count(*) as text) as "count" from "job_outbox"'
+    );
+
+    return Number(result.rows[0]?.count ?? "0");
+  }
+
+  async function selectOutboxJobs() {
+    const result = await pool.query<{
+      name: string;
+      payload: Record<string, unknown>;
+      status: string;
+    }>(
+      'select "name", "payload", "status" from "job_outbox" order by "created_at" asc'
+    );
+
+    return result.rows;
   }
 });

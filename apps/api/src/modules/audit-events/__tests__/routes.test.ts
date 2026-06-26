@@ -36,9 +36,47 @@ describe("audit event routes", () => {
     await app.close();
   });
 
+  it("enqueues an audit-event.created job with the ingested identifiers", async () => {
+    const enqueuedJobs: Array<{
+      name: string;
+      payload: unknown;
+    }> = [];
+    const app = await buildEventRouteTestApp(["2026-06-16T12:00:00.000Z"], {
+      enqueueJob(job) {
+        enqueuedJobs.push(job);
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      payload: {
+        event: "user.deleted",
+        metadata: {}
+      }
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(enqueuedJobs).toEqual([
+      {
+        name: "audit-event.created",
+        payload: {
+          createdAt: "2026-06-16T12:00:00.000Z",
+          eventId: response.json().id,
+          organizationId: "00000000-0000-0000-0000-000000000000",
+          projectId: "00000000-0000-0000-0000-000000000000"
+        }
+      }
+    ]);
+
+    await app.close();
+  });
+
   it("returns 402 when the organization quota is exhausted", async () => {
     const organizationId = "00000000-0000-0000-0000-000000000000";
+    const enqueueJob = vi.fn();
     const app = await buildEventRouteTestApp(["2026-06-16T12:00:00.000Z"], {
+      enqueueJob,
       planByOrganizationId: {
         [organizationId]: "starter"
       },
@@ -56,6 +94,7 @@ describe("audit event routes", () => {
     });
 
     expect(response.statusCode).toBe(402);
+    expect(enqueueJob).not.toHaveBeenCalled();
     expect(response.json()).toEqual({
       error: "event_quota_exceeded",
       plan: {
@@ -68,6 +107,59 @@ describe("audit event routes", () => {
         usedEvents: 100000
       }
     });
+
+    await app.close();
+  });
+
+  it("returns 500 and does not persist the event when enqueue fails", async () => {
+    const app = await buildEventRouteTestApp(["2026-06-16T12:00:00.000Z"], {
+      enqueueJob() {
+        throw new Error("enqueue_failed");
+      }
+    });
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      payload: {
+        event: "user.deleted",
+        metadata: {}
+      }
+    });
+    const listResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/events`
+    });
+
+    expect(ingestResponse.statusCode).toBe(500);
+    expect(listResponse.statusCode).toBe(200);
+    expect(listResponse.json()).toEqual({
+      events: [],
+      pageInfo: {
+        hasMore: false,
+        nextCursor: null
+      }
+    });
+
+    await app.close();
+  });
+
+  it("rejects invalid event payloads before enqueueing", async () => {
+    const enqueueJob = vi.fn();
+    const app = await buildEventRouteTestApp(["2026-06-16T12:00:00.000Z"], {
+      enqueueJob
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      payload: {
+        metadata: {}
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(enqueueJob).not.toHaveBeenCalled();
 
     await app.close();
   });
