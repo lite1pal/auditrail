@@ -468,6 +468,18 @@ const platformCoreEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "packages/db/src/schema/identity.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "The shared tenant, auth, invitation, onboarding-state, export-job, and generic meter schema currently live in one reusable DB module.",
+    notes: [
+      "This file is broad but not AuditTrail-specific anymore.",
+      "Later cleanup can split concerns further without blocking the first extraction cut."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
     path: "packages/db/src/schema/billing.ts",
     pathKind: "file",
     category: "platform-core",
@@ -487,6 +499,107 @@ const platformCoreEntries = [
     reason: "The generic outbox table is reusable platform infrastructure.",
     notes: [
       "Keep job names and payload ownership product-neutral at the schema layer."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/migrations/0001_platform_foundation.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "The platform foundation migration adds reusable auth, membership, invitation, and export-job storage.",
+    notes: [
+      "This migration is broad but reusable.",
+      "Keep later refinements mechanical instead of leaving it in the unknown bucket."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0002_unique_memberships.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Membership uniqueness is a generic tenant-isolation constraint.",
+    notes: [
+      "This migration should move with the shared organization model."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0003_unique_pending_invitations.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Pending invitation uniqueness is reusable platform behavior.",
+    notes: [
+      "Keep the same duplicate-revocation safety behavior."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0004_organization_pricing.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Organization plan selection and monthly usage storage are now generic platform metering seams.",
+    notes: [
+      "Product labels and plan catalogs stay outside the migration.",
+      "This migration still fits the reusable meter model."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0005_onboarding_states.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "User-specific onboarding dismissal state is generic platform UX persistence.",
+    notes: [
+      "Keep milestone completion derived elsewhere."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0006_windy_mister_fear.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "The generic meter-key migration is reusable platform metering infrastructure.",
+    notes: [
+      "This removed an old product-shaped column and should move with the shared usage seam."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/migrations/0007_job_outbox.sql",
+    pathKind: "file",
+    category: "platform-extension",
+    extractionAction: "copy",
+    reason: "The outbox table migration is reusable platform-extension infrastructure.",
+    notes: [
+      "Keep it with the jobs and worker seams."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/migrations/0008_billing_storage.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Billing storage is reusable platform persistence for provider-backed billing state.",
+    notes: [
+      "The migration is provider-neutral and does not contain AuditTrail-specific behavior."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/migrations/0009_internal_support_role.sql",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Internal support-role persistence is reusable platform support tooling.",
+    notes: [
+      "Keep the conservative `none` default."
     ],
     requiredForMinimalScaffold: false
   })
@@ -610,6 +723,18 @@ const productSpecificEntries = [
       "Replace with placeholder product onboarding tests only when templating is introduced."
     ],
     requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/schema/audit-events.ts",
+    pathKind: "file",
+    category: "audit-product",
+    extractionAction: "exclude",
+    reason: "Audit event persistence is AuditTrail product-specific and must not move into the generic boilerplate.",
+    notes: [
+      "Keep this table out of the boilerplate.",
+      "The DB schema barrel template should stop exporting it in the extracted package."
+    ],
+    requiredForMinimalScaffold: false
   })
 ] as const satisfies readonly ExtractionManifestEntry[];
 
@@ -684,6 +809,52 @@ const replaceWithTemplateEntries = [
       "Keep the generic seed helper shape only if the boilerplate still wants demo data."
     ],
     requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/index.ts",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "template",
+    reason: "The top-level DB barrel currently re-exports the mixed schema barrel and should become a boilerplate-specific export surface.",
+    notes: [
+      "Keep the client export.",
+      "Replace the schema export shape so the boilerplate barrel does not automatically expose AuditTrail-owned tables."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/schema/index.ts",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "template",
+    reason: "The schema barrel currently exports both reusable tables and the AuditTrail audit-events table.",
+    notes: [
+      "Generate a boilerplate barrel that exports only the reusable schema set.",
+      "Do not silently carry the audit-events table into the generic package."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/schema/__tests__/index.test.ts",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "template",
+    reason: "The schema export test currently asserts AuditTrail audit-event exports and should track the boilerplate barrel instead.",
+    notes: [
+      "Replace with assertions for the extracted generic schema exports."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/migrations/0000_dry_mattie_franklin.sql",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "template",
+    reason: "The initial migration mixes reusable project tables with the AuditTrail audit-events table and needs a boilerplate-specific replacement.",
+    notes: [
+      "A future extraction script should generate or substitute a non-audit initial migration instead of copying this file unchanged."
+    ],
+    requiredForMinimalScaffold: true
   }),
   entry({
     path: "README.md",
@@ -782,41 +953,6 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
-    path: "packages/db/src/schema/index.ts",
-    pathKind: "file",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "Schema export aggregation mixes platform and audit tables.",
-    notes: [
-      "Keep generic tables.",
-      "Exclude or isolate audit-event tables."
-    ],
-    requiredForMinimalScaffold: true
-  }),
-  entry({
-    path: "packages/db/src/schema/identity.ts",
-    pathKind: "file",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "Identity schema mixes generic tenant/auth tables with current pricing and onboarding assumptions.",
-    notes: [
-      "Most of this file should move to the boilerplate.",
-      "Review plan ids, defaults, and product naming before extraction."
-    ],
-    requiredForMinimalScaffold: true
-  }),
-  entry({
-    path: "packages/db/src/index.ts",
-    pathKind: "file",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "DB package exports may include both generic and AuditTrail-specific schema surfaces.",
-    notes: [
-      "Split or prune exports during extraction rather than copying blindly."
-    ],
-    requiredForMinimalScaffold: true
-  }),
-  entry({
     path: "packages/db/src/README.md",
     pathKind: "file",
     category: "documentation",
@@ -828,38 +964,15 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: false
   }),
   entry({
-    path: "packages/db/src/schema/__tests__/**",
+    path: "packages/db/src/migrations/meta/**",
     pathKind: "glob",
     category: "mixed",
     extractionAction: "manual-review",
-    reason: "Schema tests should be reviewed alongside mixed DB exports and product tables.",
+    reason: "Drizzle migration snapshots and journals still need regeneration or explicit curation during extraction.",
     notes: [
-      "Keep tests only for generic extracted tables."
+      "Keep these files fail-closed until a later task decides whether the boilerplate regenerates them or ships curated metadata."
     ],
     requiredForMinimalScaffold: false
-  }),
-  entry({
-    path: "packages/db/src/schema/audit-events.ts",
-    pathKind: "file",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "Audit event persistence is product-specific and lives beside generic schema exports.",
-    notes: [
-      "Exclude from the boilerplate unless later replaced with a different example product."
-    ],
-    requiredForMinimalScaffold: false
-  }),
-  entry({
-    path: "packages/db/src/migrations/**",
-    pathKind: "glob",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "Migration history mixes platform foundation, generic extensions, and audit-product tables.",
-    notes: [
-      "A future extraction script should rebuild or filter migration history deliberately.",
-      "Do not copy all migrations blindly."
-    ],
-    requiredForMinimalScaffold: true
   }),
   entry({
     path: "apps/web/app/api-keys/page.tsx",

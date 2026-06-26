@@ -2,6 +2,15 @@
 
 ## 2026-06-26
 
+- Refined the extraction manifest for `packages/db/src` so the reusable
+  identity schema and most concrete migrations now have explicit extraction
+  ownership instead of living under one broad manual-review bucket.
+
+- Reclassified the mixed DB barrels and the initial migration that still
+  exports or creates the AuditTrail audit-event table as template targets,
+  shrinking the remaining DB manual-review area to files that still need real
+  rewrite or regeneration decisions.
+
 - Added `tools/extraction/dry-run.ts` plus a pure planner module and focused
   tests so the repo can print a deterministic extraction plan without copying
   files or generating a boilerplate repo.

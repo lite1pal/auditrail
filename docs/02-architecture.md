@@ -455,7 +455,13 @@ Current examples captured there:
 - boilerplate copy: auth, organizations, invitations, API keys, onboarding framework, jobs or worker skeletons, shared UI, config helpers, boundary tooling, and generic product-definition seams
 - product-specific: audit-event API modules, audit-event web features, and `packages/domain/src/audit-events/**`
 - template replacements: product definition config, nav adapters, onboarding copy adapters, app chrome, and other AuditTrail-branded surfaces
-- manual review: mixed `packages/db/**`, mixed export barrels, route composition files, docs, deployment files, and workspace config
+- manual review: the remaining mixed `packages/db/**` surfaces such as the audit-event schema file and any migration history without explicit ownership, plus route composition files, docs, deployment files, and workspace config
+
+Recent extraction-prep progress in `packages/db`:
+
+- `packages/db/src/schema/identity.ts` is now treated as reusable platform storage instead of broad mixed ownership
+- most concrete migrations now have explicit copy ownership in the extraction manifest
+- the DB barrels and the initial migration that still mix reusable tables with the AuditTrail audit-event table remain explicit template targets instead of broad manual-review entries
 
 Recent progress toward extraction:
 

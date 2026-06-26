@@ -45,3 +45,13 @@ Rules for a future extraction script:
 - one file resolves to conflicting primary actions without the explicit template-over-exclude rule
 - a tracked file under the monitored app, package, tool, or docs roots is unclassified
 - a product-specific path leaks into the boilerplate copy set
+
+Current `packages/db/src` posture:
+
+- reusable schema files such as `schema/identity.ts`, `schema/billing.ts`, and
+  `schema/jobs.ts` are now classified explicitly
+- most migrations now have explicit copy ownership
+- the DB barrels and the initial mixed audit-event migration remain templated
+  rather than copied blindly
+- only the remaining unmatched migration history or audit-event schema files
+  should stay in manual review

@@ -25,6 +25,26 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-061 Reduce DB extraction manual-review area
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - tools/extraction/manifest.ts
+    - tools/extraction/README.md
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - `packages/db/src` export and migration paths have more explicit extraction ownership in the manifest
+    - The extraction dry-run reports a smaller DB manual-review set without changing runtime behavior
+    - Remaining DB manual-review paths are limited to files that still need real rewrite or regeneration decisions
+
 - [x] T-060 Add dry-run extraction script
   status: done
   priority: high
