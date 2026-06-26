@@ -106,6 +106,9 @@ tests for that seam as part of the same change. The current request-runtime
 path is the example: tests assert `x-request-id` generation or reuse plus the
 structured completion log fields without leaking auth headers, cookies, API
 keys, or request bodies.
+The centralized error-policy seam follows the same rule: tests must cover the
+production-safe unknown-error response, the non-production debug path, and
+compatibility for existing validation, auth, quota, and rate-limit responses.
 
 Use `app.inject()` for route tests unless a real network socket is required.
 When adding new persistence adapters for public credential or auth workflows,

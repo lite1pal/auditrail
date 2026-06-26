@@ -110,6 +110,32 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-045 Add production-safe error handling policy
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/runtime-error-policy
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/app.ts
+    - apps/api/src/http-errors.ts
+    - apps/api/src/plugins/request-runtime.ts
+    - apps/api/src/__tests__/app.test.ts
+    - apps/api/src/__tests__/http-errors.test.ts
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Production unknown errors return safe generic responses without stack traces or raw internal messages
+    - Validation, auth, quota, domain, and rate-limit responses remain compatible and request ID headers stay present
+    - Unknown errors are logged with safe request metadata and docs describe the centralized API error policy
+
 - [x] T-044 Add request IDs and structured logs
   status: done
   priority: high

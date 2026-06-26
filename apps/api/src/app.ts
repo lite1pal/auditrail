@@ -8,7 +8,7 @@ import {
   API_VERSION_PREFIX,
   getApiDescriptor,
 } from "./api-version.js";
-import { loadConfig } from "./config.js";
+import { loadConfig, type ApiConfig } from "./config.js";
 import { loadEnvFiles } from "./env-files.js";
 import { registerApiErrorHandler } from "./http-errors.js";
 import { registerApiSchemas, schemaIds } from "./http-schemas.js";
@@ -74,6 +74,7 @@ export interface BuildAppOptions {
   rateLimit?: RateLimitOptions;
   infrastructure?: InfrastructureOptions;
   logger?: FastifyServerOptions["logger"];
+  nodeEnv?: ApiConfig["NODE_ENV"];
 }
 
 interface RuntimeMagicLinkSenderDependencies {
@@ -91,7 +92,9 @@ export function buildApp(options: BuildAppOptions = {}) {
   });
 
   app.register(requestRuntimePlugin);
-  registerApiErrorHandler(app);
+  registerApiErrorHandler(app, {
+    nodeEnv: options.nodeEnv
+  });
   registerApiSchemas(app);
 
   app.register(swagger, {

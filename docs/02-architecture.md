@@ -162,6 +162,12 @@ selected safe fields such as method, route, status, duration, and request
 correlation. Raw request bodies, auth headers, cookies, and audit-event
 metadata must not be emitted into those logs.
 
+Centralized API error policy also belongs in the app-level runtime seam rather
+than in feature routes. `apps/api/src/http-errors.ts` preserves explicit
+validation and known safe error shapes, but production-mode unknown failures
+must be collapsed to a generic internal error response while request logs keep
+the correlation ID and safe metadata.
+
 For future extraction, module shape should also preserve domain ownership:
 
 - `platform-core` modules may depend on shared packages and other platform modules

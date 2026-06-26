@@ -2,6 +2,14 @@
 
 ## 2026-06-26
 
+- Centralized API unknown-error handling so production responses now collapse
+  to a generic `internal_server_error` shape while local development and test
+  runs retain a deterministic debug `message` field.
+
+- Preserved the existing validation, auth, quota, domain, and rate-limit
+  response shapes while wiring unknown-failure logs to the request correlation
+  ID with only safe metadata.
+
 - Added API request correlation through `x-request-id`, with valid inbound IDs
   reused and invalid or missing IDs replaced by generated values that are also
   returned on the response header.

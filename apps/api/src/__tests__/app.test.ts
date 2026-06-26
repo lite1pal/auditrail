@@ -142,6 +142,156 @@ describe("health route", () => {
     expect(serializedLogs).not.toContain("sensitive-metadata-value");
   });
 
+  it("hides unknown error messages in production responses while keeping x-request-id", async () => {
+    const app = buildApp({
+      nodeEnv: "production",
+      useRateLimit: false
+    });
+
+    app.get("/production-error", async () => {
+      throw new Error("database unavailable password=secret");
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/production-error"
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.headers["x-request-id"]).toEqual(expect.any(String));
+    expect(response.json()).toEqual({
+      error: "internal_server_error"
+    });
+    expect(response.body).not.toContain("database unavailable");
+    expect(response.body).not.toContain("password=secret");
+    expect(response.body).not.toContain("stack");
+
+    await app.close();
+  });
+
+  it("keeps a deterministic debug message for unknown errors in test mode", async () => {
+    const app = buildApp({
+      nodeEnv: "test",
+      useRateLimit: false
+    });
+
+    app.get("/test-error", async () => {
+      throw new Error("database unavailable");
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/test-error"
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.headers["x-request-id"]).toEqual(expect.any(String));
+    expect(response.json()).toEqual({
+      error: "internal_server_error",
+      message: "database unavailable"
+    });
+
+    await app.close();
+  });
+
+  it("logs unknown errors with safe metadata and a generic error code", async () => {
+    const collector = createLogCollector();
+    const app = buildApp({
+      logger: {
+        level: "info",
+        stream: collector.stream
+      },
+      nodeEnv: "production",
+      useRateLimit: false
+    });
+
+    app.get("/unknown-error-log", async () => {
+      throw new Error("database unavailable password=secret");
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/unknown-error-log",
+      headers: {
+        "x-request-id": "req_prod_error"
+      }
+    });
+
+    expect(response.statusCode).toBe(500);
+
+    await app.close();
+
+    const errorLog = collector
+      .records()
+      .find((entry) => entry.msg === "unhandled_request_error");
+    const completionLog = collector
+      .records()
+      .find((entry) => entry.msg === "request_completed");
+
+    expect(errorLog).toMatchObject({
+      errorCode: "internal_server_error",
+      errorName: "Error",
+      method: "GET",
+      requestId: "req_prod_error",
+      route: "/unknown-error-log"
+    });
+    expect(completionLog).toMatchObject({
+      errorCode: "internal_server_error",
+      method: "GET",
+      requestId: "req_prod_error",
+      route: "/unknown-error-log",
+      statusCode: 500
+    });
+
+    const serializedLogs = JSON.stringify(collector.records());
+    expect(serializedLogs).not.toContain("password=secret");
+    expect(serializedLogs).not.toContain("database unavailable");
+  });
+
+  it("logs non-error thrown values by type without exposing their contents", async () => {
+    const collector = createLogCollector();
+    const app = buildApp({
+      logger: {
+        level: "info",
+        stream: collector.stream
+      },
+      nodeEnv: "production",
+      useRateLimit: false
+    });
+
+    app.get("/null-error-log", async () => {
+      throw null;
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/null-error-log",
+      headers: {
+        "x-request-id": "req_null_error"
+      }
+    });
+
+    expect(response.statusCode).toBe(500);
+
+    await app.close();
+
+    const errorLog = collector
+      .records()
+      .find((entry) => entry.msg === "unhandled_request_error");
+
+    expect(errorLog).toMatchObject({
+      errorCode: "internal_server_error",
+      errorName: "NonErrorThrown",
+      method: "GET",
+      requestId: "req_null_error",
+      route: "/null-error-log",
+      thrownValueType: "null"
+    });
+
+    const serializedLogs = JSON.stringify(collector.records());
+    expect(serializedLogs).not.toContain("null-error-log\":null");
+  });
+
   it("returns API version metadata", async () => {
     const app = buildApp();
 

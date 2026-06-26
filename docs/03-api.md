@@ -86,6 +86,20 @@ Most protected routes use one of these shared response shapes:
 }
 ```
 
+- generic internal error:
+
+```json
+{
+  "error": "internal_server_error"
+}
+```
+
+Unknown internal failures now follow an environment-aware policy. In
+production, the API returns only the generic `internal_server_error` code and
+does not expose stack traces, SQL errors, or raw exception messages. In local
+development and test runs, the same response may include a debug `message`
+field so failures remain diagnosable without changing the production contract.
+
 ## Authentication
 
 Protected API routes use a bearer API key:

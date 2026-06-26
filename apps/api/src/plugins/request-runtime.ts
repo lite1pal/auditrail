@@ -84,12 +84,12 @@ export function extractErrorCode(payload: unknown) {
     return undefined;
   }
 
-  if ("error" in payload && typeof payload.error === "string") {
-    return payload.error;
-  }
-
   if ("code" in payload && typeof payload.code === "string") {
     return payload.code;
+  }
+
+  if ("error" in payload && typeof payload.error === "string") {
+    return payload.error;
   }
 
   return undefined;

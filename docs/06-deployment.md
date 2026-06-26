@@ -132,6 +132,10 @@ Expected response:
   `requestId`, method, route, status code, and duration. Operators can forward
   a valid inbound `x-request-id` through proxies or edge layers and expect the
   API to return that header value on the response for log correlation.
+- Production API responses now collapse unknown internal failures to the
+  generic `internal_server_error` shape. Operators should use the request ID
+  plus server logs for diagnosis instead of expecting stack traces or adapter
+  exception messages in client-visible responses.
 ## Platform Runtime Requirements
 
 The production platform layer will require explicit environment configuration

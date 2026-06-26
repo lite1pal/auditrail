@@ -1,8 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import { ZodError } from "zod";
 
-export function registerApiErrorHandler(app: FastifyInstance) {
-  app.setErrorHandler((error, _request, reply) => {
+export interface ApiErrorHandlerOptions {
+  nodeEnv?: "development" | "test" | "production";
+}
+
+export function registerApiErrorHandler(
+  app: FastifyInstance,
+  options: ApiErrorHandlerOptions = {}
+) {
+  const nodeEnv = options.nodeEnv ?? normalizeNodeEnv(process.env.NODE_ENV);
+  const exposeInternalMessage = nodeEnv !== "production";
+
+  app.setErrorHandler((error, request, reply) => {
     if (isFastifyValidationError(error)) {
       const validationContext = error.validationContext;
       const errorCode =
@@ -31,8 +41,42 @@ export function registerApiErrorHandler(app: FastifyInstance) {
       });
     }
 
-    app.log.error(error);
-    reply.send(error);
+    if (isRateLimitError(error)) {
+      request.requestCompletedErrorCode = error.code ?? "FST_ERR_RATE_LIMIT";
+
+      return reply.code(error.statusCode).send({
+        statusCode: error.statusCode,
+        code: error.code ?? "FST_ERR_RATE_LIMIT",
+        error: error.error ?? "Too Many Requests",
+        message: error.message
+      });
+    }
+
+    request.requestCompletedErrorCode = "internal_server_error";
+    request.log.error(
+      {
+        errorCode: "internal_server_error",
+        errorName: getErrorName(error),
+        method: request.method,
+        requestId: request.id,
+        route: request.routeOptions.url,
+        ...(error instanceof Error
+          ? {}
+          : {
+              thrownValueType: getThrownValueType(error)
+            })
+      },
+      "unhandled_request_error"
+    );
+
+    return reply.code(500).send({
+      error: "internal_server_error",
+      ...(exposeInternalMessage
+        ? {
+            message: getDevelopmentErrorMessage(error)
+          }
+        : {})
+    });
   });
 }
 
@@ -56,6 +100,26 @@ function isFastifyValidationError(
   );
 }
 
+function isRateLimitError(
+  error: unknown
+): error is {
+  code?: string;
+  error?: string;
+  message: string;
+  statusCode: 429;
+} {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    error.statusCode === 429 &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    (error.message.includes("Rate limit exceeded") ||
+      ("code" in error && error.code === "FST_ERR_RATE_LIMIT"))
+  );
+}
+
 function getFastifyIssuePath(issue: {
   instancePath?: string;
   params?: Record<string, unknown>;
@@ -76,4 +140,40 @@ function getFastifyIssuePath(issue: {
   }
 
   return [];
+}
+
+function normalizeNodeEnv(nodeEnv: string | undefined) {
+  if (nodeEnv === "production" || nodeEnv === "test") {
+    return nodeEnv;
+  }
+
+  return "development";
+}
+
+function getDevelopmentErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.length > 0) {
+    return error.message;
+  }
+
+  return "Unexpected error";
+}
+
+function getErrorName(error: unknown) {
+  if (error instanceof Error && error.name.length > 0) {
+    return error.name;
+  }
+
+  return "NonErrorThrown";
+}
+
+function getThrownValueType(error: unknown) {
+  if (error === null) {
+    return "null";
+  }
+
+  if (Array.isArray(error)) {
+    return "array";
+  }
+
+  return typeof error;
 }
