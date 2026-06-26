@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   apiKeys,
   auditEvents,
+  billingCustomers,
+  billingSubscriptions,
   jobOutbox,
   organizationMonthlyUsage,
   userOrganizationOnboardingStates,
@@ -16,6 +18,8 @@ describe("database schema exports", () => {
     expect(projects).toBeDefined();
     expect(apiKeys).toBeDefined();
     expect(auditEvents).toBeDefined();
+    expect(billingCustomers).toBeDefined();
+    expect(billingSubscriptions).toBeDefined();
     expect(jobOutbox).toBeDefined();
     expect(organizationMonthlyUsage).toBeDefined();
     expect(userOrganizationOnboardingStates).toBeDefined();

@@ -190,7 +190,11 @@ migrations before enabling the quota-aware ingest path in production.
 `packages/db/src/migrations/0007_job_outbox.sql` adds the generic `job_outbox`
 table used for durable background-work persistence. Apply it before shipping a
 future worker runtime or any job enqueue path, but this migration does not add
-an extra long-running service by itself.
+an extra long-running service by itself. `packages/db/src/migrations/0008_billing_storage.sql`
+adds generic `billing_customers` and `billing_subscriptions` tables for future
+provider-backed billing state. Apply it before shipping any billing-provider
+sync, webhook ingestion, or billing management runtime, but this migration does
+not add billing routes or provider calls by itself.
 
 When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic

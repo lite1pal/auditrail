@@ -123,7 +123,9 @@ Persistence adapters that rely on database-specific locking or transaction
 behavior should prefer this path even when the public runtime integration does
 not exist yet. The generic jobs outbox repo is the current example: its
 claim/retry semantics are verified directly against Postgres instead of only
-through unit doubles.
+through unit doubles. The same rule applies to future platform billing
+persistence adapters because uniqueness, upsert, and organization-isolation
+behavior depend on the real database.
 
 Current integration discovery pattern:
 

@@ -87,6 +87,30 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-062 Add billing DB schema
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/billing-db-schema
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/db/src/schema/*
+    - packages/db/src/migrations/*
+    - apps/api/src/modules/platform/billing/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Generic billing tables and migration exist without Stripe or audit-product coupling
+    - A platform-owned billing repository interface and Postgres adapter persist provider customer and subscription state
+    - Integration tests cover billing persistence behavior, organization isolation, and uniqueness constraints
+    - Existing entitlement, quota, API, and runtime behavior remain unchanged
+
 - [x] T-039 Add subscription and billing domain scaffolding
   status: done
   priority: high

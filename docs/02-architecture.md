@@ -73,6 +73,14 @@ not add Stripe SDK imports, webhook handling, checkout or portal routes,
 subscription persistence, invoices, or payment-method runtime behavior in the
 same slice.
 
+Generic billing persistence now lives in `packages/db/src/schema/billing.ts`
+plus `apps/api/src/modules/platform/billing/*`. The `billing_customers` and
+`billing_subscriptions` tables and the Postgres repository adapter are the
+platform-owned storage seam for provider customer and subscription state. This
+slice is persistence only for now: it must not add Stripe SDK imports,
+checkout or portal routes, webhook handlers, invoices, payment methods, or
+entitlement-enforcement behavior in the same change.
+
 The API-side platform entitlement service now lives under
 `apps/api/src/modules/platform/entitlements`. That seam resolves the current
 organization plan plus generic monthly meter usage into feature and meter

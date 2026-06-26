@@ -2,6 +2,21 @@
 
 ## 2026-06-26
 
+- Added generic billing persistence in `packages/db/src/schema/billing.ts` plus
+  `apps/api/src/modules/platform/billing/*`, including platform-owned
+  repository types, a Postgres adapter, and integration coverage for customer
+  and subscription upsert, lookup, uniqueness, and organization isolation.
+
+- Added `billing_customers` and `billing_subscriptions` through a new
+  migration-only storage seam so future Stripe integration can persist provider
+  customer and subscription state without coupling those tables to
+  AuditTrail-specific product modules.
+
+- Kept the billing persistence slice non-runtime and provider-neutral. It does
+  not add Stripe SDK imports, billing routes, webhook handlers, billing UI, or
+  any change to entitlement enforcement, audit quota behavior, or public API
+  contracts.
+
 - Added a generic `packages/domain/src/billing` seam for billing vocabulary,
   including provider-aware customer, plan, price, subscription, checkout, and
   portal schemas plus a pure billing-plan-to-entitlement-plan link helper.
