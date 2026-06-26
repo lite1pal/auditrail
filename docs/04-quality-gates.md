@@ -139,6 +139,11 @@ Preferred test placement:
 - route tests next to their module
 - integration tests next to their module with `.integration.test.ts`
 
+Pure internal support-role helpers in `packages/domain` must have unit tests
+alongside any role-model changes. The product-route authorization tests should
+continue to prove that organization membership checks stay unchanged and that
+support access does not become an implicit bypass.
+
 New public API routes should register under the current versioned prefix, currently `/api/v1`.
 Do not move operational health checks away from unversioned `/health`.
 

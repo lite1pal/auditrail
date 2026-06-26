@@ -4,6 +4,31 @@ This file tracks auth and sign-in work items.
 
 ## Queue
 
+- [ ] T-023 Add internal support role model
+  status: in_progress
+  priority: medium
+  owner: codex
+  branch: codex/internal-support-role
+  pr:
+  last_updated: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/internal-support/*
+    - packages/domain/src/index.ts
+    - apps/api/src/modules/platform/*
+    - apps/api/src/modules/auth/*
+    - apps/api/src/**/__tests__/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/auth.txt
+  acceptance:
+    - The codebase has a generic internal support role model with explicit none, support, and admin values
+    - Default users do not gain support access
+    - Support helpers are pure, explicit, and unit tested
+    - Existing organization membership checks and product routes remain unchanged
+    - No support console UI or support lookup routes are added
+
 - [ ] T-022 Add session management and MFA foundations
   status: todo
   priority: high

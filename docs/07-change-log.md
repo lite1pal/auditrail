@@ -2,6 +2,14 @@
 
 ## 2026-06-26
 
+- Added a generic internal support role seam in `packages/domain/src/internal-support`
+  with explicit `none`, `support`, and `admin` values plus pure access
+  predicates for future support tooling.
+
+- Kept the support-role seam intentionally non-runtime. It does not add
+  persistence, support lookup routes, a console UI, or any change to customer
+  organization membership checks or product-route authorization.
+
 - Added a platform-owned billing provider adapter seam under
   `apps/api/src/modules/platform/billing/*` so checkout and portal actions can
   create real provider sessions without changing the generic web or API

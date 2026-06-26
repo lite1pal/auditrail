@@ -407,6 +407,9 @@ Current `platform-extension` candidates that should stay generic when added:
 - background jobs and scheduling, with the current `job_outbox` persistence seam under `apps/api/src/modules/jobs/*` and the idle runtime shell under `apps/worker/*`
 - notifications and outbound webhooks
 - exports and delivery infrastructure
+- internal support/admin role modeling and support-tool predicates, with explicit
+  `none`, `support`, and `admin` values that do not bypass organization
+  membership checks or grant customer-org access by themselves
 - admin/support controls
 - MFA, SSO, and enterprise auth controls
 
