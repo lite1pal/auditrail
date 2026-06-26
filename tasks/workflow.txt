@@ -4,28 +4,6 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
-- [ ] T-048 Wire boundary scanner into repo checks
-  status: ready
-  priority: medium
-  owner: codex
-  branch: codex/platform-boundary-ci
-  pr:
-  last_updated: 2026-06-26
-  completed:
-  blocked_reason:
-  files:
-    - package.json
-    - docs/01-agent-engineering-rules.md
-    - docs/02-architecture.md
-    - docs/04-quality-gates.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - Root package scripts include `check:boundaries`
-    - `pnpm verify` includes the boundary scanner
-    - Docs explain the boundary check and command
-    - Existing repo passes the boundary scanner before the check is wired into normal verification
-
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
   status: in_progress
   priority: medium
@@ -46,6 +24,28 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-048 Wire boundary scanner into repo checks
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/platform-boundary-ci
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - package.json
+    - docs/01-agent-engineering-rules.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Root package scripts include `check:boundaries`
+    - `pnpm verify` includes the boundary scanner
+    - Docs explain the boundary check and command
+    - Existing repo passes the boundary scanner before the check is wired into normal verification
 
 - [x] T-049 Fix existing boundary scanner violations
   status: done

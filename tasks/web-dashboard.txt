@@ -6,6 +6,25 @@ This file tracks web dashboard work items.
 
 ## Done
 
+- [x] T-050 Fix current web architecture-check component size violations
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/web-architecture-check-fixes
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/web/src/features/onboarding/components/*
+    - apps/web/src/features/organizations/components/*
+    - apps/web/src/features/**/__tests__/*
+    - tasks/web-dashboard.txt
+  acceptance:
+    - `pnpm --filter web check:architecture` passes for the current repo
+    - The oversized onboarding and organization plan components are split into smaller feature-local pieces without behavior changes
+    - Existing web tests still pass
+
 - [x] T-042 Add a dedicated getting-started onboarding flow
   status: done
   priority: high

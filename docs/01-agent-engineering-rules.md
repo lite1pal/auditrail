@@ -79,3 +79,26 @@ Shared packages should stay narrow:
 - `packages/testkit`: test helpers only
 
 Do not put framework, database, queue, or filesystem access into `packages/domain`.
+
+## Architecture boundary rule
+
+`platform-core` and `platform-extension` code must not import `audit-product`
+code. Audit-product modules may import platform modules, but never the reverse.
+
+The boundary rules used for enforcement are exposed at:
+
+```text
+tools/architecture-boundaries/rules.ts
+```
+
+Run the local scanner with:
+
+```bash
+pnpm check:boundaries
+```
+
+Normal repo verification now includes this check through:
+
+```bash
+pnpm verify
+```

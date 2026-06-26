@@ -13,9 +13,14 @@ pnpm verify
 This runs:
 
 ```bash
+pnpm check:boundaries
 pnpm typecheck
 pnpm test
 ```
+
+`pnpm check:boundaries` fails fast when `platform-core` or
+`platform-extension` code imports `audit-product` code, or when generic domain
+paths reach into `packages/domain/src/audit-events/**`.
 
 `pnpm test` is the fast unit and route-behavior gate. It excludes integration tests and enforces the API coverage threshold.
 
@@ -162,3 +167,23 @@ Platform modules must land in this order:
 2. repository implementations with integration tests
 3. Fastify routes with `app.inject()` tests and required coverage
 4. web API clients/loaders/components consuming those routes
+
+## Boundary Verification
+
+The boundary rule is directional:
+
+- `platform-core` may depend on platform code, but not `audit-product`
+- `platform-extension` may depend on platform code, but not `audit-product`
+- `audit-product` may depend on platform modules
+
+The enforced rule map is exposed at:
+
+```text
+tools/architecture-boundaries/rules.ts
+```
+
+Run the scanner directly with:
+
+```bash
+pnpm check:boundaries
+```

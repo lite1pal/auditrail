@@ -2,6 +2,26 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-26 - Add Boundary Scanner To Normal Repo Verification
+
+Changed:
+
+- added a root `pnpm check:boundaries` command for the platform-vs-audit import scanner
+- updated `pnpm verify` to run the boundary scanner before repo-wide typecheck and tests
+- documented the boundary command and directional import rule in the agent and quality-gate docs
+
+Why:
+
+- platform-to-audit dependency violations should fail fast in normal repo verification instead of relying on manual scanner runs
+- the current repo now passes the scanner, so the boundary rule can be part of everyday checks without introducing known red builds
+
+Docs updated:
+
+- `docs/01-agent-engineering-rules.md`
+- `docs/02-architecture.md`
+- `docs/04-quality-gates.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-26 - Remove Existing Platform-To-Audit Boundary Violations
 
 Changed:

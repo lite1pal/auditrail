@@ -14,11 +14,17 @@ Use these labels when changing architecture:
 - `platform-extension`: reusable SaaS capability that this repo may add later
 - `audit-product`: specific to AuditTrail's event-ingest and event-read product
 
-The current source-root boundary map for future static enforcement lives in
-`packages/architecture-boundaries/src/rules.ts`.
+The current source-root boundary map for future static enforcement is exposed at
+`tools/architecture-boundaries/rules.ts`.
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
+
+Enforce the current map locally with:
+
+```bash
+pnpm check:boundaries
+```
 
 ## Apps
 
