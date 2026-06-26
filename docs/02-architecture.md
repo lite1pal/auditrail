@@ -57,6 +57,12 @@ That module defines the reusable shape for product nav items, usage meters,
 empty-state copy, and onboarding-step composition without creating the
 AuditTrail-specific product config yet.
 
+Generic background job vocabulary now also lives in
+`packages/domain/src/jobs`. That seam defines reusable job names, statuses,
+JSON-like payload validation, and envelope parsing only. It must remain pure
+and must not introduce outbox tables, queue clients, workers, or runtime job
+processing.
+
 The concrete AuditTrail-owned product definition now lives under
 `packages/domain/src/audit-events/product.ts`. It reuses the generic product
 shape and audit onboarding catalog while staying behind the audit-product

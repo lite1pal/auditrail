@@ -2,6 +2,10 @@
 
 ## 2026-06-26
 
+- Added a generic `packages/domain/src/jobs` seam for background job
+  vocabulary, including typed job names, statuses, JSON-like payload schemas,
+  and envelope parsing without adding any outbox, queue, or worker runtime.
+
 - Moved the remaining AuditTrail audit-events feature copy, including event
   screen headers, empty-state text, dashboard labels, chart copy, table labels,
   and detail-panel text, behind the audit-owned product definition.

@@ -12,6 +12,10 @@
       "types": "./src/audit-events/index.ts",
       "import": "./src/audit-events/index.ts"
     },
+    "./jobs": {
+      "types": "./src/jobs/index.ts",
+      "import": "./src/jobs/index.ts"
+    },
     "./pricing": {
       "types": "./src/pricing/index.ts",
       "import": "./src/pricing/index.ts"

@@ -110,6 +110,27 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-040 Add generic job domain types
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/jobs-domain-types
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/jobs/*
+    - packages/domain/src/index.ts
+    - packages/domain/package.json
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - `packages/domain` exposes a pure generic jobs seam with typed job names, statuses, payload validation, and envelope parsing
+    - Domain tests cover valid and invalid job envelopes without adding any DB, queue, or worker runtime
+    - The architecture docs explain the new jobs seam as vocabulary only, not runtime infrastructure
+
 - [x] T-037 Replace product-shaped usage counters with a generic meter model
   status: done
   priority: high
