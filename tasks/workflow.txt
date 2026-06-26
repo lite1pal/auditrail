@@ -25,6 +25,26 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-052 Add AuditTrail product definition
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/audit-product-definition
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/audit-events/*
+    - packages/domain/src/product/product-definition.ts
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - `packages/domain/src/audit-events/product.ts` exposes an AuditTrail-specific product definition typed against the generic product seam
+    - Existing audit onboarding definitions are reused rather than duplicated
+    - No platform module imports the AuditTrail product definition and runtime behavior stays unchanged
+
 - [x] T-051 Add generic product definition types
   status: done
   priority: medium

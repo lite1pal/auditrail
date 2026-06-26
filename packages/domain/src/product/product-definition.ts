@@ -28,9 +28,9 @@ export interface ProductDefinition<
   emptyStateCopy: ProductCopy;
   id: string;
   name: string;
-  navItems: ProductNavItem<TNavItemId>[];
-  onboardingSteps: OnboardingStepDefinition<TStepId>[];
-  usageMeters: ProductUsageMeterDefinition<TMeterKey>[];
+  navItems: readonly ProductNavItem<TNavItemId>[];
+  onboardingSteps: readonly OnboardingStepDefinition<TStepId>[];
+  usageMeters: readonly ProductUsageMeterDefinition<TMeterKey>[];
 }
 
 const nonEmptyStringSchema = z.string().trim().min(1);

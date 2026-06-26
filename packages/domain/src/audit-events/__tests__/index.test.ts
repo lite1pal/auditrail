@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { productDefinitionSchema } from "../../product/index.js";
+
 import {
+  auditTrailProduct,
   auditOnboardingSteps,
   ingestAuditEventSchema,
   toAuditOnboardingCompletedAtByStep
@@ -80,6 +83,25 @@ describe("audit event schemas", () => {
       first_event_ingested: "2026-06-25T12:02:00.000Z",
       member_invited: "2026-06-25T12:03:00.000Z",
       project_created: "2026-06-25T12:00:00.000Z"
+    });
+  });
+
+  it("exposes an explicit AuditTrail product definition", () => {
+    expect(productDefinitionSchema.parse(auditTrailProduct)).toEqual(
+      auditTrailProduct
+    );
+
+    expect(auditTrailProduct).toMatchObject({
+      id: "audit-events",
+      name: "AuditTrail",
+      navItems: [],
+      onboardingSteps: auditOnboardingSteps,
+      usageMeters: [
+        {
+          key: "events",
+          label: "Events"
+        }
+      ]
     });
   });
 });

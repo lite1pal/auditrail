@@ -2,6 +2,11 @@
 
 ## 2026-06-26
 
+- Added `packages/domain/src/audit-events/product.ts` as the explicit
+  AuditTrail-owned product-definition seam. It reuses the generic product types
+  from `packages/domain/src/product` without allowing platform modules to
+  depend on product config.
+
 - Added a generic `packages/domain/src/product` seam for product-definition
   types and pure validation schemas so future product-specific configuration can
   be made explicit without leaking AuditTrail details into reusable platform

@@ -57,6 +57,11 @@ That module defines the reusable shape for product nav items, usage meters,
 empty-state copy, and onboarding-step composition without creating the
 AuditTrail-specific product config yet.
 
+The concrete AuditTrail-owned product definition now lives under
+`packages/domain/src/audit-events/product.ts`. It reuses the generic product
+shape and audit onboarding catalog while staying behind the audit-product
+package entrypoint rather than the product-neutral root barrel.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/architecture-boundaries` contains typed source-root boundary metadata
