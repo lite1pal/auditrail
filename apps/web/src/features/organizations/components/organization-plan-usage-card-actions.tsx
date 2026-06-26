@@ -1,10 +1,12 @@
 import { Button } from "@/src/components/ui/button";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
+import type { WorkspaceSettingsPlanUsageCopy } from "@/src/features/organizations/components/workspace-settings-screen.types";
 
 interface OrganizationPlanUsageCardActionsProps {
   action: (formData: FormData) => Promise<void>;
   organizationId: string;
   planId: CurrentUserResponse["memberships"][number]["plan"]["id"];
+  productCopy: WorkspaceSettingsPlanUsageCopy;
   role?: CurrentUserResponse["memberships"][number]["role"];
 }
 
@@ -27,12 +29,13 @@ export function OrganizationPlanUsageCardActions({
   action,
   organizationId,
   planId,
+  productCopy,
   role
 }: OrganizationPlanUsageCardActionsProps) {
   if (role !== "owner" && role !== "admin") {
     return (
       <p className="text-sm text-[var(--muted)]">
-        Only organization owners and admins can change plans.
+        {productCopy.noPermissionDescription}
       </p>
     );
   }
@@ -50,8 +53,8 @@ export function OrganizationPlanUsageCardActions({
           variant={availablePlan.id === planId ? "primary" : "secondary"}
         >
           {availablePlan.id === planId
-            ? `${availablePlan.label} selected`
-            : `Switch to ${availablePlan.label}`}
+            ? `${availablePlan.label} ${productCopy.selectedPlanSuffix}`
+            : `${productCopy.switchToPlanPrefix} ${availablePlan.label}`}
         </Button>
       ))}
     </form>

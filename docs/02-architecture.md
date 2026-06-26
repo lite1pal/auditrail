@@ -84,6 +84,12 @@ Audit-specific screen, dashboard, chart, empty-state, table, and detail-panel
 text is sourced from `packages/domain/src/audit-events/product.ts` through a
 feature-local audit adapter rather than being embedded inline in components.
 
+AuditTrail-specific plan and usage copy now also follows that seam. The
+platform-owned organizations settings feature receives plan/quota labels and
+descriptions through the `apps/web/app/settings` composition boundary rather
+than embedding AuditTrail event-usage language directly in reusable settings
+components.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/architecture-boundaries` contains typed source-root boundary metadata

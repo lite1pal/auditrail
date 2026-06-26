@@ -79,10 +79,34 @@ export interface AuditTrailAuditEventsContent {
   tooltipCountSuffix: string;
 }
 
+export interface AuditTrailWorkspaceSettingsPlanUsageContent {
+  emptyStateDescription: string;
+  metrics: {
+    currentPlan: string;
+    includedUnits: string;
+    remainingUnits: string;
+    usedThisMonth: string;
+  };
+  navDescription: string;
+  navLabel: string;
+  noPermissionDescription: string;
+  resetDatePrefix: string;
+  selectedPlanSuffix: string;
+  sectionDescription: string;
+  sectionTitle: string;
+  switchToPlanPrefix: string;
+  usageWindowPrefix: string;
+}
+
+export interface AuditTrailWorkspaceSettingsContent {
+  planUsage: AuditTrailWorkspaceSettingsPlanUsageContent;
+}
+
 type AuditTrailProductDefinition = ProductDefinition & {
   appChrome: AuditTrailAppChromeContent;
   auditEvents: AuditTrailAuditEventsContent;
   onboarding: AuditTrailOnboardingContent;
+  workspaceSettings: AuditTrailWorkspaceSettingsContent;
 };
 
 export const auditTrailProduct = {
@@ -202,6 +226,29 @@ export const auditTrailProduct = {
       }
     },
     title: "Getting started"
+  },
+  workspaceSettings: {
+    planUsage: {
+      emptyStateDescription:
+        "Select an organization to review its current plan and monthly event usage.",
+      metrics: {
+        currentPlan: "Current plan",
+        includedUnits: "Included events",
+        remainingUnits: "Remaining",
+        usedThisMonth: "Used this month"
+      },
+      navDescription: "Review monthly quota usage and switch the active plan.",
+      navLabel: "Plan & usage",
+      noPermissionDescription:
+        "Only organization owners and admins can change plans.",
+      resetDatePrefix: "Resets on",
+      selectedPlanSuffix: "selected",
+      sectionDescription:
+        "Review the current monthly quota, the UTC reset window, and switch plans when your workspace needs more capacity.",
+      sectionTitle: "Plan & usage",
+      switchToPlanPrefix: "Switch to",
+      usageWindowPrefix: "Usage is tracked by UTC calendar month from"
+    }
   },
   usageMeters: [
     {

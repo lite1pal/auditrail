@@ -1,18 +1,21 @@
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
+import type { WorkspaceSettingsPlanUsageCopy } from "@/src/features/organizations/components/workspace-settings-screen.types";
 
 interface OrganizationPlanUsageCardMetricsProps {
   plan: CurrentUserResponse["memberships"][number]["plan"];
+  productCopy: WorkspaceSettingsPlanUsageCopy;
 }
 
 export function OrganizationPlanUsageCardMetrics({
-  plan
+  plan,
+  productCopy
 }: OrganizationPlanUsageCardMetricsProps) {
   return (
     <div className="grid gap-3 lg:grid-cols-4">
-      <Metric label="Current plan" value={plan.name} />
-      <Metric label="Included events" value={formatNumber(plan.includedEvents)} />
-      <Metric label="Used this month" value={formatNumber(plan.usedEvents)} />
-      <Metric label="Remaining" value={formatNumber(plan.remainingEvents)} />
+      <Metric label={productCopy.metrics.currentPlan} value={plan.name} />
+      <Metric label={productCopy.metrics.includedUnits} value={formatNumber(plan.includedEvents)} />
+      <Metric label={productCopy.metrics.usedThisMonth} value={formatNumber(plan.usedEvents)} />
+      <Metric label={productCopy.metrics.remainingUnits} value={formatNumber(plan.remainingEvents)} />
     </div>
   );
 }

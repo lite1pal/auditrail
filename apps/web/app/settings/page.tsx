@@ -13,6 +13,7 @@ import {
 } from "@/src/features/organizations/server/organizations-server";
 
 import { getAuditTrailShellProductConfig } from "@/app/audit-product-navigation";
+import { getAuditTrailWorkspaceSettingsProductCopy } from "@/app/audit-product-settings";
 
 interface SettingsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -27,6 +28,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     activeOrganizationId: workspace.activeOrganizationId,
     activeProjectId: workspace.activeProjectId
   });
+  const settingsProductCopy = getAuditTrailWorkspaceSettingsProductCopy();
 
   return (
     <AppShell
@@ -52,6 +54,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         inviteMemberAction={inviteMemberAction}
         newApiKey={workspace.newApiKey}
         organizations={workspace.organizations}
+        productCopy={settingsProductCopy}
         projects={workspace.projects}
         revokeApiKeyAction={revokeApiKeyAction}
       />

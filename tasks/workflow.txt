@@ -25,6 +25,27 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-057 Move plan and usage product copy behind product config
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/product-config-plan-usage-copy
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/audit-events/*
+    - apps/web/app/settings/*
+    - apps/web/src/features/organizations/*
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - AuditTrail-specific plan and usage labels or descriptions no longer live inline in generic settings UI
+    - Plan and usage product-facing copy is sourced from audit-owned product config or an audit-owned adapter
+    - Current plan and usage behavior stays intact and repo checks still pass
+
 - [x] T-056 Move audit-events feature copy behind product config
   status: done
   priority: medium

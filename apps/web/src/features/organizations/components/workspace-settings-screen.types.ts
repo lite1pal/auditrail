@@ -2,6 +2,29 @@ import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import type { ManagedApiKey } from "@/src/features/api-keys/domain/schemas";
 import type { Organization, Project } from "@/src/features/organizations/domain/schemas";
 
+export interface WorkspaceSettingsPlanUsageCopy {
+  emptyStateDescription: string;
+  metrics: {
+    currentPlan: string;
+    includedUnits: string;
+    remainingUnits: string;
+    usedThisMonth: string;
+  };
+  navDescription: string;
+  navLabel: string;
+  noPermissionDescription: string;
+  resetDatePrefix: string;
+  selectedPlanSuffix: string;
+  sectionDescription: string;
+  sectionTitle: string;
+  switchToPlanPrefix: string;
+  usageWindowPrefix: string;
+}
+
+export interface WorkspaceSettingsProductCopy {
+  planUsage: WorkspaceSettingsPlanUsageCopy;
+}
+
 export interface WorkspaceSettingsScreenProps {
   acceptInvitationAction: (formData: FormData) => Promise<void>;
   activeOrganizationId?: string;
@@ -22,6 +45,7 @@ export interface WorkspaceSettingsScreenProps {
     rawKey: string;
   };
   organizations: Organization[];
+  productCopy: WorkspaceSettingsProductCopy;
   projects: Project[];
   revokeApiKeyAction: (formData: FormData) => Promise<void>;
 }

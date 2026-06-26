@@ -1,29 +1,34 @@
 import { Card } from "@/src/components/ui/card";
+import type { WorkspaceSettingsPlanUsageCopy } from "@/src/features/organizations/components/workspace-settings-screen.types";
 
-const sectionLinks = [
-  {
-    description: "Switch organizations and create the workspace shell.",
-    href: "#workspace-settings",
-    label: "Workspace"
-  },
-  {
-    description: "Review monthly quota usage and switch the active plan.",
-    href: "#plan-settings",
-    label: "Plan & usage"
-  },
-  {
-    description: "Handle invitations and teammate access.",
-    href: "#access-settings",
-    label: "Access"
-  },
-  {
-    description: "Select or create projects for the current organization.",
-    href: "#project-settings",
-    label: "Projects"
-  }
-];
+export function SettingsSectionsNav({
+  planUsage
+}: {
+  planUsage: WorkspaceSettingsPlanUsageCopy;
+}) {
+  const sectionLinks = [
+    {
+      description: "Switch organizations and create the workspace shell.",
+      href: "#workspace-settings",
+      label: "Workspace"
+    },
+    {
+      description: planUsage.navDescription,
+      href: "#plan-settings",
+      label: planUsage.navLabel
+    },
+    {
+      description: "Handle invitations and teammate access.",
+      href: "#access-settings",
+      label: "Access"
+    },
+    {
+      description: "Select or create projects for the current organization.",
+      href: "#project-settings",
+      label: "Projects"
+    }
+  ];
 
-export function SettingsSectionsNav() {
   return (
     <Card className="grid gap-4">
       <div className="grid gap-1">

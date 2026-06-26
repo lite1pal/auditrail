@@ -179,6 +179,23 @@ describe("audit event schemas", () => {
         tooltipCountSuffix: "events",
         topEventTypesLabel: "Top event types",
         totalEventsLabel: "Total events"
+      },
+      workspaceSettings: {
+        planUsage: {
+          emptyStateDescription:
+            "Select an organization to review its current plan and monthly event usage.",
+          navDescription: "Review monthly quota usage and switch the active plan.",
+          navLabel: "Plan & usage",
+          noPermissionDescription:
+            "Only organization owners and admins can change plans.",
+          resetDatePrefix: "Resets on",
+          sectionDescription:
+            "Review the current monthly quota, the UTC reset window, and switch plans when your workspace needs more capacity.",
+          sectionTitle: "Plan & usage",
+          selectedPlanSuffix: "selected",
+          switchToPlanPrefix: "Switch to",
+          usageWindowPrefix: "Usage is tracked by UTC calendar month from"
+        }
       }
     });
   });

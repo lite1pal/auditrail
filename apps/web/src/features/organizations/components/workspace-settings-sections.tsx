@@ -22,6 +22,7 @@ interface WorkspaceSettingsSectionsProps
     | "createProjectAction"
     | "invitationUrl"
     | "inviteMemberAction"
+    | "productCopy"
     | "projects"
   > {
   activeProject?: Project;
@@ -38,6 +39,7 @@ export function WorkspaceSettingsSections({
   createProjectAction,
   invitationUrl,
   inviteMemberAction,
+  productCopy,
   projects
 }: WorkspaceSettingsSectionsProps) {
   const canManageWorkspace =
@@ -57,14 +59,15 @@ export function WorkspaceSettingsSections({
       </SettingsGroup>
 
       <SettingsGroup
-        description="Review the current monthly quota, the UTC reset window, and switch plans when your workspace needs more capacity."
+        description={productCopy.planUsage.sectionDescription}
         id="plan-settings"
-        title="Plan & usage"
+        title={productCopy.planUsage.sectionTitle}
       >
         <OrganizationPlanUsageCard
           action={changeOrganizationPlanAction}
           organizationId={activeOrganizationId}
           plan={activeOrganizationPlan}
+          productCopy={productCopy.planUsage}
           role={activeOrganizationRole}
         />
       </SettingsGroup>

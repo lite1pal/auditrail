@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { WorkspaceSettingsScreen } from "@/src/features/organizations/components/workspace-settings-screen";
+import type { WorkspaceSettingsProductCopy } from "@/src/features/organizations/components/workspace-settings-screen.types";
 
 describe("WorkspaceSettingsScreen", () => {
   it("surfaces the current workspace and a clear next step", () => {
@@ -41,6 +42,7 @@ describe("WorkspaceSettingsScreen", () => {
             name: "Acme"
           }
         ]}
+        productCopy={productCopy}
         projects={[
           {
             id: "project-1",
@@ -95,6 +97,7 @@ describe("WorkspaceSettingsScreen", () => {
             name: "Acme"
           }
         ]}
+        productCopy={productCopy}
         projects={[]}
         revokeApiKeyAction={noopAction}
       />
@@ -126,6 +129,7 @@ describe("WorkspaceSettingsScreen", () => {
             name: "Acme"
           }
         ]}
+        productCopy={productCopy}
         projects={[]}
         revokeApiKeyAction={noopAction}
       />
@@ -149,6 +153,7 @@ describe("WorkspaceSettingsScreen", () => {
         createProjectAction={noopAction}
         inviteMemberAction={noopAction}
         organizations={[]}
+        productCopy={productCopy}
         projects={[]}
         revokeApiKeyAction={noopAction}
       />
@@ -175,3 +180,27 @@ function starterPlan() {
     usedEvents: 1
   };
 }
+
+const productCopy: WorkspaceSettingsProductCopy = {
+  planUsage: {
+    emptyStateDescription:
+      "Select an organization to review its current plan and monthly event usage.",
+    metrics: {
+      currentPlan: "Current plan",
+      includedUnits: "Included events",
+      remainingUnits: "Remaining",
+      usedThisMonth: "Used this month"
+    },
+    navDescription: "Review monthly quota usage and switch the active plan.",
+    navLabel: "Plan & usage",
+    noPermissionDescription:
+      "Only organization owners and admins can change plans.",
+    resetDatePrefix: "Resets on",
+    selectedPlanSuffix: "selected",
+    sectionDescription:
+      "Review the current monthly quota, the UTC reset window, and switch plans when your workspace needs more capacity.",
+    sectionTitle: "Plan & usage",
+    switchToPlanPrefix: "Switch to",
+    usageWindowPrefix: "Usage is tracked by UTC calendar month from"
+  }
+};

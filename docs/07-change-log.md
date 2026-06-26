@@ -6,6 +6,11 @@
   screen headers, empty-state text, dashboard labels, chart copy, table labels,
   and detail-panel text, behind the audit-owned product definition.
 
+- Moved AuditTrail-specific plan and usage labels, quota descriptions, and
+  usage-meter copy behind the audit-owned product definition plus a small
+  `apps/web/app/settings` adapter so platform-owned settings components no
+  longer embed AuditTrail event-usage language.
+
 - Moved the remaining AuditTrail app chrome strings, including metadata,
   loading copy, and top-level error copy, behind the audit-owned product
   definition plus a small app-level adapter.

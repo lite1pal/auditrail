@@ -20,6 +20,7 @@ export function WorkspaceSettingsScreen({
   invitationUrl,
   inviteMemberAction,
   organizations,
+  productCopy,
   projects
 }: WorkspaceSettingsScreenProps) {
   const activeProject = projects.find((project) => project.id === activeProjectId);
@@ -28,7 +29,7 @@ export function WorkspaceSettingsScreen({
   return (
     <main className="mx-auto grid max-w-[1240px] gap-8 px-4 py-6 md:px-6 md:py-10 xl:grid-cols-[260px_minmax(0,1fr)]">
       <aside className="self-start xl:sticky xl:top-6">
-        <SettingsSectionsNav />
+        <SettingsSectionsNav planUsage={productCopy.planUsage} />
       </aside>
       <div className="grid gap-8">
         <WorkspaceSettingsHero
@@ -50,6 +51,7 @@ export function WorkspaceSettingsScreen({
           createProjectAction={createProjectAction}
           invitationUrl={invitationUrl}
           inviteMemberAction={inviteMemberAction}
+          productCopy={productCopy}
           projects={projects}
         />
       </div>
