@@ -15,14 +15,14 @@ describe("architecture boundary rules", () => {
     ]);
   });
 
-  it("keeps the platform-extension category available even before roots exist", () => {
+  it("tracks the current platform-extension roots", () => {
     const platformExtension = architectureBoundaryRules.categories.find(
       (category) => category.id === "platform-extension"
     );
 
     expect(platformExtension).toMatchObject({
       id: "platform-extension",
-      globPatterns: []
+      globPatterns: ["apps/api/src/modules/jobs/**"]
     });
   });
 });

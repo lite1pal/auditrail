@@ -2,6 +2,18 @@
 
 ## 2026-06-26
 
+- Added a generic `job_outbox` persistence seam in `packages/db` plus
+  `apps/api/src/modules/jobs`, including a Postgres repository adapter for
+  enqueue, claim, complete, fail, retry, and pending-count behavior.
+
+- Added `packages/db/src/migrations/0007_job_outbox.sql` and Postgres
+  integration tests for durable outbox semantics, including future scheduling,
+  retry handling, max-attempt failure, and `FOR UPDATE SKIP LOCKED` claim
+  safety.
+
+- Classified `apps/api/src/modules/jobs/**` as `platform-extension` so generic
+  jobs infrastructure can evolve without depending on `audit-product` code.
+
 - Added a generic `packages/domain/src/jobs` seam for background job
   vocabulary, including typed job names, statuses, JSON-like payload schemas,
   and envelope parsing without adding any outbox, queue, or worker runtime.

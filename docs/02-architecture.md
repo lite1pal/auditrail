@@ -63,6 +63,13 @@ JSON-like payload validation, and envelope parsing only. It must remain pure
 and must not introduce outbox tables, queue clients, workers, or runtime job
 processing.
 
+Generic durable background-job persistence now lives in `packages/db/src/schema/jobs.ts`
+plus `apps/api/src/modules/jobs/*`. The `job_outbox` table and repository
+adapter are the shared outbox seam for future async side effects such as
+webhook delivery, notifications, exports, or integrity checks. This seam is
+persistence only for now: it must not add a worker process, a polling loop,
+Redis, BullMQ, or audit-ingest enqueue behavior in the same slice.
+
 The concrete AuditTrail-owned product definition now lives under
 `packages/domain/src/audit-events/product.ts`. It reuses the generic product
 shape and audit onboarding catalog while staying behind the audit-product
@@ -258,15 +265,18 @@ service boundary.
 Platform persistence lives in `packages/db` and is exposed to API modules
 through repository adapters. The schema includes users, magic links, sessions,
 organization memberships, organization invitations, projects, API keys, and
-audit events. Organization pricing state stores only the selected
+audit events, plus the generic `job_outbox` table for durable asynchronous
+work. Organization pricing state stores only the selected
 `organizations.plan_id`, while monthly counters are persisted in
 `organization_monthly_usage` keyed by `organization_id + month_start`. Browser
 onboarding dismissal state is persisted separately in
 `user_organization_onboarding_states` keyed by `organization_id + user_id`,
 while milestone completion stays derived from projects, API keys, invitations,
 and audit events instead of being duplicated into its own status table.
-API services must continue to depend on repository interfaces
-rather than Drizzle directly.
+Outbox claim semantics stay inside the repository adapter so future workers can
+reuse Postgres-safe `FOR UPDATE SKIP LOCKED` claiming without leaking Drizzle or
+locking details into services. API services must continue to depend on
+repository interfaces rather than Drizzle directly.
 
 Browser session principal resolution is separate from machine API-key auth.
 `sessionAuthPlugin` resolves HttpOnly cookie sessions into `request.sessionUser`
@@ -309,7 +319,7 @@ Current `platform-extension` candidates that should stay generic when added:
 
 - billing and subscriptions
 - entitlements and generic usage meters
-- background jobs and scheduling
+- background jobs and scheduling, with the current `job_outbox` persistence seam under `apps/api/src/modules/jobs/*`
 - notifications and outbound webhooks
 - exports and delivery infrastructure
 - admin/support controls

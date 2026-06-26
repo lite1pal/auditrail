@@ -48,7 +48,7 @@ export const architectureBoundaryCategories = [
     label: "Platform Extension",
     description:
       "Future reusable platform capabilities such as billing, jobs, notifications, exports, MFA, SSO, or support tooling.",
-    globPatterns: [],
+    globPatterns: ["apps/api/src/modules/jobs/**"],
     allowedDependencyTargets: [
       "platform-core",
       "platform-extension",

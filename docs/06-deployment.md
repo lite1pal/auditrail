@@ -168,6 +168,10 @@ monthly quota enforcement. `packages/db/src/migrations/0006_windy_mister_fear.sq
 converts that table into a generic meter model with `meter_key` and `quantity`
 columns while preserving the current `events` meter. Run the pricing and usage
 migrations before enabling the quota-aware ingest path in production.
+`packages/db/src/migrations/0007_job_outbox.sql` adds the generic `job_outbox`
+table used for durable background-work persistence. Apply it before shipping a
+future worker runtime or any job enqueue path, but this migration does not add
+an extra long-running service by itself.
 
 When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic

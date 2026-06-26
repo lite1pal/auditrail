@@ -110,6 +110,30 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-041 Add outbox database schema
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/jobs-outbox-schema
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/jobs/*
+    - apps/api/src/modules/jobs/__tests__/*
+    - packages/db/src/*
+    - packages/architecture-boundaries/src/rules.ts
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - A generic durable `job_outbox` table and migration exist without adding any worker runtime
+    - API modules can enqueue, claim, complete, and fail generic jobs through a repository interface plus Postgres adapter
+    - Integration tests cover core persistence behavior and the docs describe the new persistence seam
+
 - [x] T-040 Add generic job domain types
   status: done
   priority: medium

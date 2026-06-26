@@ -107,6 +107,11 @@ only on route behavior.
 
 Unit and route tests are colocated with source files under local `__tests__` directories.
 Integration tests use the `.integration.test.ts` suffix and are discovered separately.
+Persistence adapters that rely on database-specific locking or transaction
+behavior should prefer this path even when the public runtime integration does
+not exist yet. The generic jobs outbox repo is the current example: its
+claim/retry semantics are verified directly against Postgres instead of only
+through unit doubles.
 
 Current integration discovery pattern:
 
