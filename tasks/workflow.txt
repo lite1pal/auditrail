@@ -4,6 +4,25 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
+- [ ] T-047 Add boundary scanner test fixtures
+  status: blocked
+  priority: medium
+  owner: codex
+  branch: codex/platform-boundary-fixtures
+  pr:
+  last_updated: 2026-06-26
+  completed:
+  blocked_reason: The fixture coverage is in place, but the current repo still fails `pnpm tsx tools/check-architecture-boundaries.ts` because of pre-existing platform-to-audit imports in `apps/api/src/modules/platform/*` and the generic `packages/domain/src/index.ts` audit re-export.
+  files:
+    - packages/architecture-boundaries/*
+    - tools/architecture-boundaries/__fixtures__/*
+    - tools/check-architecture-boundaries.ts
+    - tasks/workflow.txt
+  acceptance:
+    - Focused scanner tests cover at least one allowed dependency and the required forbidden directions
+    - Fixture failures assert readable violation details without scanning the whole repo
+    - Existing repo scanner result is recorded clearly without refactoring app or package code
+
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
   status: in_progress
   priority: medium
