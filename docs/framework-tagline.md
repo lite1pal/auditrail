@@ -1,0 +1,1 @@
+An AI-native SaaS framework that gives agents a constrained architecture, generators, quality gates, and tiny task specs so they can build production SaaS features quickly without rereading the whole codebase.
