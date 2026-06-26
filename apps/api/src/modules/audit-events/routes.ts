@@ -4,6 +4,8 @@ import { z } from "zod";
 import { getRequestPrincipal } from "../api-keys/request-principal.js";
 import { registerApiErrorHandler } from "../../http-errors.js";
 import { registerApiSchemas } from "../../http-schemas.js";
+import { createPostgresPlatformRepo } from "../platform/postgres-repo.js";
+import { createPlatformEntitlementService } from "../platform/entitlements/service.js";
 import {
   ingestEventRouteSchema,
   listEventsRouteSchema,
@@ -65,7 +67,14 @@ export async function registerEventRoutes(
     createAuditEventService(
       "db" in app
         ? createPostgresAuditEventRepo(app.db)
-        : createInMemoryAuditEventRepo()
+        : createInMemoryAuditEventRepo(),
+      "db" in app
+        ? {
+            entitlementService: createPlatformEntitlementService(
+              createPostgresPlatformRepo(app.db)
+            )
+          }
+        : {}
     );
 
   app.post(

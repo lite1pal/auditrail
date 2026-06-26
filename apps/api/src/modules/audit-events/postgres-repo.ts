@@ -27,6 +27,7 @@ import {
 import type {
   AuditEventListFilters,
   AuditEventRecord,
+  AuditEventQuotaState,
   AuditEventRepo,
   AuditEventSummaryFilters,
   AuditEventTimeseriesFilters,
@@ -47,21 +48,34 @@ export function createPostgresAuditEventRepo(
   const usageMeterKey = "events";
 
   return {
-    async append(tenant: AuditEventTenant, input: IngestAuditEventInput) {
+    async append(
+      tenant: AuditEventTenant,
+      input: IngestAuditEventInput,
+      options?: {
+        quota?: AuditEventQuotaState;
+      }
+    ) {
       const currentTime = now();
       const window = getUtcMonthWindow(currentTime);
 
       return db.transaction(async (tx) => {
-        const [organizationRecord] = await tx
-          .select({
-            planId: organizations.planId
-          })
-          .from(organizations)
-          .where(eq(organizations.id, tenant.organizationId))
-          .limit(1);
+        const quota = options?.quota;
+        let planId = quota?.id as PricingPlanId | undefined;
+        let includedEvents = quota?.includedEvents;
 
-        const planId = (organizationRecord?.planId ?? "starter") as PricingPlanId;
-        const plan = getPricingPlan(planId);
+        if (includedEvents === undefined || !planId) {
+          const [organizationRecord] = await tx
+            .select({
+              planId: organizations.planId
+            })
+            .from(organizations)
+            .where(eq(organizations.id, tenant.organizationId))
+            .limit(1);
+
+          planId = (organizationRecord?.planId ?? "starter") as PricingPlanId;
+          includedEvents = getPricingPlan(planId).includedEvents;
+        }
+
         const monthStart = new Date(window.periodStart);
 
         await tx
@@ -92,7 +106,7 @@ export function createPostgresAuditEventRepo(
               eq(organizationMonthlyUsage.organizationId, tenant.organizationId),
               eq(organizationMonthlyUsage.monthStart, monthStart),
               eq(organizationMonthlyUsage.meterKey, usageMeterKey),
-              sql`${organizationMonthlyUsage.quantity} < ${plan.includedEvents}`
+              sql`${organizationMonthlyUsage.quantity} < ${includedEvents}`
             )
           )
           .returning({
@@ -118,7 +132,7 @@ export function createPostgresAuditEventRepo(
             summarizePricingUsage({
               now: currentTime,
               planId,
-              usedEvents: currentUsageRecord?.quantity ?? plan.includedEvents
+              usedEvents: currentUsageRecord?.quantity ?? includedEvents
             })
           );
         }

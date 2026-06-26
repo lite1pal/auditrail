@@ -7,6 +7,7 @@ import { decodeAuditEventCursor } from "../cursor.js";
 import { createInMemoryAuditEventRepo } from "../repo.js";
 import { registerEventRoutes } from "../routes.js";
 import { createAuditEventService } from "../service.js";
+import { createPlatformEntitlementService } from "../../platform/entitlements/service.js";
 
 describe("audit event routes", () => {
   it("accepts valid event payloads", async () => {
@@ -1237,11 +1238,47 @@ async function buildEventRouteTestApp(
   repoOptions: Parameters<typeof createInMemoryAuditEventRepo>[0] = {}
 ) {
   let index = 0;
+  const fallbackTime = "2026-06-16T12:59:59.000Z";
   const repo = createInMemoryAuditEventRepo({
     ...repoOptions,
-    now: () => createdAtValues[index++] ?? "2026-06-16T12:59:59.000Z"
+    now: () => createdAtValues[index++] ?? fallbackTime
   });
-  const service = createAuditEventService(repo);
+  const entitlementService = createPlatformEntitlementService(
+    {
+      async getOrganizationEntitlementSnapshot(input) {
+        const periodStart =
+          createdAtValues[Math.min(index, createdAtValues.length - 1)] ?? fallbackTime;
+        const currentWindowStart = new Date(periodStart);
+
+        currentWindowStart.setUTCDate(1);
+        currentWindowStart.setUTCHours(0, 0, 0, 0);
+
+        return {
+          meterUsage: [
+            {
+              meterKey: "events",
+              usedUnits:
+                repoOptions.usageByKey?.[
+                  `${input.organizationId}:${currentWindowStart.toISOString()}`
+                ] ?? 0
+            }
+          ],
+          organizationId: input.organizationId,
+          planId:
+            repoOptions.planByOrganizationId?.[input.organizationId] ?? "starter"
+        };
+      }
+    },
+    {
+      now: () =>
+        new Date(
+          createdAtValues[Math.min(index, createdAtValues.length - 1)] ?? fallbackTime
+        )
+    }
+  );
+  const service = createAuditEventService(repo, {
+    entitlementService
+  });
   const app = Fastify({
     logger: false
   });

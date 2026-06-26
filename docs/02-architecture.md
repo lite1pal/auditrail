@@ -206,9 +206,13 @@ Client
 The read path uses the same API key principal to scope events to the authenticated project.
 Quota enforcement happens only on the public ingest path. Event reads, stats,
 and timeseries remain available after a workspace reaches its monthly included
-event limit. Successful ingest now also writes a generic `audit-event.created`
-outbox job in the same audit-owned persistence slice so future worker-driven
-side effects can be triggered from durable intent instead of inline API work.
+event limit. The audit ingest path now asks the platform entitlement service
+for the generic `events` meter decision before attempting the quota-protected
+write, while the audit-owned repository keeps the conditional usage increment
+as the write-time guard so event insert and usage accounting stay aligned.
+Successful ingest now also writes a generic `audit-event.created` outbox job in
+the same audit-owned persistence slice so future worker-driven side effects can
+be triggered from durable intent instead of inline API work.
 
 This entire event flow is `audit-product`.
 

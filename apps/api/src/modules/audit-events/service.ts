@@ -1,4 +1,5 @@
 import type { IngestAuditEventInput } from "@auditrail/domain/audit-events";
+import { getPricingPlan, type PricingUsageSummary } from "@auditrail/domain/pricing";
 
 import type {
   AuditEventListFilters,
@@ -10,6 +11,11 @@ import type {
   AuditEventTimeseriesPoint,
   AuditEventTenant
 } from "./repo.js";
+import {
+  defaultPlatformMeterKey,
+  type PlatformEntitlementService
+} from "../platform/entitlements/service.js";
+import { EventQuotaExceededError } from "./repo.js";
 
 export interface AuditEventService {
   ingest(
@@ -32,10 +38,35 @@ export interface AuditEventService {
 
 export { EventQuotaExceededError } from "./repo.js";
 
-export function createAuditEventService(repo: AuditEventRepo): AuditEventService {
+export function createAuditEventService(
+  repo: AuditEventRepo,
+  options: {
+    entitlementService?: PlatformEntitlementService;
+  } = {}
+): AuditEventService {
   return {
-    ingest(tenant, input) {
-      return repo.append(tenant, input);
+    async ingest(tenant, input) {
+      if (!options.entitlementService) {
+        return repo.append(tenant, input);
+      }
+
+      const quotaDecision = await options.entitlementService.canConsumeMeter({
+        meterKey: defaultPlatformMeterKey,
+        organizationId: tenant.organizationId,
+        quantity: 1
+      });
+      const quota = await resolveEventQuota(
+        options.entitlementService,
+        tenant.organizationId
+      );
+
+      if (quotaDecision.status !== "allowed") {
+        throw new EventQuotaExceededError(quota);
+      }
+
+      return repo.append(tenant, input, {
+        quota
+      });
     },
     list(tenant, filters) {
       return repo.list(tenant, filters);
@@ -46,5 +77,26 @@ export function createAuditEventService(repo: AuditEventRepo): AuditEventService
     timeseries(tenant, filters) {
       return repo.timeseries(tenant, filters);
     }
+  };
+}
+
+async function resolveEventQuota(
+  entitlementService: PlatformEntitlementService,
+  organizationId: string
+): Promise<PricingUsageSummary> {
+  const summary = await entitlementService.getEntitlementSummary(organizationId);
+  const eventUsage = summary.meterUsage.find(
+    (meterUsage) => meterUsage.meterKey === defaultPlatformMeterKey
+  );
+  const plan = getPricingPlan(summary.planId);
+
+  return {
+    id: summary.planId,
+    includedEvents: eventUsage?.includedUnits ?? plan.includedEvents,
+    name: plan.name,
+    periodEnd: summary.periodEnd,
+    periodStart: summary.periodStart,
+    remainingEvents: eventUsage?.remainingUnits ?? 0,
+    usedEvents: eventUsage?.usedUnits ?? 0
   };
 }

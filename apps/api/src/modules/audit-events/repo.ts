@@ -73,10 +73,15 @@ export interface InMemoryAuditEventRepoOptions {
   usageByKey?: Record<string, number>;
 }
 
+export interface AuditEventQuotaState extends PricingUsageSummary {}
+
 export interface AuditEventRepo {
   append(
     tenant: AuditEventTenant,
-    input: IngestAuditEventInput
+    input: IngestAuditEventInput,
+    options?: {
+      quota?: AuditEventQuotaState;
+    }
   ): Promise<AuditEventRecord>;
   list(
     tenant: AuditEventTenant,
@@ -103,29 +108,40 @@ export class EventQuotaExceededError extends Error {
 }
 
 export function createInMemoryAuditEventRepo(
-  options: InMemoryAuditEventRepoOptions = {}
+  repoOptions: InMemoryAuditEventRepoOptions = {}
 ): AuditEventRepo {
   const events: StoredAuditEventRecord[] = [];
-  const now = options.now ?? (() => new Date().toISOString());
+  const now = repoOptions.now ?? (() => new Date().toISOString());
   const organizationPlans = new Map<string, PricingPlanId>(
-    Object.entries(options.planByOrganizationId ?? {})
+    Object.entries(repoOptions.planByOrganizationId ?? {})
   );
-  const monthlyUsage = new Map<string, number>(Object.entries(options.usageByKey ?? {}));
+  const monthlyUsage = new Map<string, number>(
+    Object.entries(repoOptions.usageByKey ?? {})
+  );
 
   return {
-    async append(tenant, input) {
+    async append(tenant, input, options) {
       const currentTime = new Date(now());
       const window = getUtcMonthWindow(currentTime);
       const usageKey = `${tenant.organizationId}:${window.periodStart}`;
       const usedEvents = monthlyUsage.get(usageKey) ?? 0;
-      const plan = summarizePricingUsage({
+      const quota = options?.quota;
+      const includedEvents = quota?.includedEvents ?? getQuotaLimit({
+        organizationId: tenant.organizationId,
         now: currentTime,
-        planId: organizationPlans.get(tenant.organizationId) ?? "starter",
+        organizationPlans,
         usedEvents
-      });
+      }).includedEvents;
 
-      if (plan.remainingEvents <= 0) {
-        throw new EventQuotaExceededError(plan);
+      if (usedEvents >= includedEvents) {
+        throw new EventQuotaExceededError(
+          summarizeQuotaExceededPlan({
+            now: currentTime,
+            planId:
+              quota?.id ?? organizationPlans.get(tenant.organizationId) ?? "starter",
+            usedEvents
+          })
+        );
       }
 
       const record = {
@@ -139,7 +155,7 @@ export function createInMemoryAuditEventRepo(
         createdAt: currentTime.toISOString()
       };
 
-      await options.enqueueJob?.(
+      await repoOptions.enqueueJob?.(
         createAuditEventCreatedJob({
           event: record,
           tenant
@@ -222,6 +238,31 @@ export function createInMemoryAuditEventRepo(
         .sort((left, right) => left.bucketStart.localeCompare(right.bucketStart));
     }
   };
+}
+
+function getQuotaLimit(input: {
+  now: Date;
+  organizationId: string;
+  organizationPlans: Map<string, PricingPlanId>;
+  usedEvents: number;
+}) {
+  return summarizePricingUsage({
+    now: input.now,
+    planId: input.organizationPlans.get(input.organizationId) ?? "starter",
+    usedEvents: input.usedEvents
+  });
+}
+
+function summarizeQuotaExceededPlan(input: {
+  now: Date;
+  planId: PricingPlanId;
+  usedEvents: number;
+}) {
+  return summarizePricingUsage({
+    now: input.now,
+    planId: input.planId,
+    usedEvents: input.usedEvents
+  });
 }
 
 function compareAuditEventsDesc(left: AuditEventRecord, right: AuditEventRecord) {

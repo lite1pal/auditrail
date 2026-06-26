@@ -110,6 +110,27 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-060 Migrate audit event quota check to entitlement service
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/audit-quota-entitlements
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/audit-events/*
+    - apps/api/src/modules/platform/entitlements/*
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Audit-event ingest calls the generic platform entitlement service for the `events` meter before quota-protected writes
+    - Existing `402 event_quota_exceeded` behavior, success responses, auth behavior, and outbox timing remain compatible
+    - Quota failures do not insert events or enqueue outbox jobs
+    - Updated API and integration tests cover the entitlement-backed quota seam
+
 - [x] T-059 Add platform entitlement service
   status: done
   priority: high

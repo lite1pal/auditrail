@@ -2,6 +2,14 @@
 
 ## 2026-06-26
 
+- Migrated the audit-event ingest quota decision to the platform-owned
+  entitlement service, so the audit product now asks the generic `events`
+  meter seam for allow or deny before quota-protected writes.
+
+- Preserved the existing `402 event_quota_exceeded` contract and outbox timing
+  by keeping the audit-owned repository's conditional monthly-usage update as
+  the write-time guard and compatibility fallback under concurrent ingest.
+
 - Added a platform-owned API entitlement service seam under
   `apps/api/src/modules/platform/entitlements` that resolves organization plan
   and current-month meter usage into generic feature and meter decisions using

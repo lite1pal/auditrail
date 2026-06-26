@@ -204,6 +204,7 @@ describe("event API integration", () => {
     });
 
     expect(response.statusCode).toBe(402);
+    await expect(countAuditEvents()).resolves.toBe(0);
     await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
@@ -216,6 +217,14 @@ describe("event API integration", () => {
   async function countOutboxJobs() {
     const result = await pool.query<{ count: string }>(
       'select cast(count(*) as text) as "count" from "job_outbox"'
+    );
+
+    return Number(result.rows[0]?.count ?? "0");
+  }
+
+  async function countAuditEvents() {
+    const result = await pool.query<{ count: string }>(
+      'select cast(count(*) as text) as "count" from "audit_events"'
     );
 
     return Number(result.rows[0]?.count ?? "0");
