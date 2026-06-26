@@ -25,6 +25,29 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-062 Add local extraction output generator
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/extraction-output
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - tools/extraction/*
+    - package.json
+    - .gitignore
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - A local extraction-output script generates a candidate boilerplate directory under an ignored repo-local path
+    - Output generation reuses the dry-run planner and fails closed on unknown, conflicting, or product-specific copy paths
+    - Generated output includes explicit template placeholders plus a README and report explaining manual-review limits
+
 - [x] T-061 Reduce DB extraction manual-review area
   status: done
   priority: high

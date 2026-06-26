@@ -4,10 +4,11 @@ Keep the build vertical and incremental.
 
 ## Recommended Order
 
-1. Prepare extraction inputs without extracting yet:
+1. Keep extraction prep local and fail-closed:
    - keep `tools/extraction/manifest.ts` current as the canonical advisory split
    - keep `tools/extraction/dry-run.ts` green as the fail-closed plan check
-   - reduce mixed and manual-review paths before any real extraction output is attempted
+   - use `tools/extraction/extract.ts` only for ignored local candidate output
+   - reduce mixed and manual-review paths before treating any generated output as reusable
    - keep future extraction fail-closed on unknown paths
 
 1. Add dashboard read model:

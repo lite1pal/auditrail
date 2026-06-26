@@ -1,4 +1,4 @@
-# Extraction Manifest
+# Extraction Tooling
 
 `tools/extraction/manifest.ts` is a machine-readable advisory manifest for a
 future SaaS boilerplate extraction.
@@ -6,6 +6,10 @@ future SaaS boilerplate extraction.
 `tools/extraction/dry-run.ts` is the read-only planner that validates the
 current repo tree against that manifest and prints what a future extraction
 would copy, exclude, template, or stop for manual review.
+
+`tools/extraction/extract.ts` is the local-only output writer. It reuses the
+same planner and can write a candidate boilerplate tree under an ignored
+directory such as `.generated/saas-boilerplate/`.
 
 What it does:
 
@@ -16,16 +20,16 @@ What it does:
 
 What it does not do:
 
-- it does not copy files
-- it does not modify the repo
 - it does not mean extraction is currently supported
-- it does not generate a boilerplate repo directory
+- it does not publish a package or create a separate repo
+- it does not treat the generated directory as a finished boilerplate
 
 Commands:
 
 ```bash
 pnpm check:extraction-manifest
 pnpm check:extraction
+pnpm extract:boilerplate
 pnpm test:extraction
 ```
 
@@ -37,6 +41,32 @@ Rules for a future extraction script:
 - preserve the platform boundary rule that `platform-core` and
   `platform-extension` code must remain free of AuditTrail product imports
 
+`pnpm extract:boilerplate` writes local output only. Current behavior:
+
+- runs the same fail-closed planner logic before writing
+- writes to `.generated/saas-boilerplate/` by default
+- removes the target directory first unless `--no-clean` is passed
+- copies only `copy` files
+- writes minimal placeholder stubs for `template` files
+- omits `exclude` and `manual-review` files from the generated tree
+- writes `EXTRACTION_README.md` and `extraction-report.json` into the output
+
+Optional flags:
+
+```bash
+pnpm extract:boilerplate -- --no-clean
+pnpm extract:boilerplate -- --output .generated/custom-boilerplate
+```
+
+Output safety policy:
+
+- output must stay inside the current repo
+- output must live under `.generated/` or `tmp/`
+- output generation fails before writing if the dry-run planner reports any
+  unknown, conflicting, unmatched-required, or product-copy leak error
+- product-specific files are never copied unless they are explicitly classified
+  as templates
+
 `pnpm check:extraction-manifest` validates manifest structure only.
 
 `pnpm check:extraction` runs the dry-run planner. It fails when:
@@ -45,6 +75,10 @@ Rules for a future extraction script:
 - one file resolves to conflicting primary actions without the explicit template-over-exclude rule
 - a tracked file under the monitored app, package, tool, or docs roots is unclassified
 - a product-specific path leaks into the boilerplate copy set
+
+The generated output is intentionally incomplete while manual-review files
+still exist. Treat `extraction-report.json` as the source of truth for what was
+copied, templated, excluded, or still requires explicit follow-up.
 
 Current `packages/db/src` posture:
 

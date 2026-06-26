@@ -5,6 +5,7 @@ node_modules
 dist
 coverage
 .turbo
+.generated/
 .env
 !.env.example
 

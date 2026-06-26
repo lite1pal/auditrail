@@ -23,6 +23,9 @@ The planned extraction manifest for future boilerplate work is exposed at
 The read-only extraction dry-run planner is exposed at
 `tools/extraction/dry-run.ts`.
 
+The local-only candidate output writer is exposed at
+`tools/extraction/extract.ts`.
+
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
 
@@ -449,6 +452,14 @@ The dry-run planner is intentionally source-repo tooling:
 - it prints a deterministic plan only
 - it fails closed on unknown tracked files, conflicting primary actions, unmatched required entries, and product-code leaks into the copy set
 - it does not create extraction output or a scaffold repo
+
+The output writer is intentionally more conservative than a real extraction:
+
+- it reuses the same fail-closed planner before writing
+- it writes only to ignored repo-local directories such as `.generated/saas-boilerplate/`
+- it copies only explicit `copy` paths and writes minimal placeholders for explicit `template` paths
+- it omits `exclude` and `manual-review` files from the generated tree
+- it does not claim the generated directory is a supported boilerplate
 
 Current examples captured there:
 

@@ -251,3 +251,13 @@ pnpm test:extraction
 manifest and fails closed on unknown tracked files, unmatched required entries,
 conflicting primary actions, or product-code leaks into the copy set. It is a
 focused tooling check and is not part of `pnpm verify` yet.
+
+For a local candidate output directory, run:
+
+```bash
+pnpm extract:boilerplate
+```
+
+This command is also outside `pnpm verify`. It reuses the same fail-closed
+planner and writes only to ignored repo-local output such as
+`.generated/saas-boilerplate/`.

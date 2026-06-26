@@ -2,6 +2,16 @@
 
 ## 2026-06-26
 
+- Added `tools/extraction/extract.ts` plus a small output module and focused
+  tests so the repo can generate a local candidate boilerplate tree under an
+  ignored directory without publishing or moving source files.
+
+- Added `pnpm extract:boilerplate` and `.generated/` ignore rules. The writer
+  reuses the fail-closed dry-run planner, copies only explicit platform paths,
+  writes minimal placeholders for explicit template seams, and emits
+  `EXTRACTION_README.md` plus `extraction-report.json` with the remaining
+  manual-review set.
+
 - Refined the extraction manifest for `packages/db/src` so the reusable
   identity schema and most concrete migrations now have explicit extraction
   ownership instead of living under one broad manual-review bucket.
