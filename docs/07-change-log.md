@@ -2,6 +2,14 @@
 
 ## 2026-06-26
 
+- Refined the platform entitlement seam so product code can resolve a generic
+  meter decision and the current entitlement summary from one snapshot read
+  instead of separately asking for a decision and then a quota summary.
+
+- Rewired audit-event ingest to consume that combined entitlement evaluation
+  seam for the `events` meter while preserving the existing quota error
+  contract, repository write-time guard, and outbox timing.
+
 - Migrated the audit-event ingest quota decision to the platform-owned
   entitlement service, so the audit product now asks the generic `events`
   meter seam for allow or deny before quota-protected writes.

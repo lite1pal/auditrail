@@ -50,17 +50,14 @@ export function createAuditEventService(
         return repo.append(tenant, input);
       }
 
-      const quotaDecision = await options.entitlementService.canConsumeMeter({
+      const entitlement = await options.entitlementService.evaluateMeterEntitlement({
         meterKey: defaultPlatformMeterKey,
         organizationId: tenant.organizationId,
         quantity: 1
       });
-      const quota = await resolveEventQuota(
-        options.entitlementService,
-        tenant.organizationId
-      );
+      const quota = resolveEventQuota(entitlement.summary);
 
-      if (quotaDecision.status !== "allowed") {
+      if (entitlement.decision.status !== "allowed") {
         throw new EventQuotaExceededError(quota);
       }
 
@@ -80,11 +77,9 @@ export function createAuditEventService(
   };
 }
 
-async function resolveEventQuota(
-  entitlementService: PlatformEntitlementService,
-  organizationId: string
-): Promise<PricingUsageSummary> {
-  const summary = await entitlementService.getEntitlementSummary(organizationId);
+function resolveEventQuota(
+  summary: Awaited<ReturnType<PlatformEntitlementService["getEntitlementSummary"]>>
+): PricingUsageSummary {
   const eventUsage = summary.meterUsage.find(
     (meterUsage) => meterUsage.meterKey === defaultPlatformMeterKey
   );

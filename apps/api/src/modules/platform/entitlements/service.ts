@@ -68,6 +68,14 @@ export interface PlatformEntitlementSummary<
   usageLimits: readonly UsageLimit<TMeterKey>[];
 }
 
+export interface PlatformMeterEntitlementEvaluation<
+  TFeatureKey extends string = string,
+  TMeterKey extends string = string
+> {
+  decision: EntitlementDecision<TFeatureKey, TMeterKey>;
+  summary: PlatformEntitlementSummary<TFeatureKey, TMeterKey>;
+}
+
 export interface PlatformEntitlementService<
   TFeatureKey extends string = string,
   TMeterKey extends string = string
@@ -81,6 +89,11 @@ export interface PlatformEntitlementService<
     featureKey: TFeatureKey;
     organizationId: string;
   }): Promise<EntitlementDecision<TFeatureKey, TMeterKey>>;
+  evaluateMeterEntitlement(input: {
+    meterKey: TMeterKey;
+    organizationId: string;
+    quantity: number;
+  }): Promise<PlatformMeterEntitlementEvaluation<TFeatureKey, TMeterKey>>;
   getEntitlementSummary(
     organizationId: string
   ): Promise<PlatformEntitlementSummary<TFeatureKey, TMeterKey>>;
@@ -133,25 +146,37 @@ export function createPlatformEntitlementService<
       TFeatureKey,
       TMeterKey
     >);
+  const evaluateMeterEntitlement = async (input: {
+    meterKey: TMeterKey;
+    organizationId: string;
+    quantity: number;
+  }) => {
+    const quantity = quantitySchema.parse(input.quantity);
+    const meterKey = meterKeySchema.parse(input.meterKey) as TMeterKey;
+    const state = await loadEntitlementState(
+      repo,
+      resolvePlanEntitlement,
+      defaultPlanId,
+      organizationIdSchema.parse(input.organizationId),
+      now
+    );
 
-  return {
-    async canConsumeMeter(input) {
-      const quantity = quantitySchema.parse(input.quantity);
-      const meterKey = meterKeySchema.parse(input.meterKey) as TMeterKey;
-      const state = await loadEntitlementState(
-        repo,
-        resolvePlanEntitlement,
-        defaultPlanId,
-        organizationIdSchema.parse(input.organizationId),
-        now
-      );
-
-      return evaluateMeterConsumption({
+    return {
+      decision: evaluateMeterConsumption({
         entitlement: state.entitlement,
         meterKey,
         requestedUnits: quantity,
         usedUnits: state.meterUsageByMeterKey.get(meterKey) ?? 0
-      });
+      }),
+      summary: summarizeLoadedEntitlements(state)
+    };
+  };
+
+  return {
+    async canConsumeMeter(input) {
+      const evaluation = await evaluateMeterEntitlement(input);
+
+      return evaluation.decision;
     },
     async canUseFeature(input) {
       const featureKey = featureKeySchema.parse(input.featureKey) as TFeatureKey;
@@ -168,6 +193,9 @@ export function createPlatformEntitlementService<
         featureKey
       });
     },
+    async evaluateMeterEntitlement(input) {
+      return evaluateMeterEntitlement(input);
+    },
     async getEntitlementSummary(organizationId) {
       const state = await loadEntitlementState(
         repo,
@@ -176,38 +204,7 @@ export function createPlatformEntitlementService<
         organizationIdSchema.parse(organizationId),
         now
       );
-      const summarized = summarizeEntitlements(state.entitlement);
-
-      return {
-        features: summarized.features,
-        meterUsage: summarized.usageLimits.map((usageLimit) => {
-          const usedUnits = state.meterUsageByMeterKey.get(usageLimit.meterKey) ?? 0;
-
-          if (usageLimit.kind === "unlimited") {
-            return {
-              includedUnits: null,
-              kind: usageLimit.kind,
-              meterKey: usageLimit.meterKey,
-              remainingUnits: null,
-              usedUnits
-            };
-          }
-
-          return {
-            includedUnits: usageLimit.includedUnits,
-            kind: usageLimit.kind,
-            meterKey: usageLimit.meterKey,
-            remainingUnits: Math.max(usageLimit.includedUnits - usedUnits, 0),
-            usedUnits
-          };
-        }),
-        organizationId: state.organizationId,
-        periodEnd: state.periodEnd,
-        periodStart: state.periodStart,
-        planId: state.planId,
-        usageLimits: summarized.usageLimits,
-        usedDefaultPlan: state.usedDefaultPlan
-      };
+      return summarizeLoadedEntitlements(state);
     }
   };
 }
@@ -247,5 +244,47 @@ async function loadEntitlementState<
     periodStart: currentWindow.periodStart,
     planId,
     usedDefaultPlan: snapshot.planId === undefined
+  };
+}
+
+function summarizeLoadedEntitlements<
+  TFeatureKey extends string,
+  TMeterKey extends string
+>(
+  state: Awaited<
+    ReturnType<typeof loadEntitlementState<TFeatureKey, TMeterKey>>
+  >
+): PlatformEntitlementSummary<TFeatureKey, TMeterKey> {
+  const summarized = summarizeEntitlements(state.entitlement);
+
+  return {
+    features: summarized.features,
+    meterUsage: summarized.usageLimits.map((usageLimit) => {
+      const usedUnits = state.meterUsageByMeterKey.get(usageLimit.meterKey) ?? 0;
+
+      if (usageLimit.kind === "unlimited") {
+        return {
+          includedUnits: null,
+          kind: usageLimit.kind,
+          meterKey: usageLimit.meterKey,
+          remainingUnits: null,
+          usedUnits
+        };
+      }
+
+      return {
+        includedUnits: usageLimit.includedUnits,
+        kind: usageLimit.kind,
+        meterKey: usageLimit.meterKey,
+        remainingUnits: Math.max(usageLimit.includedUnits - usedUnits, 0),
+        usedUnits
+      };
+    }),
+    organizationId: state.organizationId,
+    periodEnd: state.periodEnd,
+    periodStart: state.periodStart,
+    planId: state.planId,
+    usageLimits: summarized.usageLimits,
+    usedDefaultPlan: state.usedDefaultPlan
   };
 }

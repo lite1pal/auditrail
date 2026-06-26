@@ -110,6 +110,26 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-061 Refine the entitlement seam for reusable quota snapshots
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/entitlement-snapshot-seam
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/entitlements/*
+    - apps/api/src/modules/audit-events/*
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - The platform entitlement service exposes a generic meter-evaluation seam that returns both the allow or deny decision and the current entitlement summary from one snapshot load
+    - Audit-event ingest uses that generic seam so quota decisions and quota snapshots do not require duplicate entitlement reads
+    - The service remains generic and product-neutral, and existing quota behavior and API contracts stay unchanged
+
 - [x] T-060 Migrate audit event quota check to entitlement service
   status: done
   priority: high

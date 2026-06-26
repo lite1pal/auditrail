@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createPlatformEntitlementService,
@@ -155,6 +155,67 @@ describe("createPlatformEntitlementService", () => {
       status: "denied_meter_limit_exceeded",
       usedUnits: 98
     });
+  });
+
+  it("resolves a meter decision and summary from one snapshot read", async () => {
+    const repo = {
+      getOrganizationEntitlementSnapshot: vi.fn(async (input) => ({
+        meterUsage: [
+          {
+            meterKey: "events",
+            usedUnits: 90
+          }
+        ],
+        organizationId: input.organizationId,
+        planId: "starter" as const
+      }))
+    } satisfies PlatformEntitlementRepo<string>;
+    const service = createPlatformEntitlementService(repo, {
+      now: () => new Date("2026-06-26T12:00:00.000Z"),
+      resolvePlanEntitlement: planResolver
+    });
+
+    await expect(
+      service.evaluateMeterEntitlement({
+        meterKey: "events",
+        organizationId: "org-1",
+        quantity: 10
+      })
+    ).resolves.toEqual({
+      decision: {
+        includedUnits: 100,
+        meterKey: "events",
+        remainingUnits: 10,
+        requestedUnits: 10,
+        status: "allowed",
+        usedUnits: 90
+      },
+      summary: {
+        features: ["exports"],
+        meterUsage: [
+          {
+            includedUnits: 100,
+            kind: "limited",
+            meterKey: "events",
+            remainingUnits: 10,
+            usedUnits: 90
+          }
+        ],
+        organizationId: "org-1",
+        periodEnd: "2026-07-01T00:00:00.000Z",
+        periodStart: "2026-06-01T00:00:00.000Z",
+        planId: "starter",
+        usageLimits: [
+          {
+            includedUnits: 100,
+            kind: "limited",
+            meterKey: "events"
+          }
+        ],
+        usedDefaultPlan: false
+      }
+    });
+    expect(repo.getOrganizationEntitlementSnapshot).toHaveBeenCalledTimes(1);
   });
 
   it("throws when the organization is missing", async () => {

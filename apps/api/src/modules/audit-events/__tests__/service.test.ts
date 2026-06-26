@@ -56,39 +56,43 @@ describe("createAuditEventService", () => {
       timeseries: vi.fn()
     };
     const entitlementService = {
-      canConsumeMeter: vi.fn(async () => ({
-        includedUnits: 100_000,
-        meterKey: "events",
-        remainingUnits: 1,
-        requestedUnits: 1,
-        status: "allowed" as const,
-        usedUnits: 99_999
-      })),
+      canConsumeMeter: vi.fn(),
       canUseFeature: vi.fn(),
-      getEntitlementSummary: vi.fn(async () => ({
-        features: [],
-        meterUsage: [
-          {
-            includedUnits: 100_000,
-            kind: "limited" as const,
-            meterKey: "events",
-            remainingUnits: 1,
-            usedUnits: 99_999
-          }
-        ],
-        organizationId: "org-1",
-        periodEnd: "2026-07-01T00:00:00.000Z",
-        periodStart: "2026-06-01T00:00:00.000Z",
-        planId: "starter" as const,
-        usageLimits: [
-          {
-            includedUnits: 100_000,
-            kind: "limited" as const,
-            meterKey: "events"
-          }
-        ],
-        usedDefaultPlan: false
-      }))
+      evaluateMeterEntitlement: vi.fn(async () => ({
+        decision: {
+          includedUnits: 100_000,
+          meterKey: "events",
+          remainingUnits: 1,
+          requestedUnits: 1,
+          status: "allowed" as const,
+          usedUnits: 99_999
+        },
+        summary: {
+          features: [],
+          meterUsage: [
+            {
+              includedUnits: 100_000,
+              kind: "limited" as const,
+              meterKey: "events",
+              remainingUnits: 1,
+              usedUnits: 99_999
+            }
+          ],
+          organizationId: "org-1",
+          periodEnd: "2026-07-01T00:00:00.000Z",
+          periodStart: "2026-06-01T00:00:00.000Z",
+          planId: "starter" as const,
+          usageLimits: [
+            {
+              includedUnits: 100_000,
+              kind: "limited" as const,
+              meterKey: "events"
+            }
+          ],
+          usedDefaultPlan: false
+        }
+      })),
+      getEntitlementSummary: vi.fn()
     };
     const service = createAuditEventService(repo, {
       entitlementService
@@ -105,11 +109,13 @@ describe("createAuditEventService", () => {
       }
     );
 
-    expect(entitlementService.canConsumeMeter).toHaveBeenCalledWith({
+    expect(entitlementService.evaluateMeterEntitlement).toHaveBeenCalledWith({
       meterKey: "events",
       organizationId: "org-1",
       quantity: 1
     });
+    expect(entitlementService.canConsumeMeter).not.toHaveBeenCalled();
+    expect(entitlementService.getEntitlementSummary).not.toHaveBeenCalled();
     expect(repo.append).toHaveBeenCalledWith(
       {
         organizationId: "org-1",
@@ -143,39 +149,43 @@ describe("createAuditEventService", () => {
       },
       {
         entitlementService: {
-          canConsumeMeter: vi.fn(async () => ({
-            includedUnits: 100_000,
-            meterKey: "events",
-            remainingUnits: 0,
-            requestedUnits: 1,
-            status: "denied_meter_limit_exceeded" as const,
-            usedUnits: 100_000
-          })),
+          canConsumeMeter: vi.fn(),
           canUseFeature: vi.fn(),
-          getEntitlementSummary: vi.fn(async () => ({
-            features: [],
-            meterUsage: [
-              {
-                includedUnits: 100_000,
-                kind: "limited" as const,
-                meterKey: "events",
-                remainingUnits: 0,
-                usedUnits: 100_000
-              }
-            ],
-            organizationId: "org-1",
-            periodEnd: "2026-07-01T00:00:00.000Z",
-            periodStart: "2026-06-01T00:00:00.000Z",
-            planId: "starter" as const,
-            usageLimits: [
-              {
-                includedUnits: 100_000,
-                kind: "limited" as const,
-                meterKey: "events"
-              }
-            ],
-            usedDefaultPlan: false
-          }))
+          evaluateMeterEntitlement: vi.fn(async () => ({
+            decision: {
+              includedUnits: 100_000,
+              meterKey: "events",
+              remainingUnits: 0,
+              requestedUnits: 1,
+              status: "denied_meter_limit_exceeded" as const,
+              usedUnits: 100_000
+            },
+            summary: {
+              features: [],
+              meterUsage: [
+                {
+                  includedUnits: 100_000,
+                  kind: "limited" as const,
+                  meterKey: "events",
+                  remainingUnits: 0,
+                  usedUnits: 100_000
+                }
+              ],
+              organizationId: "org-1",
+              periodEnd: "2026-07-01T00:00:00.000Z",
+              periodStart: "2026-06-01T00:00:00.000Z",
+              planId: "starter" as const,
+              usageLimits: [
+                {
+                  includedUnits: 100_000,
+                  kind: "limited" as const,
+                  meterKey: "events"
+                }
+              ],
+              usedDefaultPlan: false
+            }
+          })),
+          getEntitlementSummary: vi.fn()
         }
       }
     );
@@ -223,39 +233,43 @@ describe("createAuditEventService", () => {
       },
       {
         entitlementService: {
-          canConsumeMeter: vi.fn(async () => ({
-            includedUnits: 100_000,
-            meterKey: "events",
-            remainingUnits: 1,
-            requestedUnits: 1,
-            status: "allowed" as const,
-            usedUnits: 99_999
-          })),
+          canConsumeMeter: vi.fn(),
           canUseFeature: vi.fn(),
-          getEntitlementSummary: vi.fn(async () => ({
-            features: [],
-            meterUsage: [
-              {
-                includedUnits: 100_000,
-                kind: "limited" as const,
-                meterKey: "events",
-                remainingUnits: 1,
-                usedUnits: 99_999
-              }
-            ],
-            organizationId: "org-1",
-            periodEnd: "2026-07-01T00:00:00.000Z",
-            periodStart: "2026-06-01T00:00:00.000Z",
-            planId: "starter" as const,
-            usageLimits: [
-              {
-                includedUnits: 100_000,
-                kind: "limited" as const,
-                meterKey: "events"
-              }
-            ],
-            usedDefaultPlan: false
-          }))
+          evaluateMeterEntitlement: vi.fn(async () => ({
+            decision: {
+              includedUnits: 100_000,
+              meterKey: "events",
+              remainingUnits: 1,
+              requestedUnits: 1,
+              status: "allowed" as const,
+              usedUnits: 99_999
+            },
+            summary: {
+              features: [],
+              meterUsage: [
+                {
+                  includedUnits: 100_000,
+                  kind: "limited" as const,
+                  meterKey: "events",
+                  remainingUnits: 1,
+                  usedUnits: 99_999
+                }
+              ],
+              organizationId: "org-1",
+              periodEnd: "2026-07-01T00:00:00.000Z",
+              periodStart: "2026-06-01T00:00:00.000Z",
+              planId: "starter" as const,
+              usageLimits: [
+                {
+                  includedUnits: 100_000,
+                  kind: "limited" as const,
+                  meterKey: "events"
+                }
+              ],
+              usedDefaultPlan: false
+            }
+          })),
+          getEntitlementSummary: vi.fn()
         }
       }
     );
@@ -288,25 +302,29 @@ describe("createAuditEventService", () => {
     };
     const service = createAuditEventService(repo, {
       entitlementService: {
-        canConsumeMeter: vi.fn(async () => ({
-          includedUnits: 100_000,
-          meterKey: "events",
-          remainingUnits: 1,
-          requestedUnits: 1,
-          status: "allowed" as const,
-          usedUnits: 99_999
-        })),
+        canConsumeMeter: vi.fn(),
         canUseFeature: vi.fn(),
-        getEntitlementSummary: vi.fn(async () => ({
-          features: [],
-          meterUsage: [],
-          organizationId: "org-1",
-          periodEnd: "2026-07-01T00:00:00.000Z",
-          periodStart: "2026-06-01T00:00:00.000Z",
-          planId: "starter" as const,
-          usageLimits: [],
-          usedDefaultPlan: false
-        }))
+        evaluateMeterEntitlement: vi.fn(async () => ({
+          decision: {
+            includedUnits: 100_000,
+            meterKey: "events",
+            remainingUnits: 1,
+            requestedUnits: 1,
+            status: "allowed" as const,
+            usedUnits: 99_999
+          },
+          summary: {
+            features: [],
+            meterUsage: [],
+            organizationId: "org-1",
+            periodEnd: "2026-07-01T00:00:00.000Z",
+            periodStart: "2026-06-01T00:00:00.000Z",
+            planId: "starter" as const,
+            usageLimits: [],
+            usedDefaultPlan: false
+          }
+        })),
+        getEntitlementSummary: vi.fn()
       }
     });
 

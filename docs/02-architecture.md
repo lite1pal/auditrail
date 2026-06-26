@@ -71,7 +71,9 @@ organization plan plus generic monthly meter usage into feature and meter
 decisions by calling the pure domain helpers. It is platform-owned and generic:
 it must not import audit-product modules, expose product-specific routes, or
 replace the current audit-event ingest quota enforcement path in the same
-slice.
+slice. Product code should prefer its combined meter-evaluation seam when it
+needs both an allow or deny decision and the current quota snapshot, so one
+entitlement read can serve both decisions and response metadata.
 
 Generic product-definition types also live in `packages/domain/src/product`.
 That module defines the reusable shape for product nav items, usage meters,
@@ -207,9 +209,10 @@ The read path uses the same API key principal to scope events to the authenticat
 Quota enforcement happens only on the public ingest path. Event reads, stats,
 and timeseries remain available after a workspace reaches its monthly included
 event limit. The audit ingest path now asks the platform entitlement service
-for the generic `events` meter decision before attempting the quota-protected
-write, while the audit-owned repository keeps the conditional usage increment
-as the write-time guard so event insert and usage accounting stay aligned.
+for the generic `events` meter decision plus current quota snapshot before
+attempting the quota-protected write, while the audit-owned repository keeps
+the conditional usage increment as the write-time guard so event insert and
+usage accounting stay aligned.
 Successful ingest now also writes a generic `audit-event.created` outbox job in
 the same audit-owned persistence slice so future worker-driven side effects can
 be triggered from durable intent instead of inline API work.
