@@ -239,3 +239,15 @@ pnpm check:extraction-manifest
 
 This check verifies only manifest structure and section-action consistency. It
 does not perform extraction, file copying, or repo mutation.
+
+For the repo-tree dry-run extraction plan, run:
+
+```bash
+pnpm check:extraction
+pnpm test:extraction
+```
+
+`pnpm check:extraction` validates the current tree against the advisory
+manifest and fails closed on unknown tracked files, unmatched required entries,
+conflicting primary actions, or product-code leaks into the copy set. It is a
+focused tooling check and is not part of `pnpm verify` yet.

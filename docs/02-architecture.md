@@ -20,6 +20,9 @@ The current source-root boundary map for future static enforcement is exposed at
 The planned extraction manifest for future boilerplate work is exposed at
 `tools/extraction/manifest.ts`.
 
+The read-only extraction dry-run planner is exposed at
+`tools/extraction/dry-run.ts`.
+
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
 
@@ -439,6 +442,13 @@ The manifest separates:
 - `replaceWithTemplate`: product-shaped files that need placeholder boilerplate equivalents
 - `requiresManualReview`: mixed ownership, docs, migrations, and composition files
 - `platformCore`, `platformExtension`, and `productSpecific`: explicit ownership views for later dry-run tooling
+
+The dry-run planner is intentionally source-repo tooling:
+
+- it validates the current repo tree against the manifest
+- it prints a deterministic plan only
+- it fails closed on unknown tracked files, conflicting primary actions, unmatched required entries, and product-code leaks into the copy set
+- it does not create extraction output or a scaffold repo
 
 Current examples captured there:
 

@@ -25,6 +25,29 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-060 Add dry-run extraction script
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/extraction-dry-run
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - tools/extraction/*
+    - tools/check-extraction-manifest.ts
+    - package.json
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - A dry-run extraction script reads the advisory manifest and prints a deterministic plan without writing output
+    - The extraction check fails closed on unknown files, conflicting actions, unmatched required entries, or product-code leaks into the copy set
+    - Focused tests cover the planner behavior and docs explain the dry-run command and failure policy
+
 - [x] T-058 Add extraction manifest
   status: done
   priority: high

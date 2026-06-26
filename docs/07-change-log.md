@@ -2,6 +2,20 @@
 
 ## 2026-06-26
 
+- Added `tools/extraction/dry-run.ts` plus a pure planner module and focused
+  tests so the repo can print a deterministic extraction plan without copying
+  files or generating a boilerplate repo.
+
+- Added `pnpm check:extraction` and `pnpm test:extraction` for the extraction
+  dry-run path. The dry-run validates the current repo tree against the
+  advisory manifest and fails closed on unknown tracked files, unmatched
+  required entries, conflicting primary actions, or product-code leaks into the
+  copy set.
+
+- Refined the extraction manifest to classify API bootstrap files, web app
+  composition files, DB support files, and source-repo-only extraction tooling
+  so the dry-run can cover the current monitored roots explicitly.
+
 - Added `tools/extraction/manifest.ts` as the canonical machine-readable
   advisory map for future boilerplate extraction, with explicit copy,
   exclude, template-replacement, and manual-review sections plus ownership

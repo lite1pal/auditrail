@@ -6,7 +6,8 @@ Keep the build vertical and incremental.
 
 1. Prepare extraction inputs without extracting yet:
    - keep `tools/extraction/manifest.ts` current as the canonical advisory split
-   - add dry-run extraction tooling only after mixed paths have been reduced further
+   - keep `tools/extraction/dry-run.ts` green as the fail-closed plan check
+   - reduce mixed and manual-review paths before any real extraction output is attempted
    - keep future extraction fail-closed on unknown paths
 
 1. Add dashboard read model:

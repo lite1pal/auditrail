@@ -7,6 +7,7 @@ export type ExtractionCategory =
   | "mixed"
   | "documentation"
   | "branding"
+  | "repo-tooling"
   | "workspace-config"
   | "deployment";
 
@@ -24,6 +25,7 @@ export interface ExtractionManifestEntry {
   reason: string;
   notes: readonly string[];
   requiredForMinimalScaffold: boolean;
+  allowEmptyMatch?: boolean;
 }
 
 export interface ExtractionManifestSection {
@@ -56,6 +58,73 @@ function entry(
 }
 
 const platformCoreEntries = [
+  entry({
+    path: "apps/api/src/plugins/**",
+    pathKind: "glob",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Fastify plugin seams for auth, database, rate limiting, request runtime, and session resolution are reusable platform infrastructure.",
+    notes: [
+      "Keep plugin behavior generic and audit-free.",
+      "Review app composition separately."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/api-version.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "API version helpers are reusable platform runtime metadata.",
+    notes: [
+      "Keep the versioned prefix contract generic."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/config.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "API env parsing and validation are reusable runtime foundations.",
+    notes: [
+      "Template default product-facing cookie names only if needed."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/env-files.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Repo and app env-file loading precedence is reusable platform behavior.",
+    notes: [
+      "Preserve root then app-local then process-env precedence."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/http-errors.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Centralized API error handling is platform runtime infrastructure.",
+    notes: [
+      "Keep safe production error collapsing and request correlation behavior."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/validate-env.ts",
+    pathKind: "file",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "The build and startup env validator is reusable platform tooling.",
+    notes: [
+      "Keep it aligned with config parsing."
+    ],
+    requiredForMinimalScaffold: true
+  }),
   entry({
     path: "apps/api/src/modules/auth/**",
     pathKind: "glob",
@@ -165,6 +234,28 @@ const platformCoreEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "apps/web/src/components/layout/**",
+    pathKind: "glob",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Shared layout components and their tests belong with the reusable shell.",
+    notes: [
+      "Keep shell composition generic and product-config driven."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/app/auth/**",
+    pathKind: "glob",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Auth route composition pages are generic hosted-SaaS browser flows.",
+    notes: [
+      "Template any product-facing copy only through feature or product seams."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
     path: "apps/web/src/components/ui/**",
     pathKind: "glob",
     category: "platform-core",
@@ -187,6 +278,17 @@ const platformCoreEntries = [
       "Review generated schema files against the extracted API contract."
     ],
     requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/src/test/**",
+    pathKind: "glob",
+    category: "platform-core",
+    extractionAction: "copy",
+    reason: "Web test-only helper shims are reusable support code for the platform UI test suite.",
+    notes: [
+      "Keep these helpers generic and test-only."
+    ],
+    requiredForMinimalScaffold: false
   }),
   entry({
     path: "apps/web/src/config/**",
@@ -475,6 +577,39 @@ const productSpecificEntries = [
       "These adapters intentionally bind generic UI to audit-owned config."
     ],
     requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/web/app/__tests__/audit-product-chrome.test.ts",
+    pathKind: "file",
+    category: "audit-product",
+    extractionAction: "exclude",
+    reason: "AuditTrail-specific chrome adapter tests should not become boilerplate defaults.",
+    notes: [
+      "Replace with placeholder product-config tests only when a generic scaffold product exists."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/web/app/__tests__/audit-product-navigation.test.ts",
+    pathKind: "file",
+    category: "audit-product",
+    extractionAction: "exclude",
+    reason: "AuditTrail-specific navigation adapter tests are product-owned.",
+    notes: [
+      "Do not copy AuditTrail nav assumptions into the boilerplate."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/web/app/getting-started/__tests__/audit-product-onboarding.test.ts",
+    pathKind: "file",
+    category: "audit-product",
+    extractionAction: "exclude",
+    reason: "AuditTrail-specific onboarding adapter tests are product-owned.",
+    notes: [
+      "Replace with placeholder product onboarding tests only when templating is introduced."
+    ],
+    requiredForMinimalScaffold: false
   })
 ] as const satisfies readonly ExtractionManifestEntry[];
 
@@ -539,6 +674,18 @@ const replaceWithTemplateEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "packages/db/src/seed.ts",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "template",
+    reason: "Demo seed data should become placeholder boilerplate sample data rather than copy the current example names.",
+    notes: [
+      "Replace example organization, project, and API key names.",
+      "Keep the generic seed helper shape only if the boilerplate still wants demo data."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
     path: "README.md",
     pathKind: "file",
     category: "documentation",
@@ -566,6 +713,63 @@ const replaceWithTemplateEntries = [
 
 const manualReviewEntries = [
   entry({
+    path: "apps/api/src/__tests__/**",
+    pathKind: "glob",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "Root API tests mix platform runtime coverage with app composition assumptions.",
+    notes: [
+      "Split generic runtime tests from product-composition tests during extraction."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/app.ts",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "App route composition wires both platform and AuditTrail product modules together.",
+    notes: [
+      "Keep platform route registration.",
+      "Remove audit-event registration in the extracted boilerplate."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/http-schemas.ts",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "Shared API schemas currently include both platform and audit-product response shapes.",
+    notes: [
+      "Split generic schemas from audit-event contracts before automated extraction."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/server.ts",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "The runtime entrypoint is generic structurally but depends on mixed app composition.",
+    notes: [
+      "Keep bootstrap flow and env loading.",
+      "Review route registration dependencies before extraction."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/api/src/server-local-auth.ts",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "The dev-only auth entrypoint mixes generic startup with local AuditTrail development assumptions.",
+    notes: [
+      "Decide whether the extracted boilerplate should keep a local-auth harness."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
     path: "packages/domain/src/index.ts",
     pathKind: "file",
     category: "mixed",
@@ -574,17 +778,6 @@ const manualReviewEntries = [
     notes: [
       "Verify no AuditTrail-only modules are re-exported.",
       "Future script should fail if this barrel references product paths."
-    ],
-    requiredForMinimalScaffold: true
-  }),
-  entry({
-    path: "packages/db/src/index.ts",
-    pathKind: "file",
-    category: "mixed",
-    extractionAction: "manual-review",
-    reason: "DB package exports may include both generic and AuditTrail-specific schema surfaces.",
-    notes: [
-      "Split or prune exports during extraction rather than copying blindly."
     ],
     requiredForMinimalScaffold: true
   }),
@@ -613,6 +806,39 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "packages/db/src/index.ts",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "DB package exports may include both generic and AuditTrail-specific schema surfaces.",
+    notes: [
+      "Split or prune exports during extraction rather than copying blindly."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "packages/db/src/README.md",
+    pathKind: "file",
+    category: "documentation",
+    extractionAction: "manual-review",
+    reason: "DB package docs may mix reusable storage guidance with current product assumptions.",
+    notes: [
+      "Rewrite or trim docs to match the extracted schema surface."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/db/src/schema/__tests__/**",
+    pathKind: "glob",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "Schema tests should be reviewed alongside mixed DB exports and product tables.",
+    notes: [
+      "Keep tests only for generic extracted tables."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
     path: "packages/db/src/schema/audit-events.ts",
     pathKind: "file",
     category: "mixed",
@@ -636,27 +862,39 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
-    path: "apps/api/src/app.ts",
+    path: "apps/web/app/api-keys/page.tsx",
     pathKind: "file",
     category: "mixed",
     extractionAction: "manual-review",
-    reason: "App route composition wires both platform and AuditTrail product modules together.",
+    reason: "The API keys page composes generic features through an AuditTrail-specific shell adapter.",
     notes: [
-      "Keep platform route registration.",
-      "Remove audit-event registration in the extracted boilerplate."
+      "Keep the page shell.",
+      "Swap in placeholder product navigation wiring."
     ],
     requiredForMinimalScaffold: true
   }),
   entry({
-    path: "apps/api/src/http-schemas.ts",
+    path: "apps/web/app/error.tsx",
     pathKind: "file",
     category: "mixed",
     extractionAction: "manual-review",
-    reason: "Shared API schemas currently include both platform and audit-product response shapes.",
+    reason: "The top-level error route is generic structurally but depends on product-owned chrome copy.",
     notes: [
-      "Split generic schemas from audit-event contracts before automated extraction."
+      "Keep the route shell.",
+      "Point it at placeholder product chrome."
     ],
     requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/app/favicon.ico",
+    pathKind: "file",
+    category: "branding",
+    extractionAction: "manual-review",
+    reason: "App icon assets require a branding decision before extraction.",
+    notes: [
+      "Replace with placeholder branding or omit from the first boilerplate cut."
+    ],
+    requiredForMinimalScaffold: false
   }),
   entry({
     path: "apps/web/app/page.tsx",
@@ -678,6 +916,29 @@ const manualReviewEntries = [
     notes: [
       "Keep the generic settings shell.",
       "Rewire to placeholder product config adapters."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/app/loading.tsx",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "The loading route is generic structurally but depends on product-owned chrome copy.",
+    notes: [
+      "Keep the route shell.",
+      "Point it at placeholder product chrome."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/app/globals.css",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "Global app styles may need brand and scaffold cleanup before extraction.",
+    notes: [
+      "Keep only generic tokens, reset, and base styles in the first boilerplate cut."
     ],
     requiredForMinimalScaffold: true
   }),
@@ -706,6 +967,29 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "apps/web/app/members/page.tsx",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "The members page composes generic features through an AuditTrail-specific shell adapter.",
+    notes: [
+      "Keep the page shell.",
+      "Swap in placeholder product navigation wiring."
+    ],
+    requiredForMinimalScaffold: true
+  }),
+  entry({
+    path: "apps/web/app/page.module.css",
+    pathKind: "file",
+    category: "mixed",
+    extractionAction: "manual-review",
+    reason: "The dashboard page styles should be reviewed alongside any replacement product landing screen.",
+    notes: [
+      "Remove or rewrite styles when the boilerplate landing or dashboard is templated."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
     path: "docs/**",
     pathKind: "glob",
     category: "documentation",
@@ -714,6 +998,39 @@ const manualReviewEntries = [
     notes: [
       "Future extraction should template or rewrite docs selectively.",
       "Do not copy product-specific operational instructions into the boilerplate verbatim."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "tools/check-extraction-manifest.ts",
+    pathKind: "file",
+    category: "repo-tooling",
+    extractionAction: "manual-review",
+    reason: "Extraction-manifest validation is source-repo preparation tooling and may not belong in the extracted boilerplate.",
+    notes: [
+      "Keep it with the source repo unless the boilerplate also needs self-auditing extraction metadata."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "tools/architecture-boundaries/__fixtures__/**",
+    pathKind: "glob",
+    category: "repo-tooling",
+    extractionAction: "manual-review",
+    reason: "Boundary-scanner fixtures are source-repo-only test assets and should not be silently copied into a future boilerplate.",
+    notes: [
+      "Keep these fixtures with the source repo unless the extracted boilerplate also ships the same scanner test suite."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "tools/extraction/**",
+    pathKind: "glob",
+    category: "repo-tooling",
+    extractionAction: "manual-review",
+    reason: "Extraction planning and dry-run tooling are source-repo preparation tools rather than runtime boilerplate output.",
+    notes: [
+      "Keep this tooling with the source product repo unless a later task deliberately ships it as standalone repo tooling."
     ],
     requiredForMinimalScaffold: false
   }),
@@ -819,4 +1136,3 @@ export const extractionManifest = {
     entries: platformExtensionEntries
   }
 } as const satisfies ExtractionManifest;
-
