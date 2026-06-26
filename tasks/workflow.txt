@@ -25,6 +25,24 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-046 Add forbidden import scanner
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/platform-boundary-scanner
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - tools/architecture-boundaries/*
+    - tools/check-architecture-boundaries.ts
+    - tasks/workflow.txt
+  acceptance:
+    - A local scanner reads the existing boundary map and reports forbidden platform-to-audit imports
+    - The scanner exits non-zero when violations are present and prints readable messages
+    - The repo either passes the scanner or the exact current violations are reported clearly
+
 - [x] T-045 Add platform and audit boundary map
   status: done
   priority: medium
