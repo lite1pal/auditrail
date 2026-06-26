@@ -42,8 +42,15 @@ import {
   type PlatformBillingService,
 } from "./modules/platform/billing/service.js";
 import { createCurrentUserContextService } from "./modules/platform/context.js";
+import { createPlatformEntitlementService } from "./modules/platform/entitlements/service.js";
 import { createPostgresPlatformRepo } from "./modules/platform/postgres-repo.js";
 import { registerPlatformRoutes } from "./modules/platform/routes.js";
+import { createPostgresPlatformSupportRepo } from "./modules/platform/support/postgres-repo.js";
+import { registerPlatformSupportRoutes } from "./modules/platform/support/routes.js";
+import {
+  createPlatformSupportService,
+  type PlatformSupportService
+} from "./modules/platform/support/service.js";
 import {
   createPlatformService,
   type PlatformService,
@@ -80,6 +87,9 @@ export interface BuildAppOptions {
   };
   billing?: {
     service: PlatformBillingService;
+  };
+  support?: {
+    service: PlatformSupportService;
   };
   runtimeMagicLinkSender?: MagicLinkSender;
   useInfrastructure?: boolean;
@@ -135,6 +145,10 @@ export function buildApp(options: BuildAppOptions = {}) {
           name: "platform",
           description:
             "Workspace, membership, and machine credential management",
+        },
+        {
+          name: "support",
+          description: "Internal support lookup and troubleshooting"
         },
       ],
       components: {
@@ -249,6 +263,7 @@ export function buildApp(options: BuildAppOptions = {}) {
       const apiKeyRepo = createPostgresApiKeyRepo(infrastructureApp.db);
       const billingRepo = createPostgresPlatformBillingRepo(infrastructureApp.db);
       const platformRepo = createPostgresPlatformRepo(infrastructureApp.db);
+      const supportRepo = createPostgresPlatformSupportRepo(infrastructureApp.db);
       const magicLinkSender =
         options.runtimeMagicLinkSender ?? createRuntimeMagicLinkSender(config);
       const webPublicUrl = requireRuntimeConfig(
@@ -281,6 +296,12 @@ export function buildApp(options: BuildAppOptions = {}) {
       }, {
         adapter: billingProviderAdapter
       });
+      const supportService =
+        options.support?.service ??
+        createPlatformSupportService(supportRepo, {
+          billingRepo,
+          entitlementService: createPlatformEntitlementService(platformRepo)
+        });
 
       infrastructureApp.register(sessionAuthPlugin, {
         cookieName: config.AUTH_SESSION_COOKIE_NAME,
@@ -307,6 +328,10 @@ export function buildApp(options: BuildAppOptions = {}) {
       infrastructureApp.register(registerPlatformBillingRoutes, {
         prefix: API_VERSION_PREFIX,
         service: billingService,
+      });
+      infrastructureApp.register(registerPlatformSupportRoutes, {
+        prefix: API_VERSION_PREFIX,
+        service: supportService,
       });
       infrastructureApp.register(registerApiKeyRoutes, {
         prefix: API_VERSION_PREFIX,
@@ -351,6 +376,13 @@ export function buildApp(options: BuildAppOptions = {}) {
     app.register(registerPlatformBillingRoutes, {
       prefix: API_VERSION_PREFIX,
       service: options.billing.service,
+    });
+  }
+
+  if (options.support) {
+    app.register(registerPlatformSupportRoutes, {
+      prefix: API_VERSION_PREFIX,
+      service: options.support.service,
     });
   }
 

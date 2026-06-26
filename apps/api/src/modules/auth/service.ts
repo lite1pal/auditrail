@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { InternalSupportRole } from "@auditrail/domain/internal-support";
 import { createOpaqueToken, hashToken, verifyTokenHash } from "./tokens.js";
 
 const emailSchema = z.string().trim().email().transform((value) => value.toLowerCase());
@@ -7,6 +8,7 @@ const emailSchema = z.string().trim().email().transform((value) => value.toLower
 export interface AuthUser {
   id: string;
   email: string;
+  internalRole?: InternalSupportRole;
   name?: string;
 }
 

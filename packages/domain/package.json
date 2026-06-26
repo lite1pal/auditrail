@@ -16,6 +16,10 @@
       "types": "./src/entitlements/index.ts",
       "import": "./src/entitlements/index.ts"
     },
+    "./internal-support": {
+      "types": "./src/internal-support/index.ts",
+      "import": "./src/internal-support/index.ts"
+    },
     "./audit-events": {
       "types": "./src/audit-events/index.ts",
       "import": "./src/audit-events/index.ts"

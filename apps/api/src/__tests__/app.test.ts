@@ -8,6 +8,7 @@ import type { ApiKeyService } from "../modules/api-keys/service.js";
 import type { AuthService } from "../modules/auth/service.js";
 import type { PlatformBillingService } from "../modules/platform/billing/service.js";
 import type { PlatformService } from "../modules/platform/service.js";
+import type { PlatformSupportService } from "../modules/platform/support/service.js";
 
 describe("health route", () => {
   it("can register infrastructure plugins for runtime mode", async () => {
@@ -29,6 +30,62 @@ describe("health route", () => {
     });
 
     expect(app).toBeDefined();
+
+    await app.close();
+  });
+
+  it("registers support lookup routes when a support service is provided", async () => {
+    const app = buildApp({
+      support: {
+        service: {
+          async getOrganizationDetail() {
+            return {
+              adminEmails: [],
+              billing: {
+                customer: null,
+                subscription: null
+              },
+              createdAt: "2026-06-26T12:00:00.000Z",
+              entitlement: {
+                features: [],
+                meterUsage: [],
+                organizationId: "org-1",
+                periodEnd: "2026-07-01T00:00:00.000Z",
+                periodStart: "2026-06-01T00:00:00.000Z",
+                planId: "starter",
+                usedDefaultPlan: true,
+                usageLimits: []
+              },
+              id: "org-1",
+              memberCount: 0,
+              name: "Acme",
+              ownerEmails: []
+            };
+          },
+          async searchOrganizations() {
+            return [];
+          }
+        } satisfies PlatformSupportService
+      },
+      useRateLimit: false
+    });
+
+    app.decorateRequest("sessionUser");
+    app.addHook("preHandler", async (request) => {
+      request.sessionUser = {
+        email: "support@example.com",
+        id: "user-1",
+        internalRole: "support"
+      };
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/support/organizations?query=acme`
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ organizations: [] });
 
     await app.close();
   });

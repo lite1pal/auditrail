@@ -74,6 +74,7 @@ export const users = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     email: text("email").notNull().unique(),
+    internalRole: text("internal_role").notNull().default("none"),
     name: text("name"),
     createdAt: timestamp("created_at", {
       withTimezone: true

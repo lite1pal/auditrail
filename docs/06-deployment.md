@@ -212,6 +212,10 @@ sync, webhook ingestion, or billing management runtime. Real checkout and
 portal sessions now also require the Stripe billing env variables above, but
 the migration remains provider-neutral storage and does not add provider logic
 by itself.
+`packages/db/src/migrations/0009_internal_support_role.sql` adds the
+`users.internal_role` column used by internal support/admin lookup routes. It
+defaults to `none` for existing users and does not change normal product route
+authorization.
 
 When deploying the web app on a different origin from the API, keep
 `WEB_PUBLIC_URL` aligned with the externally reachable web URL used in magic

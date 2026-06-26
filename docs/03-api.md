@@ -143,6 +143,27 @@ These browser-session routes use the signed-in user membership instead of a bear
 - `POST /api/v1/invitations/accept`
 - `POST /api/v1/invitations/:invitationId/revoke`
 
+## Internal Support Lookup
+
+The following routes are reserved for authenticated internal support or admin
+users. They return safe summary data only and do not expose API keys, session
+tokens, magic-link tokens, raw audit payloads, or billing-provider secrets:
+
+- `GET /api/v1/support/organizations?query=...`
+- `GET /api/v1/support/organizations/:organizationId`
+
+Errors:
+
+- `401 missing_session`
+- `403 forbidden`
+- `400 invalid_support_lookup_request`
+- `404 organization_not_found`
+
+Search requests require a non-empty query and are capped server-side. Detail
+responses include only safe summary fields such as organization identity,
+member counts, owner/admin email addresses when already non-secret, billing
+summary state, and entitlement summary state.
+
 ## `GET /api/v1/organizations/:organizationId/members`
 
 Lists the current organization members for signed-in users who belong to that organization.
@@ -409,6 +430,9 @@ available while an organization is over quota.
 Returns the signed-in browser user and their workspace memberships.
 
 Each membership now includes pricing and onboarding summaries for the organization:
+
+The `user` object returned by this route remains limited to the public session
+identity fields and does not expose internal support-role state.
 
 ```json
 {

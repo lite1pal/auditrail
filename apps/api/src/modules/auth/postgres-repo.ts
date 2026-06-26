@@ -106,6 +106,10 @@ async function findUserByEmail(
 function toAuthUser(record: typeof users.$inferSelect): AuthUser {
   return {
     email: record.email,
+    internalRole:
+      record.internalRole === "none"
+        ? undefined
+        : (record.internalRole as AuthUser["internalRole"] | undefined),
     id: record.id,
     name: record.name ?? undefined
   };

@@ -178,6 +178,14 @@ When investigating auth or rate-limit failures:
 - verify the email provider can still send magic links
 - inspect whether browser sessions were invalidated by a secret rotation
 
+When using internal support lookup routes:
+
+- treat them as read-only troubleshooting tools, not as a data-export path
+- confirm the caller is an internal support or admin user before investigating
+- do not copy raw response payloads into incident notes if they include personal
+  email addresses or billing summaries
+- do not expect support lookup to bypass normal product route membership checks
+
 Do not log or share:
 
 - `API_KEY_PEPPER`

@@ -410,6 +410,9 @@ Current `platform-extension` candidates that should stay generic when added:
 - internal support/admin role modeling and support-tool predicates, with explicit
   `none`, `support`, and `admin` values that do not bypass organization
   membership checks or grant customer-org access by themselves
+- read-only support organization lookup and safe summary inspection, gated by
+  the internal support/admin predicate and kept separate from normal product
+  routes
 - admin/support controls
 - MFA, SSO, and enterprise auth controls
 

@@ -2,6 +2,18 @@
 
 ## 2026-06-26
 
+- Added the first internal support API seam under
+  `apps/api/src/modules/platform/support/*`, including read-only organization
+  search and detail routes gated by the internal support/admin predicate.
+
+- Added `users.internal_role` persistence with a conservative `none` default
+  so support authorization can come from the session user without changing
+  product-route membership checks.
+
+- Kept support lookup responses deliberately safe. They return organization and
+  billing/entitlement summaries only, omitting API keys, session tokens,
+  magic-link tokens, and raw audit payloads.
+
 - Added a generic internal support role seam in `packages/domain/src/internal-support`
   with explicit `none`, `support`, and `admin` values plus pure access
   predicates for future support tooling.

@@ -144,6 +144,11 @@ alongside any role-model changes. The product-route authorization tests should
 continue to prove that organization membership checks stay unchanged and that
 support access does not become an implicit bypass.
 
+Support lookup routes must include route tests for authentication, support-only
+authorization, constrained queries, and safe response shapes. The support
+module should not expose secrets, raw audit payloads, or customer write
+capabilities.
+
 New public API routes should register under the current versioned prefix, currently `/api/v1`.
 Do not move operational health checks away from unversioned `/health`.
 

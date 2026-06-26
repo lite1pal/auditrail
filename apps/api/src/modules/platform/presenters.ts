@@ -11,6 +11,10 @@ export function toCurrentUserResponse(context: CurrentUserContext) {
       projectIds: item.projects.map((project) => project.id),
       role: item.membership.role
     })),
-    user: context.user
+    user: {
+      email: context.user.email,
+      id: context.user.id,
+      name: context.user.name
+    }
   };
 }

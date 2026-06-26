@@ -4,13 +4,14 @@ This file tracks auth and sign-in work items.
 
 ## Queue
 
-- [ ] T-023 Add internal support role model
-  status: in_progress
+- [x] T-023 Add internal support role model
+  status: done
   priority: medium
   owner: codex
   branch: codex/internal-support-role
   pr:
   last_updated: 2026-06-26
+  completed: 2026-06-26
   blocked_reason:
   files:
     - packages/domain/src/internal-support/*
@@ -53,6 +54,40 @@ This file tracks auth and sign-in work items.
     - Recovery and session lifecycle behavior is documented at the API and deployment boundaries
 
 ## Done
+
+- [x] T-024 Add support read-only org lookup
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/support-org-lookup
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/support/*
+    - apps/api/src/modules/platform/postgres-repo.ts
+    - apps/api/src/modules/auth/postgres-repo.ts
+    - apps/api/src/modules/auth/routes.ts
+    - apps/api/src/modules/platform/presenters.ts
+    - apps/api/src/__tests__/app.test.ts
+    - apps/api/src/**/__tests__/*
+    - packages/db/src/schema/identity.ts
+    - packages/db/src/migrations/0009_internal_support_role.sql
+    - packages/db/src/migrations/meta/_journal.json
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - docs/09-operations.md
+    - tasks/auth.txt
+  acceptance:
+    - Support and admin users can search and inspect organizations through read-only support routes
+    - Normal users are forbidden and product route authorization stays unchanged
+    - Support responses stay safe and omit secrets, tokens, API keys, and raw audit payloads
+    - Support lookup queries are constrained and capped
+    - No write actions, impersonation, or support console UI are added
 
 - [x] T-021 Accept browser form posts for auth confirm and logout redirects
   status: done

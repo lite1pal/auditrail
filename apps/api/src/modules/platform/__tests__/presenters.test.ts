@@ -39,7 +39,8 @@ describe("toCurrentUserResponse", () => {
         ],
         user: {
           email: "user@example.com",
-          id: "user-1"
+          id: "user-1",
+          internalRole: "support"
         }
       })
     ).toEqual({
