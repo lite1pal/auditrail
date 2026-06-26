@@ -87,6 +87,29 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Done
 
+- [x] T-063 Add billing API routes
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/billing-api-routes
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/billing/*
+    - apps/api/src/app.ts
+    - apps/api/src/__tests__/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Authenticated organization-scoped billing routes exist for status, checkout intent, and portal intent
+    - Billing status returns persisted generic customer and subscription state when present
+    - Checkout and portal routes return documented provider-not-configured behavior without Stripe integration
+    - Existing entitlement, quota, API, and runtime behavior remain unchanged
+
 - [x] T-062 Add billing DB schema
   status: done
   priority: high

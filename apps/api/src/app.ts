@@ -31,6 +31,12 @@ import {
 } from "./modules/auth/service.js";
 import { registerEventRoutes } from "./modules/audit-events/routes.js";
 import { createWorkspaceAccessService } from "./modules/platform/access.js";
+import { createPostgresPlatformBillingRepo } from "./modules/platform/billing/postgres-repo.js";
+import { registerPlatformBillingRoutes } from "./modules/platform/billing/routes.js";
+import {
+  createPlatformBillingService,
+  type PlatformBillingService,
+} from "./modules/platform/billing/service.js";
 import { createCurrentUserContextService } from "./modules/platform/context.js";
 import { createPostgresPlatformRepo } from "./modules/platform/postgres-repo.js";
 import { registerPlatformRoutes } from "./modules/platform/routes.js";
@@ -67,6 +73,9 @@ export interface BuildAppOptions {
   };
   platform?: {
     service: PlatformService;
+  };
+  billing?: {
+    service: PlatformBillingService;
   };
   runtimeMagicLinkSender?: MagicLinkSender;
   useInfrastructure?: boolean;
@@ -234,6 +243,7 @@ export function buildApp(options: BuildAppOptions = {}) {
       );
       const authRepo = createPostgresAuthRepo(infrastructureApp.db);
       const apiKeyRepo = createPostgresApiKeyRepo(infrastructureApp.db);
+      const billingRepo = createPostgresPlatformBillingRepo(infrastructureApp.db);
       const platformRepo = createPostgresPlatformRepo(infrastructureApp.db);
       const magicLinkSender =
         options.runtimeMagicLinkSender ?? createRuntimeMagicLinkSender(config);
@@ -251,6 +261,10 @@ export function buildApp(options: BuildAppOptions = {}) {
         tokenSecret: authTokenSecret,
       });
       const platformService = createPlatformService(platformRepo);
+      const billingService = createPlatformBillingService({
+        ...billingRepo,
+        findMembership: platformRepo.findMembership
+      });
 
       infrastructureApp.register(sessionAuthPlugin, {
         cookieName: config.AUTH_SESSION_COOKIE_NAME,
@@ -273,6 +287,10 @@ export function buildApp(options: BuildAppOptions = {}) {
         invitationTokenSecret: authTokenSecret,
         prefix: API_VERSION_PREFIX,
         service: platformService,
+      });
+      infrastructureApp.register(registerPlatformBillingRoutes, {
+        prefix: API_VERSION_PREFIX,
+        service: billingService,
       });
       infrastructureApp.register(registerApiKeyRoutes, {
         prefix: API_VERSION_PREFIX,
@@ -310,6 +328,13 @@ export function buildApp(options: BuildAppOptions = {}) {
     app.register(registerPlatformRoutes, {
       prefix: API_VERSION_PREFIX,
       service: options.platform.service,
+    });
+  }
+
+  if (options.billing) {
+    app.register(registerPlatformBillingRoutes, {
+      prefix: API_VERSION_PREFIX,
+      service: options.billing.service,
     });
   }
 

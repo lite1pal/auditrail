@@ -81,6 +81,13 @@ slice is persistence only for now: it must not add Stripe SDK imports,
 checkout or portal routes, webhook handlers, invoices, payment methods, or
 entitlement-enforcement behavior in the same change.
 
+The platform billing API seam now also lives under
+`apps/api/src/modules/platform/billing/*`. That layer exposes authenticated,
+organization-scoped billing status plus placeholder checkout and portal intent
+endpoints backed by a generic billing service. Until a future provider adapter
+exists, it must remain provider-neutral and return explicit not-configured
+behavior instead of creating real provider sessions.
+
 The API-side platform entitlement service now lives under
 `apps/api/src/modules/platform/entitlements`. That seam resolves the current
 organization plan plus generic monthly meter usage into feature and meter

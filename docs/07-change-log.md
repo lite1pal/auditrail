@@ -2,6 +2,19 @@
 
 ## 2026-06-26
 
+- Added a platform-owned billing API seam under
+  `apps/api/src/modules/platform/billing/*`, including an authenticated
+  service and organization-scoped routes for billing status, checkout intent,
+  and portal intent.
+
+- Wired the billing status route to persisted generic billing customer and
+  subscription state while keeping checkout and portal creation explicitly
+  provider-not-configured until a future adapter is added.
+
+- Kept the new billing API surface generic and non-provider-integrated. It does
+  not add Stripe SDK imports, real provider session creation, webhook handling,
+  billing UI, entitlement enforcement changes, or audit quota changes.
+
 - Added generic billing persistence in `packages/db/src/schema/billing.ts` plus
   `apps/api/src/modules/platform/billing/*`, including platform-owned
   repository types, a Postgres adapter, and integration coverage for customer

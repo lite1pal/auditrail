@@ -119,7 +119,10 @@ Its event reads are scoped by the selected organization and project through:
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events`
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events/stats`
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/events/timeseries`
+- `GET /api/v1/organizations/:organizationId/billing`
 - `GET /api/v1/organizations/:organizationId/members`
+- `POST /api/v1/organizations/:organizationId/billing/checkout`
+- `POST /api/v1/organizations/:organizationId/billing/portal`
 - `POST /api/v1/organizations/:organizationId/plan`
 - `POST /api/v1/organizations/:organizationId/onboarding-state`
 
@@ -128,9 +131,12 @@ Its event reads are scoped by the selected organization and project through:
 These browser-session routes use the signed-in user membership instead of a bearer API key:
 
 - `GET /api/v1/organizations`
+- `GET /api/v1/organizations/:organizationId/billing`
 - `GET /api/v1/organizations/:organizationId/projects`
 - `GET /api/v1/organizations/:organizationId/members`
 - `POST /api/v1/organizations`
+- `POST /api/v1/organizations/:organizationId/billing/checkout`
+- `POST /api/v1/organizations/:organizationId/billing/portal`
 - `POST /api/v1/organizations/:organizationId/projects`
 - `POST /api/v1/organizations/:organizationId/invitations`
 - `POST /api/v1/organizations/:organizationId/onboarding-state`
@@ -160,6 +166,108 @@ Errors:
 
 - `401 missing_session`
 - `403 forbidden`
+
+## `GET /api/v1/organizations/:organizationId/billing`
+
+Returns the current persisted billing state for the organization plus the
+current provider-configuration status.
+
+Response:
+
+```json
+{
+  "organizationId": "org-1",
+  "providerConfigurationStatus": "not_configured",
+  "customer": {
+    "id": "customer-1",
+    "provider": "stripe",
+    "providerCustomerId": "cus_123",
+    "createdAt": "2026-06-26T12:00:00.000Z",
+    "updatedAt": "2026-06-26T12:00:00.000Z"
+  },
+  "subscription": {
+    "id": "subscription-1",
+    "billingCustomerId": "customer-1",
+    "billingPlanId": "billing-growth-monthly",
+    "entitlementPlanId": "growth",
+    "provider": "stripe",
+    "providerSubscriptionId": "sub_123",
+    "providerPriceId": "price_123",
+    "status": "active",
+    "cancelAtPeriodEnd": false,
+    "createdAt": "2026-06-26T12:00:00.000Z",
+    "updatedAt": "2026-06-26T12:00:00.000Z"
+  }
+}
+```
+
+When no persisted billing state exists yet, `customer` and `subscription` are
+`null`.
+
+Errors:
+
+- `401 missing_session`
+- `403 forbidden`
+
+## `POST /api/v1/organizations/:organizationId/billing/checkout`
+
+Validates a future checkout request shape for the organization, then currently
+returns a not-configured error because no billing provider adapter is wired in.
+
+Request:
+
+```json
+{
+  "planId": "billing-growth-monthly",
+  "priceId": "price_123",
+  "successUrl": "https://app.example.com/settings/billing?success=1",
+  "cancelUrl": "https://app.example.com/settings/billing"
+}
+```
+
+Current response:
+
+```json
+{
+  "error": "billing_provider_not_configured"
+}
+```
+
+Errors:
+
+- `400 invalid_billing_request`
+- `401 missing_session`
+- `403 forbidden`
+- `501 billing_provider_not_configured`
+
+## `POST /api/v1/organizations/:organizationId/billing/portal`
+
+Validates a future billing-portal request shape for the organization, then
+currently returns a not-configured error because no billing provider adapter is
+wired in.
+
+Request:
+
+```json
+{
+  "returnUrl": "https://app.example.com/settings/billing"
+}
+```
+
+Current response:
+
+```json
+{
+  "error": "billing_provider_not_configured"
+}
+```
+
+Errors:
+
+- `400 invalid_billing_request`
+- `401 missing_session`
+- `403 forbidden`
+- `501 billing_provider_not_configured`
 
 ## Rate Limiting
 
