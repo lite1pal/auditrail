@@ -62,6 +62,12 @@ The concrete AuditTrail-owned product definition now lives under
 shape and audit onboarding catalog while staying behind the audit-product
 package entrypoint rather than the product-neutral root barrel.
 
+AuditTrail-specific onboarding labels, descriptions, sidebar copy, and CTA
+targets are now defined under that audit-owned product config and adapted at
+the `apps/web/app/getting-started` composition boundary before the reusable
+`apps/web/src/features/onboarding` UI renders them. The onboarding feature
+itself must remain generic and must not import audit-product modules directly.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/architecture-boundaries` contains typed source-root boundary metadata

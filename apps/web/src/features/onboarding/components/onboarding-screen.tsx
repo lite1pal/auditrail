@@ -5,6 +5,10 @@ import { PageShell } from "@/src/components/ui/page-shell";
 import { SectionHeader } from "@/src/components/ui/section-header";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import { OnboardingScreenContent } from "@/src/features/onboarding/components/onboarding-screen-content";
+import type {
+  OnboardingScreenCopy,
+  OnboardingStepView
+} from "@/src/features/onboarding/domain/onboarding-screen";
 
 interface OnboardingScreenProps {
   activeOnboarding?: CurrentUserResponse["memberships"][number]["onboarding"];
@@ -13,6 +17,8 @@ interface OnboardingScreenProps {
   activeProjectId?: string;
   activeProjectName?: string;
   ingestCommand?: string;
+  onboardingCopy: OnboardingScreenCopy;
+  onboardingStepViews?: readonly OnboardingStepView[];
   updateOnboardingStateAction: (formData: FormData) => Promise<void>;
 }
 
@@ -23,20 +29,24 @@ export function OnboardingScreen({
   activeProjectId,
   activeProjectName,
   ingestCommand,
+  onboardingCopy,
+  onboardingStepViews,
   updateOnboardingStateAction
 }: OnboardingScreenProps) {
   if (!activeOrganizationId || !activeOnboarding) {
     return (
       <PageShell>
         <SectionHeader
-          description="Create an organization to unlock the reusable setup flow."
-          eyebrow="Workspace setup"
-          title="Getting started"
+          description={onboardingCopy.emptyStateDescription}
+          eyebrow={onboardingCopy.eyebrow}
+          title={onboardingCopy.title}
         />
-        <EmptyState label="No organization is available yet. Create a workspace first, then come back here for the guided setup flow." />
+        <EmptyState label={onboardingCopy.emptyStateDescription} />
         <div>
           <Button asChild>
-            <a href="/settings">Open settings</a>
+            <a href={onboardingCopy.emptyStatePrimaryCtaHref}>
+              {onboardingCopy.emptyStatePrimaryCtaLabel}
+            </a>
           </Button>
         </div>
       </PageShell>
@@ -52,6 +62,8 @@ export function OnboardingScreen({
         activeProjectId={activeProjectId}
         activeProjectName={activeProjectName}
         ingestCommand={ingestCommand}
+        onboardingCopy={onboardingCopy}
+        onboardingStepViews={onboardingStepViews ?? []}
         updateOnboardingStateAction={updateOnboardingStateAction}
       />
     </PageShell>

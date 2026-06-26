@@ -2,19 +2,89 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { OnboardingScreen } from "@/src/features/onboarding/components/onboarding-screen";
+import type {
+  OnboardingScreenCopy,
+  OnboardingStepView
+} from "@/src/features/onboarding/domain/onboarding-screen";
+
+const onboardingCopy: OnboardingScreenCopy = {
+  completeSummaryDescription: "Required setup is complete.",
+  dismissFromSidebarLabel: "Dismiss from sidebar",
+  emptyStateDescription:
+    "No organization is available yet. Create a workspace first, then come back here for the guided setup flow.",
+  emptyStatePrimaryCtaHref: "/settings",
+  emptyStatePrimaryCtaLabel: "Open settings",
+  eyebrow: "Workspace setup",
+  incompleteSummaryDescription:
+    "Finish the required steps to complete the initial workspace setup.",
+  showInSidebarLabel: "Show in sidebar",
+  title: "Getting started"
+};
 
 describe("OnboardingScreen", () => {
   it("renders the no-organization state", () => {
-    render(<OnboardingScreen updateOnboardingStateAction={noopAction} />);
+    render(
+      <OnboardingScreen
+        onboardingCopy={onboardingCopy}
+        updateOnboardingStateAction={noopAction}
+      />
+    );
 
     expect(screen.getByRole("heading", { name: "Getting started" })).toBeTruthy();
-    expect(screen.getByText(/No organization is available yet/)).toBeTruthy();
+    expect(screen.getAllByText(/No organization is available yet/)).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Open settings" }).getAttribute("href")).toBe(
       "/settings"
     );
   });
 
   it("renders checklist items, cta links, and the ingest command", () => {
+    const onboardingStepViews: OnboardingStepView[] = [
+      {
+        completedAt: "2026-06-25T10:00:00.000Z",
+        ctaHref: "/settings?organizationId=org-1#project-settings",
+        ctaLabel: "Create first project",
+        description:
+          "Create the first project for this organization in workspace settings.",
+        id: "project_created",
+        required: true,
+        showsIngestCommand: false,
+        status: "complete",
+        title: "Create a project"
+      },
+      {
+        ctaHref: "/api-keys?organizationId=org-1&projectId=project-1",
+        ctaLabel: "Create first API key",
+        description: "Generate a machine credential in the existing API keys flow.",
+        id: "api_key_created",
+        required: true,
+        showsIngestCommand: false,
+        status: "pending",
+        title: "Create an API key"
+      },
+      {
+        ctaHref: "/settings?organizationId=org-1&projectId=project-1",
+        ctaLabel: "Send first event",
+        description:
+          "Send one test event through the selected project to validate the full ingest path.",
+        id: "first_event_ingested",
+        required: true,
+        showsIngestCommand: true,
+        status: "pending",
+        title: "Send the first event"
+      },
+      {
+        ctaHref: "/settings?organizationId=org-1#access-settings",
+        ctaLabel: "Invite teammate",
+        description:
+          "Add another member from the workspace access settings when you are ready.",
+        id: "member_invited",
+        required: false,
+        showsIngestCommand: false,
+        status: "pending",
+        title: "Invite a teammate"
+      }
+    ];
+
     render(
       <OnboardingScreen
         activeOnboarding={{
@@ -51,6 +121,8 @@ describe("OnboardingScreen", () => {
         activeProjectId="project-1"
         activeProjectName="Production"
         ingestCommand={"curl https://api.example.com"}
+        onboardingCopy={onboardingCopy}
+        onboardingStepViews={onboardingStepViews}
         updateOnboardingStateAction={noopAction}
       />
     );

@@ -88,7 +88,25 @@ describe("audit event schemas", () => {
 
   it("exposes an explicit AuditTrail product definition", () => {
     expect(productDefinitionSchema.parse(auditTrailProduct)).toEqual(
-      auditTrailProduct
+      {
+        emptyStateCopy: {
+          emptyStateDescription:
+            "No organization is available yet. Create a workspace first, then come back here for the guided setup flow.",
+          emptyStateTitle: "Getting started",
+          primaryCtaHref: "/settings",
+          primaryCtaLabel: "Open settings"
+        },
+        id: "audit-events",
+        name: "AuditTrail",
+        navItems: [],
+        onboardingSteps: auditOnboardingSteps,
+        usageMeters: [
+          {
+            key: "events",
+            label: "Events"
+          }
+        ]
+      }
     );
 
     expect(auditTrailProduct).toMatchObject({
@@ -101,7 +119,24 @@ describe("audit event schemas", () => {
           key: "events",
           label: "Events"
         }
-      ]
+      ],
+      onboarding: {
+        steps: {
+          api_key_created: {
+            action: {
+              href: "api-keys",
+              label: "Create first API key"
+            }
+          },
+          first_event_ingested: {
+            action: {
+              href: "selected-project-settings",
+              label: "Send first event"
+            },
+            showsIngestCommand: true
+          }
+        }
+      }
     });
   });
 });

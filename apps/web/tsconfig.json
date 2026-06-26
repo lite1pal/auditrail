@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@auditrail/domain": ["../../packages/domain/src/index.ts"],
+      "@auditrail/domain/*": ["../../packages/domain/src/*/index.ts"]
     }
   },
   "include": [

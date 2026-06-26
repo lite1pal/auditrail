@@ -2,6 +2,11 @@
 
 ## 2026-06-26
 
+- Moved AuditTrail-specific onboarding step labels, descriptions, sidebar copy,
+  and CTA targets behind the audit-owned product definition plus a
+  `apps/web/app/getting-started` adapter so the reusable onboarding feature no
+  longer hardcodes product assumptions.
+
 - Added `packages/domain/src/audit-events/product.ts` as the explicit
   AuditTrail-owned product-definition seam. It reuses the generic product types
   from `packages/domain/src/product` without allowing platform modules to

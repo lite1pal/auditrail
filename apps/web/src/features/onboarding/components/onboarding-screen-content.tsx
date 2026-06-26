@@ -3,6 +3,10 @@ import { Card } from "@/src/components/ui/card";
 import { SectionHeader } from "@/src/components/ui/section-header";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import { OnboardingStepCard } from "@/src/features/onboarding/components/onboarding-step-card";
+import type {
+  OnboardingScreenCopy,
+  OnboardingStepView
+} from "@/src/features/onboarding/domain/onboarding-screen";
 
 interface OnboardingScreenContentProps {
   activeOnboarding: CurrentUserResponse["memberships"][number]["onboarding"];
@@ -11,6 +15,8 @@ interface OnboardingScreenContentProps {
   activeProjectId?: string;
   activeProjectName?: string;
   ingestCommand?: string;
+  onboardingCopy: OnboardingScreenCopy;
+  onboardingStepViews: readonly OnboardingStepView[];
   updateOnboardingStateAction: (formData: FormData) => Promise<void>;
 }
 
@@ -21,6 +27,8 @@ export function OnboardingScreenContent({
   activeProjectId,
   activeProjectName,
   ingestCommand,
+  onboardingCopy,
+  onboardingStepViews,
   updateOnboardingStateAction
 }: OnboardingScreenContentProps) {
   return (
@@ -28,12 +36,13 @@ export function OnboardingScreenContent({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <SectionHeader
           description={getHeaderDescription(activeOrganizationName, activeProjectName)}
-          eyebrow="Workspace setup"
-          title="Getting started"
+          eyebrow={onboardingCopy.eyebrow}
+          title={onboardingCopy.title}
         />
         <OnboardingSidebarToggle
           activeOnboarding={activeOnboarding}
           activeOrganizationId={activeOrganizationId}
+          onboardingCopy={onboardingCopy}
           updateOnboardingStateAction={updateOnboardingStateAction}
         />
       </div>
@@ -45,17 +54,15 @@ export function OnboardingScreenContent({
           </Badge>
           <span className="text-sm text-[var(--muted)]">
             {activeOnboarding.isComplete
-              ? "Required setup is complete."
-              : "Finish the required steps to complete the initial workspace setup."}
+              ? onboardingCopy.completeSummaryDescription
+              : onboardingCopy.incompleteSummaryDescription}
           </span>
         </div>
       </Card>
 
       <section className="grid gap-4">
-        {activeOnboarding.steps.map((step) => (
+        {onboardingStepViews.map((step) => (
           <OnboardingStepCard
-            activeOrganizationId={activeOrganizationId}
-            activeProjectId={activeProjectId}
             ingestCommand={ingestCommand}
             key={step.id}
             step={step}
@@ -69,10 +76,14 @@ export function OnboardingScreenContent({
 function OnboardingSidebarToggle({
   activeOnboarding,
   activeOrganizationId,
+  onboardingCopy,
   updateOnboardingStateAction
 }: Pick<
   OnboardingScreenContentProps,
-  "activeOnboarding" | "activeOrganizationId" | "updateOnboardingStateAction"
+  | "activeOnboarding"
+  | "activeOrganizationId"
+  | "onboardingCopy"
+  | "updateOnboardingStateAction"
 >) {
   return (
     <form action={updateOnboardingStateAction}>
@@ -82,22 +93,30 @@ function OnboardingSidebarToggle({
         type="hidden"
         value={activeOnboarding.isDismissed ? "false" : "true"}
       />
-      <OnboardingSidebarToggleButton isDismissed={activeOnboarding.isDismissed} />
+      <OnboardingSidebarToggleButton
+        dismissFromSidebarLabel={onboardingCopy.dismissFromSidebarLabel}
+        isDismissed={activeOnboarding.isDismissed}
+        showInSidebarLabel={onboardingCopy.showInSidebarLabel}
+      />
     </form>
   );
 }
 
 function OnboardingSidebarToggleButton({
-  isDismissed
+  dismissFromSidebarLabel,
+  isDismissed,
+  showInSidebarLabel
 }: {
+  dismissFromSidebarLabel: string;
   isDismissed: boolean;
+  showInSidebarLabel: string;
 }) {
   return (
     <button
       className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--panel-subtle)]"
       type="submit"
     >
-      {isDismissed ? "Show in sidebar" : "Dismiss from sidebar"}
+      {isDismissed ? showInSidebarLabel : dismissFromSidebarLabel}
     </button>
   );
 }

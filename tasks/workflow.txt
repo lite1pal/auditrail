@@ -25,6 +25,29 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-053 Move onboarding copy and CTA targets behind product config
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/product-config-onboarding-copy
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/audit-events/*
+    - apps/web/app/getting-started/*
+    - apps/web/src/features/onboarding/*
+    - apps/web/package.json
+    - apps/web/tsconfig.json
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generic onboarding UI no longer hardcodes AuditTrail step labels, descriptions, or CTA routing
+    - AuditTrail-specific onboarding copy and CTA targets live in audit-owned config or an audit-owned adapter
+    - Boundary scanner passes and current onboarding UI behavior stays intact
+
 - [x] T-052 Add AuditTrail product definition
   status: done
   priority: medium

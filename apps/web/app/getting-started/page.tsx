@@ -6,6 +6,11 @@ import {
   updateOnboardingStateAction
 } from "@/src/features/onboarding/server/onboarding-server";
 
+import {
+  buildAuditTrailOnboardingStepViews,
+  getAuditTrailOnboardingScreenCopy
+} from "./audit-product-onboarding";
+
 interface GettingStartedPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -17,6 +22,15 @@ export default async function GettingStartedPage({
   const onboarding = await loadOnboardingPage(await searchParams, {
     currentUser
   });
+  const onboardingCopy = getAuditTrailOnboardingScreenCopy();
+  const onboardingStepViews =
+    onboarding.activeOnboarding && onboarding.activeOrganizationId
+      ? buildAuditTrailOnboardingStepViews({
+          activeOnboarding: onboarding.activeOnboarding,
+          activeOrganizationId: onboarding.activeOrganizationId,
+          activeProjectId: onboarding.activeProjectId
+        })
+      : undefined;
 
   return (
     <AppShell
@@ -31,6 +45,8 @@ export default async function GettingStartedPage({
         activeProjectId={onboarding.activeProjectId}
         activeProjectName={onboarding.activeProjectName}
         ingestCommand={onboarding.ingestCommand}
+        onboardingCopy={onboardingCopy}
+        onboardingStepViews={onboardingStepViews}
         updateOnboardingStateAction={updateOnboardingStateAction}
       />
     </AppShell>
