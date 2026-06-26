@@ -4,24 +4,27 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
-- [ ] T-047 Add boundary scanner test fixtures
-  status: blocked
+- [ ] T-048 Wire boundary scanner into repo checks
+  status: ready
   priority: medium
   owner: codex
-  branch: codex/platform-boundary-fixtures
+  branch: codex/platform-boundary-ci
   pr:
   last_updated: 2026-06-26
   completed:
-  blocked_reason: The fixture coverage is in place, but the current repo still fails `pnpm tsx tools/check-architecture-boundaries.ts` because of pre-existing platform-to-audit imports in `apps/api/src/modules/platform/*` and the generic `packages/domain/src/index.ts` audit re-export.
+  blocked_reason:
   files:
-    - packages/architecture-boundaries/*
-    - tools/architecture-boundaries/__fixtures__/*
-    - tools/check-architecture-boundaries.ts
+    - package.json
+    - docs/01-agent-engineering-rules.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
     - tasks/workflow.txt
   acceptance:
-    - Focused scanner tests cover at least one allowed dependency and the required forbidden directions
-    - Fixture failures assert readable violation details without scanning the whole repo
-    - Existing repo scanner result is recorded clearly without refactoring app or package code
+    - Root package scripts include `check:boundaries`
+    - `pnpm verify` includes the boundary scanner
+    - Docs explain the boundary check and command
+    - Existing repo passes the boundary scanner before the check is wired into normal verification
 
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
   status: in_progress
@@ -43,6 +46,47 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-049 Fix existing boundary scanner violations
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/platform-boundary-fixes
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - apps/api/src/modules/platform/context.ts
+    - apps/api/src/modules/platform/onboarding.ts
+    - apps/api/src/modules/platform/postgres-repo.ts
+    - packages/domain/src/index.ts
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The existing repo passes `pnpm tsx tools/check-architecture-boundaries.ts`
+    - Platform modules no longer import `@auditrail/domain/audit-events`
+    - The generic `@auditrail/domain` barrel no longer re-exports audit-product modules
+
+- [x] T-047 Add boundary scanner test fixtures
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/platform-boundary-fixtures
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/architecture-boundaries/*
+    - tools/architecture-boundaries/__fixtures__/*
+    - tools/check-architecture-boundaries.ts
+    - tasks/workflow.txt
+  acceptance:
+    - Focused scanner tests cover at least one allowed dependency and the required forbidden directions
+    - Fixture failures assert readable violation details without scanning the whole repo
+    - Existing repo scanner result is recorded clearly without refactoring app or package code
 
 - [x] T-046 Add forbidden import scanner
   status: done

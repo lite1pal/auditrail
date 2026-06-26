@@ -63,6 +63,10 @@ Current classification:
 - `packages/domain`: mixed pure platform and audit domain helpers, which should stay separated by folder and import direction
 - `packages/testkit`: `platform-core`
 
+The generic `@auditrail/domain` barrel must stay product-neutral. AuditTrail-
+specific event and onboarding modules remain under `@auditrail/domain/audit-events`
+rather than being re-exported through the root package entrypoint.
+
 ## API Module Shape
 
 API feature modules should stay small:
@@ -246,6 +250,10 @@ Current `audit-product` responsibilities in this repo:
 - event-specific empty states and event inspection UI
 - generic monthly usage metering through `organization_monthly_usage.meter_key + quantity`
 - audit-specific onboarding milestones such as `first_event_ingested`
+
+The current `/api/v1/me` onboarding response still reflects audit-product
+milestones, but the platform module now owns that response shape locally instead
+of importing audit-product helpers from `packages/domain/src/audit-events/**`.
 
 Current `platform-extension` candidates that should stay generic when added:
 

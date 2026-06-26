@@ -1,24 +1,24 @@
 import { summarizePricingUsage } from "@auditrail/domain/pricing";
 import type {
+  OnboardingSummary,
   PricingPlanId,
   PricingUsageSummary
-} from "@auditrail/domain/pricing";
-import type { AuditOnboardingStepId } from "@auditrail/domain/audit-events";
-import type { OnboardingSummary } from "@auditrail/domain";
+} from "@auditrail/domain";
 
 import type { AuthUser } from "../auth/service.js";
+import type { PlatformAuditOnboardingStepId } from "./onboarding.js";
 import type { Membership, Organization, Project } from "./service.js";
 
 export interface UserMembershipContext {
   membership: Membership;
-  onboarding: OnboardingSummary<AuditOnboardingStepId>;
+  onboarding: OnboardingSummary<PlatformAuditOnboardingStepId>;
   organization: Organization;
   plan: PricingUsageSummary;
   projects: Project[];
 }
 
 export interface UserMembershipContextRecord {
-  onboarding: OnboardingSummary<AuditOnboardingStepId>;
+  onboarding: OnboardingSummary<PlatformAuditOnboardingStepId>;
   membership: Membership;
   organization: Organization;
   planId: PricingPlanId;

@@ -11,15 +11,17 @@ import {
 } from "@auditrail/db/schema";
 import {
   summarizeOnboardingProgress,
-  toAuditOnboardingCompletedAtByStep
 } from "@auditrail/domain";
-import { auditOnboardingSteps } from "@auditrail/domain/audit-events";
 import { getUtcMonthWindow } from "@auditrail/domain/pricing";
 import type { PricingPlanId } from "@auditrail/domain/pricing";
 import { and, asc, eq, isNull } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
 import type { UserContextRepo, UserMembershipContextRecord } from "./context.js";
+import {
+  platformAuditOnboardingSteps,
+  toPlatformAuditOnboardingCompletedAtByStep
+} from "./onboarding.js";
 import type {
   Invitation,
   Membership,
@@ -300,14 +302,14 @@ export function createPostgresPlatformRepo(
         contexts.push({
           membership: toMembership(record.membership),
           onboarding: summarizeOnboardingProgress({
-            completedAtByStep: toAuditOnboardingCompletedAtByStep({
+            completedAtByStep: toPlatformAuditOnboardingCompletedAtByStep({
               apiKeyCreatedAt: firstApiKeyRecord?.createdAt?.toISOString(),
               firstEventIngestedAt: firstEventRecord?.createdAt?.toISOString(),
               memberInvitedAt: firstInvitationRecord?.createdAt?.toISOString(),
               projectCreatedAt: firstProjectRecord?.createdAt?.toISOString()
             }),
             dismissedAt: onboardingStateRecord?.dismissedAt?.toISOString(),
-            steps: auditOnboardingSteps
+            steps: platformAuditOnboardingSteps
           }),
           organization: toOrganization(record.organization),
           planId: record.organization.planId as PricingPlanId,

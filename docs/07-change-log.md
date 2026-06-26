@@ -2,6 +2,24 @@
 
 This file records meaningful architecture and structural changes so the codebase remains understandable across sessions and contributors.
 
+## 2026-06-26 - Remove Existing Platform-To-Audit Boundary Violations
+
+Changed:
+
+- stopped re-exporting `packages/domain/src/audit-events/*` through the generic `@auditrail/domain` barrel
+- added a small platform-local onboarding shape module under `apps/api/src/modules/platform/*` so the current `/me` onboarding response no longer imports audit-product helpers directly
+- kept the existing audit-product onboarding milestone names and `/me` response behavior unchanged while removing the scanner violations that blocked boundary enforcement
+
+Why:
+
+- the boundary scanner cannot be wired into normal verification while the repo still contains known `platform-core -> audit-product` imports
+- the generic domain barrel must remain product-neutral so later extraction into a reusable platform repo stays mechanical
+
+Docs updated:
+
+- `docs/02-architecture.md`
+- `docs/07-change-log.md`
+
 ## 2026-06-26 - Add A Typed Platform Boundary Map
 
 Changed:
