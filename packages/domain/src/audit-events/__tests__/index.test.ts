@@ -154,6 +154,31 @@ describe("audit event schemas", () => {
         loadingLabel: "Loading AuditTrail...",
         metadataDescription: "AuditTrail event monitoring workspace",
         metadataTitle: "AuditTrail"
+      },
+      auditEvents: {
+        chartDescription: "Daily counts for the selected workspace and filters.",
+        chartEyebrow: "Audit events",
+        chartEmptyStateLabel: "No event volume yet.",
+        chartSeriesLabel: "Events",
+        chartTitle: "Event volume",
+        detailCloseLabel: "Close",
+        detailDescription:
+          "Inspect the selected event without leaving the dashboard.",
+        detailTitle: "Event details",
+        emptyStateCtaLabel: "Open getting started",
+        emptyStateLabel:
+          "No audit events yet. Create a project key in Settings, send one test event, and come back to see the stream and metrics fill in.",
+        inspectActionLabel: "Inspect",
+        inspectingActionLabel: "Inspecting",
+        listDescription:
+          "Track the active project, inspect one event on demand, and filter the stream without leaving this page.",
+        listEyebrow: "Audit events",
+        listTitle: "Event stream",
+        nextPageLabel: "Next page",
+        tableEmptyLabel: "No audit events match these filters.",
+        tooltipCountSuffix: "events",
+        topEventTypesLabel: "Top event types",
+        totalEventsLabel: "Total events"
       }
     });
   });

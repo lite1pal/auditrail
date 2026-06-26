@@ -25,6 +25,27 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-056 Move audit-events feature copy behind product config
+  status: done
+  priority: medium
+  owner: codex
+  branch: codex/product-config-audit-events-copy
+  pr:
+  last_updated: 2026-06-26
+  completed: 2026-06-26
+  blocked_reason:
+  files:
+    - packages/domain/src/audit-events/*
+    - apps/web/src/features/audit-events/*
+    - apps/web/vitest.config.ts
+    - docs/02-architecture.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - AuditTrail-specific audit-events screen copy no longer lives inline in feature components
+    - Audit-events copy is sourced from audit-owned product config or an audit-owned adapter
+    - Current audit-events UI behavior stays intact and repo checks still pass
+
 - [x] T-055 Move remaining product chrome behind product config
   status: done
   priority: medium

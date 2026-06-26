@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { ChartPanel } from "@/src/components/ui/chart-panel";
 import type { EventTimeseriesViewModel } from "@/src/features/audit-events/domain/types";
+import { getAuditEventsCopy } from "@/src/features/audit-events/product/audit-product-copy";
 
 interface EventTimeseriesChartProps {
   points: EventTimeseriesViewModel["points"];
@@ -24,15 +25,17 @@ const tooltipLabelFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric"
 });
 export function EventTimeseriesChart({ points }: EventTimeseriesChartProps) {
+  const copy = getAuditEventsCopy();
+
   return (
     <ChartPanel
-      eyebrow="Audit events"
-      title="Event volume"
-      description="Daily counts for the selected workspace and filters."
+      eyebrow={copy.chartEyebrow}
+      title={copy.chartTitle}
+      description={copy.chartDescription}
     >
       {points.length === 0 ? (
         <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-[var(--border)] bg-[var(--panel-subtle)] text-sm text-[var(--muted)]">
-          No event volume yet.
+          {copy.chartEmptyStateLabel}
         </div>
       ) : (
         <div className="h-[220px] w-full">
@@ -61,7 +64,7 @@ export function EventTimeseriesChart({ points }: EventTimeseriesChartProps) {
               />
               <Area
                 dataKey="count"
-                name="Events"
+                name={copy.chartSeriesLabel}
                 fill="var(--foreground)"
                 fillOpacity={0.08}
                 stroke="var(--foreground)"
@@ -101,12 +104,13 @@ function EventTimeseriesTooltip({
   }
 
   const count = payload[0]?.value ?? 0;
+  const copy = getAuditEventsCopy();
 
   return (
     <div className="grid gap-1 rounded-lg border border-[var(--border)] bg-[var(--panel-strong)] px-3 py-2 text-xs shadow-none">
       <span className="text-[var(--muted)]">{formatTooltipLabel(label)}</span>
       <strong className="text-[var(--foreground)]">
-        {new Intl.NumberFormat("en").format(count)} events
+        {new Intl.NumberFormat("en").format(count)} {copy.tooltipCountSuffix}
       </strong>
     </div>
   );

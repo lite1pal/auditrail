@@ -12,6 +12,7 @@ import type {
 } from "@/src/features/audit-events/domain/query";
 import { toEventListHref } from "@/src/features/audit-events/domain/query";
 import type { AuditEventRow } from "@/src/features/audit-events/domain/types";
+import { getAuditEventsCopy } from "@/src/features/audit-events/product/audit-product-copy";
 
 interface EventsTableProps {
   hasMore: boolean;
@@ -34,14 +35,15 @@ export function EventsTable({
   selectedEventId,
   workspace
 }: EventsTableProps) {
+  const copy = getAuditEventsCopy();
   const columns = useMemo<Array<ColumnDef<AuditEventRow>>>(
     () => {
       const baseColumns: Array<ColumnDef<AuditEventRow>> = [
-        { accessorKey: "createdAt", header: "Created" },
-        { accessorKey: "event", header: "Event" },
-        { accessorKey: "actor", header: "Actor" },
-        { accessorKey: "target", header: "Target" },
-        { accessorKey: "metadata", header: "Metadata" }
+        { accessorKey: "createdAt", header: copy.tableHeaders.created },
+        { accessorKey: "event", header: copy.tableHeaders.event },
+        { accessorKey: "actor", header: copy.tableHeaders.actor },
+        { accessorKey: "target", header: copy.tableHeaders.target },
+        { accessorKey: "metadata", header: copy.tableHeaders.metadata }
       ];
 
       if (!onInspect) {
@@ -62,29 +64,29 @@ export function EventsTable({
                 type="button"
                 variant={selected ? "secondary" : "ghost"}
               >
-                {selected ? "Inspecting" : "Inspect"}
+                {selected ? copy.inspectingActionLabel : copy.inspectActionLabel}
               </Button>
             );
           },
-          header: "Inspect",
+          header: copy.tableHeaders.inspect,
           id: "inspect"
         }
       ];
     },
-    [onInspect, selectedEventId]
+    [copy, onInspect, selectedEventId]
   );
 
   return (
     <section className="grid gap-4">
       <DataTable
         columns={columns}
-        emptyLabel="No audit events match these filters."
+        emptyLabel={copy.tableEmptyLabel}
         loading={loading}
         rows={rows}
       />
       {hasMore && nextCursor ? (
         <PaginationLink href={toEventListHref(query, nextCursor, workspace)}>
-          Next page
+          {copy.nextPageLabel}
         </PaginationLink>
       ) : null}
     </section>

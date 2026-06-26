@@ -41,8 +41,47 @@ export interface AuditTrailAppChromeContent {
   metadataTitle: string;
 }
 
+export interface AuditTrailAuditEventsContent {
+  chartDescription: string;
+  chartEmptyStateLabel: string;
+  chartEyebrow: string;
+  chartSeriesLabel: string;
+  chartTitle: string;
+  detailCloseLabel: string;
+  detailDescription: string;
+  detailLabels: {
+    actor: string;
+    created: string;
+    event: string;
+    metadata: string;
+    target: string;
+  };
+  detailTitle: string;
+  emptyStateCtaLabel: string;
+  emptyStateLabel: string;
+  inspectActionLabel: string;
+  inspectingActionLabel: string;
+  listDescription: string;
+  listEyebrow: string;
+  listTitle: string;
+  nextPageLabel: string;
+  tableEmptyLabel: string;
+  tableHeaders: {
+    actor: string;
+    created: string;
+    event: string;
+    inspect: string;
+    metadata: string;
+    target: string;
+  };
+  topEventTypesLabel: string;
+  totalEventsLabel: string;
+  tooltipCountSuffix: string;
+}
+
 type AuditTrailProductDefinition = ProductDefinition & {
   appChrome: AuditTrailAppChromeContent;
+  auditEvents: AuditTrailAuditEventsContent;
   onboarding: AuditTrailOnboardingContent;
 };
 
@@ -61,6 +100,45 @@ export const auditTrailProduct = {
     loadingLabel: "Loading AuditTrail...",
     metadataDescription: "AuditTrail event monitoring workspace",
     metadataTitle: "AuditTrail"
+  },
+  auditEvents: {
+    chartDescription: "Daily counts for the selected workspace and filters.",
+    chartEmptyStateLabel: "No event volume yet.",
+    chartEyebrow: "Audit events",
+    chartSeriesLabel: "Events",
+    chartTitle: "Event volume",
+    detailCloseLabel: "Close",
+    detailDescription: "Inspect the selected event without leaving the dashboard.",
+    detailLabels: {
+      actor: "Actor",
+      created: "Created",
+      event: "Event",
+      metadata: "Metadata",
+      target: "Target"
+    },
+    detailTitle: "Event details",
+    emptyStateCtaLabel: "Open getting started",
+    emptyStateLabel:
+      "No audit events yet. Create a project key in Settings, send one test event, and come back to see the stream and metrics fill in.",
+    inspectActionLabel: "Inspect",
+    inspectingActionLabel: "Inspecting",
+    listDescription:
+      "Track the active project, inspect one event on demand, and filter the stream without leaving this page.",
+    listEyebrow: "Audit events",
+    listTitle: "Event stream",
+    nextPageLabel: "Next page",
+    tableEmptyLabel: "No audit events match these filters.",
+    tableHeaders: {
+      actor: "Actor",
+      created: "Created",
+      event: "Event",
+      inspect: "Inspect",
+      metadata: "Metadata",
+      target: "Target"
+    },
+    topEventTypesLabel: "Top event types",
+    totalEventsLabel: "Total events",
+    tooltipCountSuffix: "events"
   },
   navItems: [
     {

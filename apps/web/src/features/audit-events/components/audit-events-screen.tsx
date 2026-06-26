@@ -19,6 +19,7 @@ import type {
 import { EventDashboard } from "@/src/features/audit-events/components/event-dashboard";
 import { EventInspectionWorkspace } from "@/src/features/audit-events/components/event-inspection-workspace";
 import { EventFilters } from "@/src/features/audit-events/components/event-filters";
+import { getAuditEventsCopy } from "@/src/features/audit-events/product/audit-product-copy";
 
 interface AuditEventsScreenProps {
   initialEvents: EventListResponse;
@@ -36,13 +37,14 @@ export function AuditEventsScreen({
   workspace
 }: AuditEventsScreenProps) {
   const viewModel = toEventListViewModel(initialEvents);
+  const copy = getAuditEventsCopy();
 
   return (
     <PageShell>
       <SectionHeader
-        description="Track the active project, inspect one event on demand, and filter the stream without leaving this page."
-        eyebrow="Audit events"
-        title="Event stream"
+        description={copy.listDescription}
+        eyebrow={copy.listEyebrow}
+        title={copy.listTitle}
       />
       <EventFilters query={query} workspace={workspace} />
       <EventDashboard
@@ -51,7 +53,7 @@ export function AuditEventsScreen({
       />
       {viewModel.rows.length === 0 ? (
         <section className="grid gap-4">
-          <EmptyState label="No audit events yet. Create a project key in Settings, send one test event, and come back to see the stream and metrics fill in." />
+          <EmptyState label={copy.emptyStateLabel} />
           <div>
             <Button asChild variant="secondary">
               <a
@@ -61,7 +63,7 @@ export function AuditEventsScreen({
                     : "/getting-started"
                 }
               >
-                Open getting started
+                {copy.emptyStateCtaLabel}
               </a>
             </Button>
           </div>

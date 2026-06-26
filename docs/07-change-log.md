@@ -2,6 +2,10 @@
 
 ## 2026-06-26
 
+- Moved the remaining AuditTrail audit-events feature copy, including event
+  screen headers, empty-state text, dashboard labels, chart copy, table labels,
+  and detail-panel text, behind the audit-owned product definition.
+
 - Moved the remaining AuditTrail app chrome strings, including metadata,
   loading copy, and top-level error copy, behind the audit-owned product
   definition plus a small app-level adapter.

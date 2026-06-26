@@ -79,6 +79,11 @@ top-level loading/error copy, is also sourced from the audit-owned product
 definition through a small `apps/web/app/audit-product-chrome.ts` adapter. This
 keeps generic app files free of product strings while preserving the same UI.
 
+The audit-events feature now follows the same pattern for product-facing copy.
+Audit-specific screen, dashboard, chart, empty-state, table, and detail-panel
+text is sourced from `packages/domain/src/audit-events/product.ts` through a
+feature-local audit adapter rather than being embedded inline in components.
+
 `packages/config` contains reusable config parsing helpers.
 
 `packages/architecture-boundaries` contains typed source-root boundary metadata
