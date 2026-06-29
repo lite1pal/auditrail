@@ -2,6 +2,25 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas add resource <resource-spec.json> --output <preview-dir>`
+  as the first real CRUD generator under `tools/saas/*`. It validates specs
+  through the canonical framework schema, reuses the dry-run planner, and
+  writes deterministic local preview files for one narrow organization-owned
+  resource shape without mutating runtime source.
+
+- Kept the first generator deliberately fail-closed. It rejects unsupported
+  ownership modes, unsupported field types, delete generation, public API
+  generation, product-nav wiring, existing target files without `--force`, and
+  blocking planner warnings before writing preview output.
+
+- Added generated domain, DB, API, web, test, and docs template output plus
+  `CUSTOMIZE` guidance for safe follow-up without generating a real
+  AuditTrail-owned runtime resource, route registration, or migration.
+
+- Added fixture-backed generator tests covering deterministic output, planner
+  alignment, overwrite safety, supported-subset enforcement, preview-output
+  isolation, and AuditTrail-free generated content.
+
 - Added `pnpm saas plan resource <resource-spec.json>` as the first read-only
   CRUD resource planner under `tools/saas/*`. It validates JSON specs through
   the canonical framework resource schema, normalizes defaults, and prints a

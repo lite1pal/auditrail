@@ -38,6 +38,14 @@ read repo metadata, framework contracts, extraction metadata,
 product-definition seams, and resource specs, but they must not generate app
 code, mutate scaffold output, or change runtime behavior in the same slice.
 
+The first write-capable framework command now also lives there:
+`pnpm saas add resource <resource-spec.json> --output <preview-dir>`. It is
+intentionally preview-only in this repo slice. It reuses the canonical
+resource schema plus the dry-run planner, supports one narrow organization-
+owned CRUD shape, and writes deterministic local preview files under
+`.generated/` or `tmp/` without registering routes, changing runtime source,
+or generating a real AuditTrail product resource.
+
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
 

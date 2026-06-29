@@ -1,5 +1,9 @@
 import { createDoctorReport, formatDoctorReport } from "./doctor.js";
 import {
+  formatGeneratedResourceSummary,
+  generateResourceFromFile
+} from "./resource-generator.js";
+import {
   createResourcePlanFromFile,
   formatResourcePlanReport
 } from "./resource-planner.js";
@@ -35,13 +39,21 @@ export function executeSaasCli(input: {
     });
   }
 
+  if (command === "add" && input.args[1] === "resource") {
+    return executeAddResourceCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
   return {
     exitCode: 1,
     stderr: [
       "Unknown or missing command.",
       "Usage:",
       "  pnpm saas doctor",
-      "  pnpm saas plan resource <path-to-resource-spec.json> [--json]"
+      "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
+      "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]"
     ].join("\n"),
     stdout: ""
   };
@@ -113,4 +125,85 @@ function executePlanResourceCommand(input: {
       stdout: ""
     };
   }
+}
+
+function executeAddResourceCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args);
+    const [specPath] = parsedArgs.positionalArgs;
+
+    if (!specPath) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing resource spec path. Usage: pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
+        stdout: ""
+      };
+    }
+
+    const result = generateResourceFromFile({
+      force: parsedArgs.options.has("--force"),
+      outputPath: parsedArgs.optionsWithValues.get("--output"),
+      repoRoot: input.repoRoot,
+      specPath
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: formatGeneratedResourceSummary(result)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Resource generation failed.",
+      stdout: ""
+    };
+  }
+}
+
+function parseCommandArguments(args: readonly string[]) {
+  const options = new Set<string>();
+  const optionsWithValues = new Map<string, string>();
+  const positionalArgs: string[] = [];
+
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+
+    if (!argument.startsWith("--")) {
+      positionalArgs.push(argument);
+      continue;
+    }
+
+    if (argument === "--force") {
+      options.add(argument);
+      continue;
+    }
+
+    if (argument === "--output") {
+      const value = args[index + 1];
+
+      if (!value || value.startsWith("--")) {
+        throw new Error("Missing value for --output.");
+      }
+
+      optionsWithValues.set(argument, value);
+      index += 1;
+      continue;
+    }
+
+    throw new Error(`Unknown option '${argument}'.`);
+  }
+
+  return {
+    options,
+    optionsWithValues,
+    positionalArgs
+  };
 }

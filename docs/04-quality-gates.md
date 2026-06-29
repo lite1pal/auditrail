@@ -237,6 +237,20 @@ pnpm saas plan resource tools/saas/examples/customer.resource.json
 deterministic dry-run file plan only. It must not write CRUD files or mutate
 runtime code.
 
+The first write-capable generator check is now:
+
+```bash
+pnpm saas add resource tools/saas/__fixtures__/resources/customer.json --output .generated/resource-preview/customer
+```
+
+The generator must stay fail-closed:
+
+- it validates the spec through the canonical framework schema
+- it reuses the dry-run planner before writing preview files
+- it supports one narrow organization-owned subset only
+- it writes under `.generated/` or `tmp/`, not real app source
+- it fails on unsupported ownership, unsupported field types, blocking planner issues, or existing target files unless `--force` is passed
+
 ## Platform Module Gates
 
 Platform modules must land in this order:

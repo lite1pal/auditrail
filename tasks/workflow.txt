@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-069 Add CRUD generator for one simple org-owned resource
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/crud-generator-org-resource
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - packages/framework/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tools/extraction/README.md
+    - README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A safe `pnpm saas add resource <resource-spec.json> --output <preview-dir>` command writes deterministic preview files for one simple organization-owned CRUD resource
+    - Generation validates specs through the canonical framework schema, reuses the dry-run planner, and fails safely on unsupported specs, blocking planner issues, or existing target files unless `--force` is passed
+    - Focused tooling tests cover deterministic output, supported-subset enforcement, planner alignment, output-path safety, overwrite behavior, and AuditTrail-free generated content
+    - Docs explain command usage, the narrow supported subset, preview-output behavior, and the fact that no real runtime resource is generated or registered
+
 - [x] T-068 Add CRUD dry-run planner
   status: done
   priority: high

@@ -17,13 +17,13 @@ Keep the build vertical and incremental.
    - read framework module/resource/check definitions from `packages/framework`
    - keep the canonical resource-spec schema in `packages/framework` as the source of truth for future resource planners and generators
    - keep `pnpm saas doctor` green as the first read-only framework CLI health check
-   - keep `pnpm saas plan resource ...` green as the read-only resource planner before any generator writes files
-   - keep CRUD templates and code generation out of scope until the contracts plus doctor checks prove stable
+   - keep `pnpm saas plan resource ...` green as the read-only resource planner contract
+   - keep `pnpm saas add resource ... --output ...` green as the first preview-only CRUD generator for one narrow organization-owned resource
 
 1. After `saas doctor`, add the next framework tooling slices in order:
    - richer doctor checks driven directly from framework contract metadata
-   - CRUD/resource generators only after the dry-run planning output is stable
-   - generated-file writing only after the generator plan stays deterministic and reviewable
+   - broaden CRUD/resource generator support beyond the first org-owned subset only after the current preview output stays deterministic and reviewable
+   - add the AI context compiler / agent-context command on top of the same framework contracts once generation seams are stable
 
 1. Add dashboard read model:
    - recent events

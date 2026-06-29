@@ -1,0 +1,56 @@
+{
+  "resource": "customer",
+  "label": "Customer",
+  "ownership": "organization",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "required": true,
+      "unique": true,
+      "sortable": true
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "status",
+      "type": "enum",
+      "required": true,
+      "values": ["active", "inactive"],
+      "default": "active"
+    },
+    {
+      "name": "externalId",
+      "type": "uuid",
+      "required": false
+    },
+    {
+      "name": "lastContactedAt",
+      "type": "datetime",
+      "required": false
+    }
+  ],
+  "crud": {
+    "list": true,
+    "create": true,
+    "read": true,
+    "update": true,
+    "delete": false
+  },
+  "api": {
+    "prefix": "/v1/organizations/:organizationId/customers"
+  },
+  "ui": {
+    "nav": false
+  }
+}

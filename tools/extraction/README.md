@@ -88,6 +88,21 @@ pnpm saas plan resource tools/saas/examples/customer.resource.json
 It validates a JSON resource spec and prints a deterministic CRUD file plan,
 but it does not write generated files yet.
 
+The first preview-only generator command is now:
+
+```bash
+pnpm saas add resource tools/saas/__fixtures__/resources/customer.json --output .generated/resource-preview/customer
+```
+
+Current generator scope:
+
+- validates the resource spec through the canonical framework schema
+- reuses the dry-run planner before writing files
+- supports one simple organization-owned CRUD shape only
+- writes deterministic preview files under `.generated/` or `tmp/`
+- refuses to overwrite existing target files unless `--force` is passed
+- does not register routes, create migrations, or generate a real AuditTrail runtime resource
+
 `pnpm saas doctor` is the first repo-local framework CLI command. It does not
 run extraction or mutate output; it inspects whether the boundary, extraction,
 placeholder-validation, product-definition, and framework-contract seams are

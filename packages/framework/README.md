@@ -53,4 +53,11 @@ Current planner scope:
 - reads JSON resource specs
 - validates and normalizes them through `frameworkResourceSpecSchema`
 - prints a grouped dry-run file plan
-- does not generate files or mutate app source yet
+- stays generic and audit-free while downstream tooling consumes it
+
+Current generator consumer scope:
+
+- `pnpm saas add resource ... --output ...` reuses the same canonical schema and planner
+- the first generator supports one narrow organization-owned CRUD subset only
+- unsupported ownership, field types, destructive CRUD, public APIs, and nav wiring are rejected before writing
+- generated output is preview-only and must stay under `.generated/` or `tmp/`
