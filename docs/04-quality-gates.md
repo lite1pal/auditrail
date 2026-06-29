@@ -293,6 +293,21 @@ The scaffold planner must stay deterministic and planning-only:
 - markdown is the default output mode and `--json` is available for stable future machine consumption
 - it does not create files, publish a package, create a repo, or mutate runtime source
 
+The first local scaffold generation check is now:
+
+```bash
+pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app
+```
+
+The scaffold generator must stay deterministic and fail-closed:
+
+- it reuses the scaffold planner before writing
+- it stages extraction output plus placeholder-product files instead of duplicating classification logic
+- it writes only to safe local targets under `.generated/` or `tmp/`
+- it writes a generated README plus `.saas/scaffold-report.json`
+- it fails on unsafe output paths, unsupported options, blocking planner warnings, forbidden AuditTrail imports, unresolved placeholders, or unsafe overwrite attempts
+- `--force` may clean only prior generated-owned scaffold output for the same app
+
 The generated-resource smoke check is now:
 
 ```bash

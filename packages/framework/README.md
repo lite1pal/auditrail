@@ -83,6 +83,14 @@ Current scaffold-planner consumer scope:
 - markdown is the default output mode and `--json` is available for stable future machine consumption
 - the command does not create scaffold output or mutate runtime source
 
+Current scaffold-generator consumer scope:
+
+- `pnpm saas generate scaffold ... --output ...` reuses the same scaffold planner contract before writing
+- the command stages extraction output plus placeholder-product files into deterministic local candidate output
+- it writes a generated README and scaffold report while staying under `.generated/` or `tmp/`
+- it fails closed on unsafe output, unresolved placeholders, forbidden AuditTrail imports, and unsafe overwrite attempts
+- it does not publish a package, create a repo, or mutate runtime source
+
 Current generator stability consumer scope:
 
 - `pnpm saas check generators` reuses the same canonical schema, planner, and generator output

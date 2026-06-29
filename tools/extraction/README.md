@@ -161,6 +161,20 @@ Current scaffold-planner scope:
 - emits deterministic markdown by default and stable JSON with `--json`
 - does not run extraction output generation, create scaffold files, publish a package, or create a repo
 
+The first local scaffold generation command is now:
+
+```bash
+pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app
+```
+
+Current scaffold-generator scope:
+
+- reuses the scaffold planner plus local extraction output and placeholder-product tooling
+- writes deterministic candidate output only under `.generated/` or `tmp/`
+- writes a generated README and `.saas/scaffold-report.json`
+- fails on unsafe paths, unsupported options, blocking planner warnings, forbidden AuditTrail imports, unresolved placeholders, or unsafe overwrite attempts
+- does not publish a package, create a repo, or mutate AuditTrail runtime source
+
 Generated-resource structural validation is now also available:
 
 ```bash

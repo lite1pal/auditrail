@@ -82,6 +82,7 @@ Run all checks:
 ```bash
 pnpm saas doctor
 pnpm saas plan scaffold my-saas-app
+pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app
 pnpm saas plan resource tools/saas/__fixtures__/resources/customer.json
 pnpm saas add resource tools/saas/__fixtures__/resources/customer.json --output .generated/resource-preview/customer
 pnpm saas agent context resource tools/saas/__fixtures__/resources/customer.json
@@ -220,10 +221,11 @@ The generated-resource AI workflow is now bounded end to end:
 - `pnpm saas agent context resource ...` emits concise repo context for the resource task
 - `pnpm saas agent recipe resource-install ...` emits a deterministic install recipe with path policy, stop conditions, safe-apply guidance, verification steps, and report format
 
-The future create-app flow now starts with planning only:
+The local create-app flow now has planning plus candidate output generation:
 
 - `pnpm saas plan scaffold my-saas-app` emits a deterministic dry-run scaffold plan built from extraction metadata, placeholder product seams, quality gates, and AI workflow hints
-- it does not create files, publish a package, create a repo, or mutate runtime source
+- `pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app` writes a local candidate scaffold with placeholder product setup, a generated README, and a scaffold report
+- it does not publish a package, create a repo, or mutate runtime source
 
 Organizations start on the `starter` plan and included events reset on UTC
 calendar month boundaries:

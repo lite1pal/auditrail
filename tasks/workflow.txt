@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-076 Add local scaffold generation output
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/local-scaffold-generation
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - tools/extraction/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - packages/framework/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A local-only scaffold generation command exists and reuses the scaffold planner plus extraction or placeholder tooling instead of duplicating classification logic
+    - Scaffold output writes deterministically into a safe ignored target, includes placeholder product setup plus generated README and report files, and stays free of AuditTrail-specific product leakage
+    - Safety checks fail on unsafe output paths, unsupported options, blocking planner warnings, unresolved placeholders, forbidden imports, and unsafe overwrite attempts
+    - Focused tooling tests cover deterministic output, path safety, placeholder setup, identity replacement, overwrite behavior, leakage detection, and no real-source mutation
+
 - [x] T-075 Add `create-saas-app` scaffold planner
   status: done
   priority: high

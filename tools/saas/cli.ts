@@ -12,6 +12,10 @@ import {
   formatScaffoldPlanMarkdown
 } from "./scaffold-planner.js";
 import {
+  formatGeneratedScaffoldSummary,
+  generateScaffold
+} from "./scaffold-generator.js";
+import {
   formatGeneratedResourceSummary,
   generateResourceFromFile
 } from "./resource-generator.js";
@@ -65,6 +69,13 @@ export function executeSaasCli(input: {
 
   if (command === "plan" && input.args[1] === "scaffold") {
     return executePlanScaffoldCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
+  if (command === "generate" && input.args[1] === "scaffold") {
+    return executeGenerateScaffoldCommand({
       args: input.args.slice(2),
       repoRoot: input.repoRoot
     });
@@ -128,6 +139,7 @@ export function executeSaasCli(input: {
       "  pnpm saas doctor",
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
       "  pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
+      "  pnpm saas generate scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--force]",
       "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
       "  pnpm saas apply resource <path-to-resource-spec.json> --target <target-dir> [--force]",
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
@@ -301,6 +313,52 @@ function executeAddResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Resource generation failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeGenerateScaffoldCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args, {
+      booleanOptions: ["--force"],
+      valueOptions: ["--output", "--package-name", "--product-name"]
+    });
+    const [appName] = parsedArgs.positionalArgs;
+
+    if (!appName) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing app name. Usage: pnpm saas generate scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--force]",
+        stdout: ""
+      };
+    }
+
+    const result = generateScaffold({
+      appName,
+      force: parsedArgs.options.has("--force"),
+      outputPath: parsedArgs.optionsWithValues.get("--output"),
+      packageName: parsedArgs.optionsWithValues.get("--package-name"),
+      productName: parsedArgs.optionsWithValues.get("--product-name"),
+      repoRoot: input.repoRoot
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: formatGeneratedScaffoldSummary(result)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Scaffold generation failed.",
       stdout: ""
     };
   }

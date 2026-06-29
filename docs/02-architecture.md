@@ -66,6 +66,15 @@ framework quality-gate seams, and AI workflow commands to describe a future
 scaffold flow without creating a package, generating scaffold output, or
 changing runtime source.
 
+The first local candidate scaffold generator also lives under `tools/saas/*`:
+`pnpm saas generate scaffold <app-name> --output <target-dir>`. It reuses the
+same scaffold planner plus extraction output and placeholder-product tooling,
+writes deterministic local output under `.generated/` or `tmp/`, emits a
+generated README and scaffold report, and fails closed on unsafe paths,
+unsupported options, unresolved placeholders, product-specific leakage, or
+unexpected overwrite attempts. It still does not publish a package, create a
+repo, or mutate AuditTrail runtime source.
+
 The first generator stability command also lives there:
 `pnpm saas check generators`. It regenerates committed fixture resources into a
 safe temp directory, compares paths and contents against golden fixtures, and

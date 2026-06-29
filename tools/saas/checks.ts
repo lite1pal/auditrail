@@ -343,6 +343,41 @@ const doctorChecks: readonly DoctorCheckDefinition[] = [
     }
   },
   {
+    id: "scaffold-generator-command",
+    name: "Scaffold generator command",
+    appliesToPaths: ["package.json", "tools/saas/cli.ts", "tools/saas/scaffold-generator.ts"],
+    command: "pnpm saas generate scaffold <app-name>",
+    required: true,
+    evaluate(context) {
+      const script = getScript(context, "saas");
+      const hasScript =
+        typeof script === "string" && script.includes("tools/saas/cli.ts");
+      const hasCli = fileExists(context, "tools/saas/cli.ts");
+      const hasRunner = fileExists(context, "tools/saas/scaffold-generator.ts");
+
+      return {
+        appliesToPaths: [
+          "package.json",
+          "tools/saas/cli.ts",
+          "tools/saas/scaffold-generator.ts"
+        ],
+        command: "pnpm saas generate scaffold <app-name>",
+        id: "scaffold-generator-command",
+        name: "Scaffold generator command",
+        required: true,
+        status: hasScript && hasCli && hasRunner ? "pass" : "fail",
+        reason:
+          hasScript && hasCli && hasRunner
+            ? "The SaaS CLI exposes the scaffold generator entrypoint and its runner module exists."
+            : "The scaffold generator command is missing its root CLI entrypoint or runner module.",
+        fix:
+          hasScript && hasCli && hasRunner
+            ? undefined
+            : "Restore the root `saas` CLI script plus `tools/saas/cli.ts` and `tools/saas/scaffold-generator.ts` so `pnpm saas generate scaffold ...` stays available."
+      };
+    }
+  },
+  {
     id: "framework-contract-package",
     name: "Framework contract package",
     appliesToPaths: [

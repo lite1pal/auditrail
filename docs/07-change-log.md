@@ -2,6 +2,19 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas generate scaffold <app-name> --output <target-dir>` as the
+  first local-only candidate scaffold writer. It reuses the scaffold planner,
+  extraction output, and placeholder-product tooling to emit deterministic
+  scaffold output with a generated README and `.saas/scaffold-report.json`
+  under ignored local directories only, without publishing a package, creating
+  a repo, or mutating AuditTrail runtime source.
+
+- Added focused scaffold-generator tests covering deterministic repeated
+  output, invalid-name rejection, unsafe-path rejection, generated-owned
+  overwrite safety, generated README and report presence, placeholder product
+  output, identity replacement, forbidden-import rejection, unresolved-
+  placeholder rejection, and real-source non-mutation.
+
 - Added `pnpm saas plan scaffold <app-name>` as the first planning-only
   create-app scaffold command. It reuses extraction dry-run metadata,
   placeholder-product seams, framework quality gates, and AI workflow hints to
