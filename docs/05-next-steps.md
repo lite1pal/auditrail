@@ -23,13 +23,14 @@ Keep the build vertical and incremental.
    - keep `pnpm saas agent recipe resource-install ...` green as the first full generated-resource AI installation workflow
    - keep `pnpm saas plan scaffold ...` green as the first planning-only create-app scaffold contract
    - keep `pnpm saas generate scaffold ... --output ...` green as the first local candidate scaffold writer
+   - keep `pnpm saas check scaffold ...` green so scaffold candidate output is proven structurally usable in isolated preview form
    - keep `pnpm saas check generators` green so generated-resource output stays reproducible and reviewable through committed golden fixtures
    - keep `pnpm saas check generated-resource` green so fixture output is proven structurally usable in isolated preview form before any real runtime registration work
    - keep `pnpm saas apply resource ... --target ...` green as the first opt-in isolated apply path while central runtime patching stays fail-closed
 
 1. After `saas doctor`, add the next framework tooling slices in order:
    - richer doctor checks driven directly from framework contract metadata
-   - add isolated scaffold smoke validation so generated candidate output is checked for structural readiness the same way generated resources are
+   - reduce scaffold extraction `manual-review` seams so local candidate output gets closer to a reusable create-app baseline
    - harden generated-resource apply so API runtime registration and migration seams can be patched safely instead of falling back to manual review
    - broaden CRUD/resource generator support beyond the first org-owned subset only after the golden-fixture check stays stable across intentional updates
    - harden machine-readable recipe and context output so future tooling can consume them without widening generated-resource scope

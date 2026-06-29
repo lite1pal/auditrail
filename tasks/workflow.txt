@@ -25,6 +25,29 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-077 Add scaffold smoke validation
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/scaffold-smoke-validation
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - tools/extraction/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - A deterministic local scaffold smoke-check command validates generated scaffold candidate output in an isolated ignored directory
+    - The smoke check reuses the scaffold planner and scaffold generator where practical, and fails on unsafe paths, forbidden AuditTrail imports, unresolved placeholders, missing required scaffold files, or real-source mutation
+    - Focused tests cover pass, deterministic repeated generation, missing generated files, forbidden imports, unresolved placeholders, cleanup, and no mutation of real app source
+
 - [x] T-076 Add local scaffold generation output
   status: done
   priority: high

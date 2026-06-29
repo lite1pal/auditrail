@@ -16,6 +16,10 @@ import {
   generateScaffold
 } from "./scaffold-generator.js";
 import {
+  formatScaffoldSmokeReport,
+  runScaffoldSmokeCheck
+} from "./scaffold-smoke.js";
+import {
   formatGeneratedResourceSummary,
   generateResourceFromFile
 } from "./resource-generator.js";
@@ -131,6 +135,13 @@ export function executeSaasCli(input: {
     });
   }
 
+  if (command === "check" && input.args[1] === "scaffold") {
+    return executeCheckScaffoldCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
   return {
     exitCode: 1,
     stderr: [
@@ -145,7 +156,8 @@ export function executeSaasCli(input: {
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
       "  pnpm saas agent recipe resource-install <path-to-resource-spec.json> [--json] [--output <recipe-file>]",
       "  pnpm saas check generators [--update]",
-      "  pnpm saas check generated-resource"
+      "  pnpm saas check generated-resource",
+      "  pnpm saas check scaffold [app-name]"
     ].join("\n"),
     stdout: ""
   };
@@ -580,6 +592,42 @@ function executeCheckGeneratedResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Generated resource smoke check failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeCheckScaffoldCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    if (input.args.length > 1) {
+      return {
+        exitCode: 1,
+        stderr: "Unexpected arguments. Usage: pnpm saas check scaffold [app-name]",
+        stdout: ""
+      };
+    }
+
+    const [appName] = input.args;
+    const report = runScaffoldSmokeCheck({
+      appName,
+      repoRoot: input.repoRoot
+    });
+
+    return {
+      exitCode: report.exitCode,
+      stderr: "",
+      stdout: formatScaffoldSmokeReport(report)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Scaffold smoke check failed.",
       stdout: ""
     };
   }

@@ -308,6 +308,20 @@ The scaffold generator must stay deterministic and fail-closed:
 - it fails on unsafe output paths, unsupported options, blocking planner warnings, forbidden AuditTrail imports, unresolved placeholders, or unsafe overwrite attempts
 - `--force` may clean only prior generated-owned scaffold output for the same app
 
+The scaffold smoke validation check is now:
+
+```bash
+pnpm saas check scaffold my-saas-app
+```
+
+It must stay deterministic and isolated:
+
+- it reuses the scaffold generator and validates its actual output instead of inventing a parallel scaffold path
+- it generates repeated scaffold output only under ignored temp directories
+- it fails on missing required scaffold files, forbidden AuditTrail imports, unresolved placeholders, generated file-set drift, or real-source mutation
+- it confirms repeated generation is deterministic after normalizing output-path-specific README and report fields
+- it cleans up temp scaffold output after the check
+
 The generated-resource smoke check is now:
 
 ```bash

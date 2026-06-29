@@ -108,6 +108,22 @@ describe("saas doctor", () => {
     );
   });
 
+  it("fails when the scaffold smoke command is missing", () => {
+    const files: Partial<Record<string, string>> = createValidRepoFiles();
+
+    delete files["tools/saas/scaffold-smoke.ts"];
+
+    const repoRoot = createRepo(createdRoots, files as Record<string, string>);
+    const report = createDoctorReport({
+      repoRoot
+    });
+
+    expect(report.exitCode).toBe(1);
+    expect(findResult(report, "scaffold-smoke-command")?.status).toBe(
+      "fail"
+    );
+  });
+
   it("fails when generated output is not git-ignored", () => {
     const files = createValidRepoFiles();
 
@@ -257,6 +273,7 @@ function createValidRepoFiles() {
     "tools/saas/agent-recipe.ts": "console.log('ok');\n",
     "tools/saas/scaffold-planner.ts": "console.log('ok');\n",
     "tools/saas/scaffold-generator.ts": "console.log('ok');\n",
+    "tools/saas/scaffold-smoke.ts": "console.log('ok');\n",
     "tools/saas/generated-resource-smoke.ts": "console.log('ok');\n",
     "tools/saas/resource-apply.ts": "console.log('ok');\n",
     "tools/extraction/dry-run.ts": "console.log('ok');\n",

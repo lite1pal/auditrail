@@ -175,6 +175,19 @@ Current scaffold-generator scope:
 - fails on unsafe paths, unsupported options, blocking planner warnings, forbidden AuditTrail imports, unresolved placeholders, or unsafe overwrite attempts
 - does not publish a package, create a repo, or mutate AuditTrail runtime source
 
+Scaffold smoke validation is now also available:
+
+```bash
+pnpm saas check scaffold my-saas-app
+```
+
+Current scaffold-smoke scope:
+
+- reuses the scaffold generator and validates the actual generated candidate output
+- writes repeated runs only into isolated temp directories under `tmp/`
+- fails on missing required scaffold files, forbidden AuditTrail imports, unresolved placeholders, deterministic drift, or real-source mutation
+- cleans up temp output after the check
+
 Generated-resource structural validation is now also available:
 
 ```bash

@@ -83,6 +83,7 @@ Run all checks:
 pnpm saas doctor
 pnpm saas plan scaffold my-saas-app
 pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app
+pnpm saas check scaffold my-saas-app
 pnpm saas plan resource tools/saas/__fixtures__/resources/customer.json
 pnpm saas add resource tools/saas/__fixtures__/resources/customer.json --output .generated/resource-preview/customer
 pnpm saas agent context resource tools/saas/__fixtures__/resources/customer.json
@@ -225,6 +226,7 @@ The local create-app flow now has planning plus candidate output generation:
 
 - `pnpm saas plan scaffold my-saas-app` emits a deterministic dry-run scaffold plan built from extraction metadata, placeholder product seams, quality gates, and AI workflow hints
 - `pnpm saas generate scaffold my-saas-app --output .generated/scaffolds/my-saas-app` writes a local candidate scaffold with placeholder product setup, a generated README, and a scaffold report
+- `pnpm saas check scaffold my-saas-app` validates isolated repeated scaffold output for missing required files, forbidden imports, unresolved placeholders, determinism, and real-source non-mutation
 - it does not publish a package, create a repo, or mutate runtime source
 
 Organizations start on the `starter` plan and included events reset on UTC

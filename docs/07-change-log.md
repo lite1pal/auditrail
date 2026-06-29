@@ -2,6 +2,20 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas check scaffold <app-name>` as the first isolated scaffold
+  smoke validation command. It reuses the local scaffold generator, validates
+  required scaffold files, placeholder-product output, forbidden AuditTrail
+  imports, unresolved placeholders, deterministic repeated output, and real-
+  source non-mutation, and cleans up temp output after the check.
+
+- Added focused scaffold-smoke tests covering pass, missing required files,
+  forbidden imports, unresolved placeholders, repeated-generation drift,
+  cleanup, CLI wiring, and runtime-mutation detection.
+
+- Tightened the root `test:saas` and `test:extraction` scripts to explicit
+  test-file globs so ignored generated output under `.generated/` and `tmp/`
+  does not pollute focused tooling test runs.
+
 - Added `pnpm saas generate scaffold <app-name> --output <target-dir>` as the
   first local-only candidate scaffold writer. It reuses the scaffold planner,
   extraction output, and placeholder-product tooling to emit deterministic

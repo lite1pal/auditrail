@@ -75,6 +75,13 @@ unsupported options, unresolved placeholders, product-specific leakage, or
 unexpected overwrite attempts. It still does not publish a package, create a
 repo, or mutate AuditTrail runtime source.
 
+The next scaffold validation command also lives there:
+`pnpm saas check scaffold <app-name>`. It generates the scaffold candidate
+twice into isolated ignored temp output, validates required scaffold files,
+placeholder-product output, forbidden AuditTrail imports, unresolved
+placeholders, deterministic repeated output, and real-source non-mutation, and
+then cleans up the temp directories.
+
 The first generator stability command also lives there:
 `pnpm saas check generators`. It regenerates committed fixture resources into a
 safe temp directory, compares paths and contents against golden fixtures, and

@@ -29,8 +29,8 @@ import {
 
 const scaffoldStageRoot = "tmp/saas-scaffold-stage";
 const defaultScaffoldOutputRoot = ".generated/scaffolds";
-const scaffoldReportPath = ".saas/scaffold-report.json";
-const scaffoldReadmePath = "README.md";
+export const scaffoldReportPath = ".saas/scaffold-report.json";
+export const scaffoldReadmePath = "README.md";
 const scaffoldOwnershipStatus = "local-candidate-scaffold";
 const textFileExtensions = new Set([
   ".css",

@@ -91,6 +91,12 @@ Current scaffold-generator consumer scope:
 - it fails closed on unsafe output, unresolved placeholders, forbidden AuditTrail imports, and unsafe overwrite attempts
 - it does not publish a package, create a repo, or mutate runtime source
 
+Current scaffold-smoke consumer scope:
+
+- `pnpm saas check scaffold ...` reuses the same scaffold generator contract and validates the actual generated candidate output
+- it checks required scaffold files, placeholder-product output, forbidden imports, unresolved placeholders, and deterministic repeated generation
+- it runs only in isolated temp output and must not mutate real runtime source
+
 Current generator stability consumer scope:
 
 - `pnpm saas check generators` reuses the same canonical schema, planner, and generator output
