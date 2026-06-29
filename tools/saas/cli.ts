@@ -2,6 +2,10 @@ import {
   createResourceAgentContextFromFile,
   formatResourceAgentContextMarkdown
 } from "./agent-context.js";
+import {
+  createResourceInstallRecipeFromFile,
+  formatResourceInstallRecipeMarkdown
+} from "./agent-recipe.js";
 import { createDoctorReport, formatDoctorReport } from "./doctor.js";
 import {
   formatGeneratedResourceSummary,
@@ -71,6 +75,17 @@ export function executeSaasCli(input: {
 
   if (
     command === "agent" &&
+    input.args[1] === "recipe" &&
+    input.args[2] === "resource-install"
+  ) {
+    return executeAgentRecipeResourceInstallCommand({
+      args: input.args.slice(3),
+      repoRoot: input.repoRoot
+    });
+  }
+
+  if (
+    command === "agent" &&
     input.args[1] === "context" &&
     input.args[2] === "resource"
   ) {
@@ -104,6 +119,7 @@ export function executeSaasCli(input: {
       "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
       "  pnpm saas apply resource <path-to-resource-spec.json> --target <target-dir> [--force]",
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
+      "  pnpm saas agent recipe resource-install <path-to-resource-spec.json> [--json] [--output <recipe-file>]",
       "  pnpm saas check generators [--update]",
       "  pnpm saas check generated-resource"
     ].join("\n"),
@@ -319,6 +335,52 @@ function executeAgentContextResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Resource agent context generation failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeAgentRecipeResourceInstallCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args, {
+      booleanOptions: ["--json"],
+      valueOptions: ["--output"]
+    });
+    const [specPath] = parsedArgs.positionalArgs;
+
+    if (!specPath) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing resource spec path. Usage: pnpm saas agent recipe resource-install <path-to-resource-spec.json> [--json] [--output <recipe-file>]",
+        stdout: ""
+      };
+    }
+
+    const result = createResourceInstallRecipeFromFile({
+      format: parsedArgs.options.has("--json") ? "json" : "markdown",
+      outputPath: parsedArgs.optionsWithValues.get("--output"),
+      repoRoot: input.repoRoot,
+      specPath
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: parsedArgs.options.has("--json")
+        ? JSON.stringify(result.bundle, null, 2)
+        : formatResourceInstallRecipeMarkdown(result.bundle)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Resource install recipe generation failed.",
       stdout: ""
     };
   }

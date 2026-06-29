@@ -69,6 +69,13 @@ Current AI-agent context consumer scope:
 - markdown is the default output mode and `--json` is available for stable future machine consumption
 - the command does not add CRUD generation behavior or mutate runtime source
 
+Current AI-agent install recipe consumer scope:
+
+- `pnpm saas agent recipe resource-install ...` reuses the same canonical schema plus the planner and agent-context metadata
+- the command emits deterministic install guidance, path policy, stop conditions, checks, and report format for one generated resource task
+- markdown is the default output mode and `--json` is available for stable future machine consumption
+- the command does not add CRUD generation behavior or mutate runtime source
+
 Current generator stability consumer scope:
 
 - `pnpm saas check generators` reuses the same canonical schema, planner, and generator output

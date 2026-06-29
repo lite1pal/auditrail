@@ -259,6 +259,26 @@ pnpm saas agent context resource tools/saas/__fixtures__/resources/customer.json
 
 The agent-context command must stay deterministic and concise:
 
+- it validates through the canonical resource schema
+- it reuses the dry-run planner instead of scanning the repo broadly
+- it emits paths, checks, stop conditions, and generator limits instead of large copied doc contents
+- optional output files must stay under `.generated/` or `tmp/`
+
+The first full generated-resource AI install recipe check is now:
+
+```bash
+pnpm saas agent recipe resource-install tools/saas/__fixtures__/resources/customer.json
+```
+
+The recipe command must stay deterministic and concise:
+
+- it validates the resource spec before emitting a recipe
+- it reuses the planner, existing agent-context metadata, smoke-check guidance, and safe apply guidance
+- it emits exact commands, allowed paths, forbidden paths, stop conditions, required checks, and report format for one resource only
+- markdown is the default output mode and `--json` is available for stable future machine consumption
+- optional output files must stay under `.generated/` or `tmp/`
+- it does not add new CRUD generation behavior or mutate runtime source
+
 The generated-resource smoke check is now:
 
 ```bash
@@ -299,11 +319,6 @@ Current apply policy:
 
 `test:saas` now covers apply-mode safety and isolated-target behavior. The
 apply command is not part of `pnpm verify` as a repo-root mutation step.
-
-- it validates through the canonical resource schema
-- it reuses the dry-run planner instead of scanning the repo broadly
-- it emits paths, checks, stop conditions, and generator limits instead of large copied doc contents
-- optional output files must stay under `.generated/` or `tmp/`
 
 The generator stability check is now:
 

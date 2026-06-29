@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-074 Add generated resource installation recipe for AI agents
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/generated-resource-agent-recipe
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tools/extraction/README.md
+    - packages/framework/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A deterministic AI-agent recipe exists for generated-resource install and customization work
+    - An explicit recipe command reuses the canonical resource schema, dry-run planner, agent-context metadata, smoke validation, and safe apply guidance without adding new generator capabilities
+    - Recipe output includes allowed paths, forbidden paths, required checks, stop conditions, safe apply guidance, customization guidance, and a strict report format
+    - Focused tooling tests cover deterministic output, invalid-spec failure, planner-warning carry-through, allowed-path derivation, forbidden product paths, required checks, stop conditions, and concise output rules
+
 - [x] T-073 Add safe apply mode for generated resource registration
   status: done
   priority: high

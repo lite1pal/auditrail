@@ -52,6 +52,13 @@ It validates the same resource spec, reuses the dry-run planner and generator
 support metadata, and emits a concise deterministic task bundle for AI coding
 agents without mutating app source, generated runtime code, or product wiring.
 
+The first full generated-resource AI install workflow command also lives under
+`tools/saas/*`: `pnpm saas agent recipe resource-install <resource-spec.json>`.
+It stays deterministic and repo-local, reuses the same schema plus planner and
+agent-context metadata, and packages planning, preview, smoke-check, safe-
+apply, customization, and verification guidance into one bounded recipe
+without adding new generator behavior or mutating real runtime source.
+
 The first generator stability command also lives there:
 `pnpm saas check generators`. It regenerates committed fixture resources into a
 safe temp directory, compares paths and contents against golden fixtures, and

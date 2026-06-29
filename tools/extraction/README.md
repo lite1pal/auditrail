@@ -131,6 +131,22 @@ Current agent-context scope:
 - can write local context artifacts only under `.generated/` or `tmp/`
 - does not generate CRUD files, mutate runtime source, or register resources
 
+The first full generated-resource AI install recipe command is now:
+
+```bash
+pnpm saas agent recipe resource-install tools/saas/__fixtures__/resources/customer.json
+```
+
+Current recipe scope:
+
+- validates the same resource spec through the canonical framework schema
+- reuses the dry-run planner plus the existing agent-context task metadata
+- emits deterministic markdown by default and stable JSON with `--json`
+- includes exact commands for doctor, planning, preview generation, smoke checks, safe apply, and verification
+- emits allowed paths, forbidden paths, stop conditions, safe customization points, rollback guidance, and a strict report format for one resource only
+- can write local recipe artifacts only under `.generated/` or `tmp/`
+- does not add CRUD generation behavior, mutate real runtime source, or register a real resource
+
 Generated-resource structural validation is now also available:
 
 ```bash

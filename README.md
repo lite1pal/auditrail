@@ -84,6 +84,7 @@ pnpm saas doctor
 pnpm saas plan resource tools/saas/__fixtures__/resources/customer.json
 pnpm saas add resource tools/saas/__fixtures__/resources/customer.json --output .generated/resource-preview/customer
 pnpm saas agent context resource tools/saas/__fixtures__/resources/customer.json
+pnpm saas agent recipe resource-install tools/saas/__fixtures__/resources/customer.json
 pnpm saas check generators
 pnpm saas check generated-resource
 pnpm saas apply resource tools/saas/__fixtures__/resources/customer.json --target .generated/apply-preview/customer
@@ -212,6 +213,11 @@ curl -i 'http://localhost:4000/api/v1/events/stats?top=5&from=2026-06-16T12:00:0
 The primary guided setup path now lives on `/getting-started`. It reuses the
 existing settings and API-key flows for project creation, key generation,
 teammate invites, and the first-event ingest command.
+
+The generated-resource AI workflow is now bounded end to end:
+
+- `pnpm saas agent context resource ...` emits concise repo context for the resource task
+- `pnpm saas agent recipe resource-install ...` emits a deterministic install recipe with path policy, stop conditions, safe-apply guidance, verification steps, and report format
 
 Organizations start on the `starter` plan and included events reset on UTC
 calendar month boundaries:

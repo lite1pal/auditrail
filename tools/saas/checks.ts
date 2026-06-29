@@ -273,6 +273,41 @@ const doctorChecks: readonly DoctorCheckDefinition[] = [
     }
   },
   {
+    id: "generated-resource-agent-recipe-command",
+    name: "Generated resource agent recipe command",
+    appliesToPaths: ["package.json", "tools/saas/cli.ts", "tools/saas/agent-recipe.ts"],
+    command: "pnpm saas agent recipe resource-install <resource-spec.json>",
+    required: true,
+    evaluate(context) {
+      const script = getScript(context, "saas");
+      const hasScript =
+        typeof script === "string" && script.includes("tools/saas/cli.ts");
+      const hasCli = fileExists(context, "tools/saas/cli.ts");
+      const hasRunner = fileExists(context, "tools/saas/agent-recipe.ts");
+
+      return {
+        appliesToPaths: [
+          "package.json",
+          "tools/saas/cli.ts",
+          "tools/saas/agent-recipe.ts"
+        ],
+        command: "pnpm saas agent recipe resource-install <resource-spec.json>",
+        id: "generated-resource-agent-recipe-command",
+        name: "Generated resource agent recipe command",
+        required: true,
+        status: hasScript && hasCli && hasRunner ? "pass" : "fail",
+        reason:
+          hasScript && hasCli && hasRunner
+            ? "The SaaS CLI exposes the generated-resource agent recipe entrypoint and its runner module exists."
+            : "The generated-resource agent recipe command is missing its root CLI entrypoint or runner module.",
+        fix:
+          hasScript && hasCli && hasRunner
+            ? undefined
+            : "Restore the root `saas` CLI script plus `tools/saas/cli.ts` and `tools/saas/agent-recipe.ts` so `pnpm saas agent recipe resource-install ...` stays available."
+      };
+    }
+  },
+  {
     id: "framework-contract-package",
     name: "Framework contract package",
     appliesToPaths: [

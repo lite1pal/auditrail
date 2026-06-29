@@ -2,6 +2,20 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas agent recipe resource-install <resource-spec.json>` as the
+  first deterministic full generated-resource AI workflow command. It reuses
+  the canonical resource schema, dry-run planner, existing agent-context
+  metadata, smoke-check guidance, and safe apply posture to emit one bounded
+  install recipe without mutating real runtime source or broadening generator
+  behavior.
+
+- Added a tracked recipe template under
+  `tools/saas/recipes/generated-resource-install.md` plus focused recipe tests
+  covering deterministic markdown and JSON output, invalid-spec failure,
+  planner-warning carry-through, derived allowed paths, forbidden AuditTrail
+  product paths, required checks, stop conditions, concise doc references, and
+  safe output-file behavior.
+
 - Added `pnpm saas apply resource <resource-spec.json> --target <target-dir>`
   as the first explicit safe apply path for generated resources. It keeps
   preview generation as the default, stages generated output in temp storage,
