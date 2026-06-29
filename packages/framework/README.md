@@ -76,6 +76,13 @@ Current AI-agent install recipe consumer scope:
 - markdown is the default output mode and `--json` is available for stable future machine consumption
 - the command does not add CRUD generation behavior or mutate runtime source
 
+Current scaffold-planner consumer scope:
+
+- `pnpm saas plan scaffold ...` reuses extraction dry-run metadata, placeholder-product metadata, and framework quality-gate seams
+- the command emits deterministic scaffold-plan data for a future create-app flow, including source groups, replacements, checks, and AI workflow hints
+- markdown is the default output mode and `--json` is available for stable future machine consumption
+- the command does not create scaffold output or mutate runtime source
+
 Current generator stability consumer scope:
 
 - `pnpm saas check generators` reuses the same canonical schema, planner, and generator output

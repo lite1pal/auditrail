@@ -308,6 +308,41 @@ const doctorChecks: readonly DoctorCheckDefinition[] = [
     }
   },
   {
+    id: "scaffold-planner-command",
+    name: "Scaffold planner command",
+    appliesToPaths: ["package.json", "tools/saas/cli.ts", "tools/saas/scaffold-planner.ts"],
+    command: "pnpm saas plan scaffold <app-name>",
+    required: true,
+    evaluate(context) {
+      const script = getScript(context, "saas");
+      const hasScript =
+        typeof script === "string" && script.includes("tools/saas/cli.ts");
+      const hasCli = fileExists(context, "tools/saas/cli.ts");
+      const hasRunner = fileExists(context, "tools/saas/scaffold-planner.ts");
+
+      return {
+        appliesToPaths: [
+          "package.json",
+          "tools/saas/cli.ts",
+          "tools/saas/scaffold-planner.ts"
+        ],
+        command: "pnpm saas plan scaffold <app-name>",
+        id: "scaffold-planner-command",
+        name: "Scaffold planner command",
+        required: true,
+        status: hasScript && hasCli && hasRunner ? "pass" : "fail",
+        reason:
+          hasScript && hasCli && hasRunner
+            ? "The SaaS CLI exposes the scaffold planner entrypoint and its runner module exists."
+            : "The scaffold planner command is missing its root CLI entrypoint or runner module.",
+        fix:
+          hasScript && hasCli && hasRunner
+            ? undefined
+            : "Restore the root `saas` CLI script plus `tools/saas/cli.ts` and `tools/saas/scaffold-planner.ts` so `pnpm saas plan scaffold ...` stays available."
+      };
+    }
+  },
+  {
     id: "framework-contract-package",
     name: "Framework contract package",
     appliesToPaths: [

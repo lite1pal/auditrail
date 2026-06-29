@@ -59,6 +59,13 @@ agent-context metadata, and packages planning, preview, smoke-check, safe-
 apply, customization, and verification guidance into one bounded recipe
 without adding new generator behavior or mutating real runtime source.
 
+The first future create-app planning command also lives under `tools/saas/*`:
+`pnpm saas plan scaffold <app-name>`. It is planning-only. It reuses
+extraction dry-run metadata, placeholder-product validation metadata,
+framework quality-gate seams, and AI workflow commands to describe a future
+scaffold flow without creating a package, generating scaffold output, or
+changing runtime source.
+
 The first generator stability command also lives there:
 `pnpm saas check generators`. It regenerates committed fixture resources into a
 safe temp directory, compares paths and contents against golden fixtures, and

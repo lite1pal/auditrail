@@ -8,6 +8,10 @@ import {
 } from "./agent-recipe.js";
 import { createDoctorReport, formatDoctorReport } from "./doctor.js";
 import {
+  createScaffoldPlan,
+  formatScaffoldPlanMarkdown
+} from "./scaffold-planner.js";
+import {
   formatGeneratedResourceSummary,
   generateResourceFromFile
 } from "./resource-generator.js";
@@ -54,6 +58,13 @@ export function executeSaasCli(input: {
 
   if (command === "plan" && input.args[1] === "resource") {
     return executePlanResourceCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
+  if (command === "plan" && input.args[1] === "scaffold") {
+    return executePlanScaffoldCommand({
       args: input.args.slice(2),
       repoRoot: input.repoRoot
     });
@@ -116,6 +127,7 @@ export function executeSaasCli(input: {
       "Usage:",
       "  pnpm saas doctor",
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
+      "  pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
       "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
       "  pnpm saas apply resource <path-to-resource-spec.json> --target <target-dir> [--force]",
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
@@ -190,6 +202,61 @@ function executePlanResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Resource planning failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executePlanScaffoldCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args, {
+      booleanOptions: ["--json"],
+      valueOptions: [
+        "--package-name",
+        "--product-name",
+        "--output",
+        "--database",
+        "--auth"
+      ]
+    });
+    const [appName] = parsedArgs.positionalArgs;
+
+    if (!appName) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing app name. Usage: pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
+        stdout: ""
+      };
+    }
+
+    const bundle = createScaffoldPlan({
+      appName,
+      authMode: parsedArgs.optionsWithValues.get("--auth"),
+      databaseProvider: parsedArgs.optionsWithValues.get("--database"),
+      outputDirectory: parsedArgs.optionsWithValues.get("--output"),
+      packageName: parsedArgs.optionsWithValues.get("--package-name"),
+      productName: parsedArgs.optionsWithValues.get("--product-name"),
+      repoRoot: input.repoRoot
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: parsedArgs.options.has("--json")
+        ? JSON.stringify(bundle, null, 2)
+        : formatScaffoldPlanMarkdown(bundle)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Scaffold planning failed.",
       stdout: ""
     };
   }

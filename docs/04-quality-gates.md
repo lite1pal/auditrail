@@ -279,6 +279,20 @@ The recipe command must stay deterministic and concise:
 - optional output files must stay under `.generated/` or `tmp/`
 - it does not add new CRUD generation behavior or mutate runtime source
 
+The first create-app scaffold planning check is now:
+
+```bash
+pnpm saas plan scaffold my-saas-app
+```
+
+The scaffold planner must stay deterministic and planning-only:
+
+- it validates app name, supported options, and target directory safety before emitting a plan
+- it reuses extraction dry-run metadata and placeholder-product metadata instead of generating scaffold output
+- it emits source, identity, product-setup, runtime-config, quality-gate, and AI-workflow groups
+- markdown is the default output mode and `--json` is available for stable future machine consumption
+- it does not create files, publish a package, create a repo, or mutate runtime source
+
 The generated-resource smoke check is now:
 
 ```bash

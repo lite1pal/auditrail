@@ -147,6 +147,20 @@ Current recipe scope:
 - can write local recipe artifacts only under `.generated/` or `tmp/`
 - does not add CRUD generation behavior, mutate real runtime source, or register a real resource
 
+The first planning-only future scaffold command is now:
+
+```bash
+pnpm saas plan scaffold my-saas-app
+```
+
+Current scaffold-planner scope:
+
+- validates app name, supported package/product/provider options, and target directory safety
+- reuses the extraction dry-run plan plus placeholder product metadata and current output/report conventions
+- emits source, identity, placeholder-setup, runtime-config, quality-gate, and AI-workflow groups
+- emits deterministic markdown by default and stable JSON with `--json`
+- does not run extraction output generation, create scaffold files, publish a package, or create a repo
+
 Generated-resource structural validation is now also available:
 
 ```bash

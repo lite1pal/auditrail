@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-075 Add `create-saas-app` scaffold planner
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/create-saas-app-planner
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tools/extraction/README.md
+    - packages/framework/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A deterministic read-only scaffold planner command exists for the future create-app flow
+    - The planner validates app name, options, and output path safely and fails clearly on unsupported options
+    - Planner output includes source, app identity, product setup, runtime config, quality gates, and AI workflow groups without writing scaffold files
+    - Focused tooling tests cover deterministic output, invalid input failures, output-path safety, required groups, quality-gate coverage, AI workflow hints, and no-write behavior
+
 - [x] T-074 Add generated resource installation recipe for AI agents
   status: done
   priority: high

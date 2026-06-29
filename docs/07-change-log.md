@@ -2,6 +2,17 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas plan scaffold <app-name>` as the first planning-only
+  create-app scaffold command. It reuses extraction dry-run metadata,
+  placeholder-product seams, framework quality gates, and AI workflow hints to
+  emit a deterministic scaffold plan without creating output, publishing a
+  package, creating a repo, or mutating runtime source.
+
+- Added focused scaffold-planner tests covering deterministic output,
+  invalid-name rejection, unsafe output-directory rejection, unsupported option
+  failure, required plan groups, quality-gate coverage, AI workflow hints,
+  stable JSON output, deterministic ordering, and no-write behavior.
+
 - Added `pnpm saas agent recipe resource-install <resource-spec.json>` as the
   first deterministic full generated-resource AI workflow command. It reuses
   the canonical resource schema, dry-run planner, existing agent-context
