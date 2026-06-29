@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-072 Add generated resource integration smoke check
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/generated-resource-smoke-check
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - tsconfig.tools.json
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tools/extraction/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - `pnpm saas check generated-resource` generates the fixture resource into an isolated output directory and validates structural usability without registering a real runtime resource
+    - The smoke check validates planner alignment, golden-fixture parity, expected file groups, forbidden AuditTrail-specific imports, unresolved placeholders, deterministic repeat generation, and syntax-readiness signals
+    - Focused tooling tests cover passing behavior, missing files, forbidden imports, unresolved placeholders, deterministic output, unsupported specs, output-path safety, cleanup, and no mutation of real app source
+    - Docs explain what the smoke check proves, what it does not prove, and how it fits into SaaS tooling verification
+
 - [x] T-071 Add generator golden fixtures and regeneration checks
   status: done
   priority: high

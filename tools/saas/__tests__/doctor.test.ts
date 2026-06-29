@@ -237,6 +237,8 @@ function createValidRepoFiles() {
       'export { architectureBoundaryRules } from "../../packages/architecture-boundaries/src/rules.js";\n',
     "tools/check-architecture-boundaries.ts": "console.log('ok');\n",
     "tools/check-extraction-manifest.ts": "console.log('ok');\n",
+    "tools/saas/cli.ts": "console.log('ok');\n",
+    "tools/saas/generated-resource-smoke.ts": "console.log('ok');\n",
     "tools/extraction/dry-run.ts": "console.log('ok');\n",
     "tools/extraction/extract.ts": "console.log('ok');\n",
     "tools/extraction/validate-placeholder-product.ts": "console.log('ok');\n",

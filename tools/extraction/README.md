@@ -131,6 +131,28 @@ Current agent-context scope:
 - can write local context artifacts only under `.generated/` or `tmp/`
 - does not generate CRUD files, mutate runtime source, or register resources
 
+Generated-resource structural validation is now also available:
+
+```bash
+pnpm saas check generated-resource
+```
+
+Current smoke-check scope:
+
+- generates the fixture resource into an isolated ignored temp directory
+- reuses the canonical resource schema, dry-run planner, preview-only generator, and committed golden fixtures
+- validates expected file groups plus customization guidance
+- fails on forbidden AuditTrail-specific imports or unresolved placeholders in generated files
+- confirms repeated generation is deterministic
+- runs a lightweight syntax-readiness pass for generated `.ts` and `.tsx` files
+- cleans up temp output after the check
+
+What it does not prove:
+
+- it does not install the generated output into the real API, web, DB, or product runtime
+- it does not add route registration, product nav wiring, package exports, or real migrations
+- it does not claim the generated output is fully standalone or fully typechecked yet
+
 `pnpm saas doctor` is the first repo-local framework CLI command. It does not
 run extraction or mutate output; it inspects whether the boundary, extraction,
 placeholder-validation, product-definition, and framework-contract seams are

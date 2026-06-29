@@ -200,6 +200,44 @@ const doctorChecks: readonly DoctorCheckDefinition[] = [
     }
   },
   {
+    id: "generated-resource-smoke-command",
+    name: "Generated resource smoke-check command",
+    appliesToPaths: ["package.json", "tools/saas/cli.ts", "tools/saas/generated-resource-smoke.ts"],
+    command: "pnpm saas check generated-resource",
+    required: true,
+    evaluate(context) {
+      const script = getScript(context, "saas");
+      const hasScript =
+        typeof script === "string" && script.includes("tools/saas/cli.ts");
+      const hasCli = fileExists(context, "tools/saas/cli.ts");
+      const hasRunner = fileExists(
+        context,
+        "tools/saas/generated-resource-smoke.ts"
+      );
+
+      return {
+        appliesToPaths: [
+          "package.json",
+          "tools/saas/cli.ts",
+          "tools/saas/generated-resource-smoke.ts"
+        ],
+        command: "pnpm saas check generated-resource",
+        id: "generated-resource-smoke-command",
+        name: "Generated resource smoke-check command",
+        required: true,
+        status: hasScript && hasCli && hasRunner ? "pass" : "fail",
+        reason:
+          hasScript && hasCli && hasRunner
+            ? "The SaaS CLI exposes the generated-resource smoke check entrypoint and its runner module exists."
+            : "The generated-resource smoke check command is missing its root CLI entrypoint or runner module.",
+        fix:
+          hasScript && hasCli && hasRunner
+            ? undefined
+            : "Restore the root `saas` CLI script plus `tools/saas/cli.ts` and `tools/saas/generated-resource-smoke.ts` so `pnpm saas check generated-resource` stays available."
+      };
+    }
+  },
+  {
     id: "framework-contract-package",
     name: "Framework contract package",
     appliesToPaths: [

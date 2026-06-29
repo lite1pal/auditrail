@@ -5,5 +5,5 @@
     "types": ["node", "vitest/globals"]
   },
   "include": ["tools/saas/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "tools/saas/__fixtures__/**"]
 }

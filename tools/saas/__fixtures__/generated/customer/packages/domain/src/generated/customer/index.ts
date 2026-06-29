@@ -17,7 +17,7 @@ export const customerRecordSchema = z.object({
   isActive: z.boolean(),
   status: z.enum(["active", "inactive"]),
   externalId: z.string().uuid().optional(),
-  lastContactedAt: z.string().datetime().optional()
+  lastContactedAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });

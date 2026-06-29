@@ -58,6 +58,14 @@ safe temp directory, compares paths and contents against golden fixtures, and
 fails on drift without touching runtime source. An explicit `--update` mode may
 refresh those committed fixtures intentionally.
 
+The next generated-output validation command also lives there:
+`pnpm saas check generated-resource`. It generates the committed fixture
+resource into an isolated ignored temp directory, reuses the planner plus
+golden-fixture comparison, and validates structural readiness signals such as
+expected file groups, deterministic repeated output, generic import safety,
+placeholder cleanup, and syntax-parsable TypeScript or TSX files without
+registering a real runtime resource.
+
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
 

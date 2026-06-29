@@ -259,6 +259,30 @@ pnpm saas agent context resource tools/saas/__fixtures__/resources/customer.json
 
 The agent-context command must stay deterministic and concise:
 
+The generated-resource smoke check is now:
+
+```bash
+pnpm saas check generated-resource
+```
+
+It is deterministic, local-only, and safe for CI. It validates the current
+fixture resource in isolated temp output by checking:
+
+- planner-aligned generated file paths only
+- parity with committed golden fixture output
+- expected domain, DB, API, web, test, and customization-doc file groups
+- no forbidden AuditTrail-specific imports in generated files
+- no unresolved template placeholders that should have been rendered
+- deterministic repeated generation
+- syntax-readiness for generated `.ts` and `.tsx` files via lightweight parse or transpile diagnostics
+
+What it does not prove yet:
+
+- it does not install the generated resource into the real AuditTrail runtime
+- it does not register API routes, web routes, DB schema barrels, nav entries, or exports
+- it does not generate or apply real migrations
+- it does not run a full standalone typecheck or build for the isolated output
+
 - it validates through the canonical resource schema
 - it reuses the dry-run planner instead of scanning the repo broadly
 - it emits paths, checks, stop conditions, and generator limits instead of large copied doc contents

@@ -12,6 +12,10 @@ import {
   runGeneratorGoldenCheck
 } from "./generator-golden.js";
 import {
+  formatGeneratedResourceSmokeReport,
+  runGeneratedResourceSmokeCheck
+} from "./generated-resource-smoke.js";
+import {
   createResourcePlanFromFile,
   formatResourcePlanReport
 } from "./resource-planner.js";
@@ -72,6 +76,13 @@ export function executeSaasCli(input: {
     });
   }
 
+  if (command === "check" && input.args[1] === "generated-resource") {
+    return executeCheckGeneratedResourceCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
   return {
     exitCode: 1,
     stderr: [
@@ -81,7 +92,8 @@ export function executeSaasCli(input: {
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
       "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
-      "  pnpm saas check generators [--update]"
+      "  pnpm saas check generators [--update]",
+      "  pnpm saas check generated-resource"
     ].join("\n"),
     stdout: ""
   };
@@ -277,6 +289,41 @@ function executeCheckGeneratorsCommand(input: {
         error instanceof Error
           ? error.message
           : "Generator golden check failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeCheckGeneratedResourceCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    if (input.args.length > 0) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Unexpected arguments. Usage: pnpm saas check generated-resource",
+        stdout: ""
+      };
+    }
+
+    const report = runGeneratedResourceSmokeCheck({
+      repoRoot: input.repoRoot
+    });
+
+    return {
+      exitCode: report.exitCode,
+      stderr: "",
+      stdout: formatGeneratedResourceSmokeReport(report)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Generated resource smoke check failed.",
       stdout: ""
     };
   }

@@ -2,6 +2,17 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas check generated-resource` as a deterministic isolated
+  smoke check for the committed fixture resource. It generates into ignored
+  temp output only, validates planner alignment, golden-fixture parity,
+  expected file groups, generic import safety, unresolved-placeholder cleanup,
+  deterministic repeat generation, and lightweight TypeScript syntax
+  readiness without registering a real runtime resource.
+
+- Added focused smoke-check tests covering pass, missing files, forbidden
+  imports, unresolved placeholders, deterministic repeat output, unsupported
+  specs, runtime-mutation detection, cleanup, and output-path safety.
+
 - Added committed golden fixtures under `tools/saas/__fixtures__/generated/*`
   plus `pnpm saas check generators` so the current CRUD generator output can be
   regenerated into a safe temp directory and compared against a tracked
