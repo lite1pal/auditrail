@@ -1,5 +1,20 @@
 # Change Log
 
+## 2026-06-28
+
+- Added `packages/framework` as a pure public framework-contract package with
+  generic Zod-validated definitions for modules, resources, fields, CRUD,
+  routes, ownership, generator plans, checks, and AI-agent task or context
+  metadata.
+
+- Kept the framework layer intentionally non-runtime. It does not add a CLI,
+  code generation, route wiring, database changes, extraction output, or any
+  AuditTrail product imports.
+
+- Updated the boundary scanner, extraction manifest, and architecture or
+  quality-gate docs so the new framework package is classified as reusable
+  platform-extension tooling and covered by focused typecheck and test gates.
+
 ## 2026-06-27
 
 - added `tools/extraction/validate-placeholder-product.ts` plus

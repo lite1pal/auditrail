@@ -9,8 +9,14 @@ Keep the build vertical and incremental.
    - keep `tools/extraction/dry-run.ts` green as the fail-closed plan check
    - use `tools/extraction/extract.ts` only for ignored local candidate output
    - keep `tools/extraction/validate-placeholder-product.ts` green as the scaffold-validation step for placeholder product wiring
+   - keep `packages/framework` limited to pure framework contract vocabulary until a later task adds read-only planning or validation consumers
    - reduce mixed and manual-review paths before treating any generated output as reusable
    - keep future extraction fail-closed on unknown paths
+
+1. Build the first tooling consumers on top of the framework contract layer:
+   - read framework module/resource/check definitions from `packages/framework`
+   - add read-only planning or validation before any generator writes files
+   - keep CLI, CRUD templates, and code generation out of scope until the contracts prove stable
 
 1. Add dashboard read model:
    - recent events

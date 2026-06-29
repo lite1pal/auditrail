@@ -25,6 +25,30 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-065 Add framework contract types
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/framework-contract-types
+  pr:
+  last_updated: 2026-06-28
+  completed: 2026-06-28
+  blocked_reason:
+  files:
+    - packages/framework/*
+    - packages/architecture-boundaries/src/*
+    - tools/extraction/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - A pure framework contract package exists with generic module, resource, CRUD, route, ownership, generator-plan, check, and agent-task vocabulary
+    - The framework package stays generic and does not import AuditTrail product modules
+    - Focused validation tests exist for the new framework schemas
+    - Boundary and extraction tooling recognize the new package without changing runtime behavior
+
 - [x] T-063 Add placeholder product validation app
   status: done
   priority: high

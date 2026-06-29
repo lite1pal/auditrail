@@ -181,6 +181,12 @@ does not import provider SDKs or construct provider checkout URLs locally.
 
 `packages/config` contains reusable config parsing helpers.
 
+`packages/framework` contains pure framework contract schemas and types for
+future CLI, generator, extraction-validation, and AI-agent tooling. It is
+public framework vocabulary only: no runtime adapters, code generation,
+filesystem writes, shell execution, env access, or AuditTrail product imports
+belong there.
+
 `packages/architecture-boundaries` contains typed source-root boundary metadata
 for future architecture scanners. It is build-time metadata only and does not
 participate in runtime behavior.
@@ -194,6 +200,7 @@ Current classification:
 - `packages/config`: `platform-core`
 - `packages/db`: mixed infrastructure for both platform and audit modules
 - `packages/domain`: mixed pure platform and audit domain helpers, which should stay separated by folder and import direction
+- `packages/framework`: `platform-extension`
 - `packages/testkit`: `platform-core`
 
 The generic `@auditrail/domain` barrel must stay product-neutral. AuditTrail-
@@ -415,6 +422,8 @@ of importing audit-product helpers from `packages/domain/src/audit-events/**`.
 
 Current `platform-extension` candidates that should stay generic when added:
 
+- framework contract vocabulary for future CLI, generator, extraction, and
+  agent tooling, with the current pure seam in `packages/framework`
 - billing and subscriptions
 - entitlements and generic usage meters, with the current pure domain seam in
   `packages/domain/src/entitlements` plus the API-side resolver seam in
@@ -470,6 +479,8 @@ The output writer is intentionally more conservative than a real extraction:
 Current examples captured there:
 
 - boilerplate copy: auth, organizations, invitations, API keys, onboarding framework, jobs or worker skeletons, shared UI, config helpers, boundary tooling, and generic product-definition seams
+- boilerplate copy also now includes the pure `packages/framework` contract
+  vocabulary for future non-runtime tooling
 - product-specific: audit-event API modules, audit-event web features, and `packages/domain/src/audit-events/**`
 - template replacements: product definition config, nav adapters, onboarding copy adapters, app chrome, and other AuditTrail-branded surfaces
 - manual review: the remaining mixed `packages/db/**` surfaces such as the audit-event schema file and any migration history without explicit ownership, plus route composition files, docs, deployment files, and workspace config

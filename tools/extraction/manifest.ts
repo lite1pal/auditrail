@@ -641,6 +641,18 @@ const platformExtensionEntries = [
       "Pair with the outbox table and worker registry when extracting."
     ],
     requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/framework/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "copy",
+    reason: "The framework contract vocabulary is a reusable tooling seam for future CLI, generator, extraction, and agent workflows.",
+    notes: [
+      "Keep the package pure and product-neutral.",
+      "Do not add generators, runtime adapters, or produced output in this layer."
+    ],
+    requiredForMinimalScaffold: false
   })
 ] as const satisfies readonly ExtractionManifestEntry[];
 

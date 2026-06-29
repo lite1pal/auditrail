@@ -42,6 +42,7 @@ const defaultWorkspacePackageRoots = new Map([
   ["config", "packages/config/src"],
   ["db", "packages/db/src"],
   ["domain", "packages/domain/src"],
+  ["framework", "packages/framework/src"],
   ["testkit", "packages/testkit/src"]
 ]);
 

@@ -74,6 +74,11 @@ What it does not prove yet:
 - it does not prove every `apps/web/app/**` composition file is extraction-ready
 - it does not remove the remaining manual-review paths from the generated report
 
+The new `packages/framework` package is the generic vocabulary seam that future
+CLI, CRUD planning, extraction validation, and AI-agent tooling should speak.
+The current extraction tooling does not generate from those contracts yet; it
+only classifies the package as reusable platform-extension code.
+
 Current limitations:
 
 - manual-review files still block any claim that the generated output is a

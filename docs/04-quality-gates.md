@@ -200,6 +200,19 @@ pnpm --filter @auditrail/worker typecheck
 pnpm --filter @auditrail/worker test
 ```
 
+## Framework Contract Gates
+
+The `@auditrail/framework` package is pure contract vocabulary for future
+tooling and must stay generic and audit-free. Its focused checks are:
+
+```bash
+pnpm --filter @auditrail/framework typecheck
+pnpm --filter @auditrail/framework test
+```
+
+When schemas are added there, keep validation coverage focused on accepted
+generic definitions plus invalid enum or ownership rejection paths.
+
 ## Platform Module Gates
 
 Platform modules must land in this order:
