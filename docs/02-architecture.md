@@ -33,10 +33,10 @@ asserts that the product-definition, onboarding, and shell seams can be wired
 without importing AuditTrail-specific modules.
 
 The first repo-local framework CLI now lives under `tools/saas/*`.
-`saas doctor` is inspection-only tooling: it may read repo metadata, framework
-contracts, extraction metadata, and product-definition seams, but it must not
-generate app code, mutate scaffold output, or change runtime behavior in the
-same slice.
+`saas doctor` and `saas plan resource` are inspection-only tooling: they may
+read repo metadata, framework contracts, extraction metadata,
+product-definition seams, and resource specs, but they must not generate app
+code, mutate scaffold output, or change runtime behavior in the same slice.
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.

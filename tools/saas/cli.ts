@@ -1,4 +1,8 @@
 import { createDoctorReport, formatDoctorReport } from "./doctor.js";
+import {
+  createResourcePlanFromFile,
+  formatResourcePlanReport
+} from "./resource-planner.js";
 
 export interface SaasCliExecutionResult {
   exitCode: number;
@@ -12,25 +16,34 @@ export function executeSaasCli(input: {
 }): SaasCliExecutionResult {
   const [command] = input.args;
 
-  if (command !== "doctor") {
+  if (command === "doctor") {
+    const report = createDoctorReport({
+      repoRoot: input.repoRoot
+    });
+
     return {
-      exitCode: 1,
-      stderr: [
-        "Unknown or missing command.",
-        "Usage: pnpm saas doctor"
-      ].join("\n"),
-      stdout: ""
+      exitCode: report.exitCode,
+      stderr: "",
+      stdout: formatDoctorReport(report)
     };
   }
 
-  const report = createDoctorReport({
-    repoRoot: input.repoRoot
-  });
+  if (command === "plan" && input.args[1] === "resource") {
+    return executePlanResourceCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
 
   return {
-    exitCode: report.exitCode,
-    stderr: "",
-    stdout: formatDoctorReport(report)
+    exitCode: 1,
+    stderr: [
+      "Unknown or missing command.",
+      "Usage:",
+      "  pnpm saas doctor",
+      "  pnpm saas plan resource <path-to-resource-spec.json> [--json]"
+    ].join("\n"),
+    stdout: ""
   };
 }
 
@@ -59,4 +72,45 @@ function isExecutedAsScript() {
   }
 
   return entryPath.endsWith("tools/saas/cli.ts");
+}
+
+function executePlanResourceCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  const options = new Set(input.args.filter((argument) => argument.startsWith("--")));
+  const positionalArgs = input.args.filter((argument) => !argument.startsWith("--"));
+  const [specPath] = positionalArgs;
+
+  if (!specPath) {
+    return {
+      exitCode: 1,
+      stderr: "Missing resource spec path. Usage: pnpm saas plan resource <path-to-resource-spec.json> [--json]",
+      stdout: ""
+    };
+  }
+
+  try {
+    const report = createResourcePlanFromFile({
+      repoRoot: input.repoRoot,
+      specPath
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: options.has("--json")
+        ? JSON.stringify(report, null, 2)
+        : formatResourcePlanReport(report)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Resource planning failed.",
+      stdout: ""
+    };
+  }
 }

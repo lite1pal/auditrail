@@ -2,6 +2,19 @@
 
 ## 2026-06-29
 
+- Added `pnpm saas plan resource <resource-spec.json>` as the first read-only
+  CRUD resource planner under `tools/saas/*`. It validates JSON specs through
+  the canonical framework resource schema, normalizes defaults, and prints a
+  deterministic grouped file plan without writing app code.
+
+- Added focused planner warnings and manual-review reporting for delete-enabled
+  resources, public organization-owned APIs without permissions, global or
+  unowned resources, product-nav updates, migration placeholders, and existing
+  repo path conflicts.
+
+- Added example resource specs, planner tests, and SaaS-tooling verification
+  notes so future generator work can build on a stable dry-run contract first.
+
 - Added a canonical resource-spec schema to `packages/framework` for future
   resource planners, generators, and AI-agent context commands. The new pure
   contract covers resource identity, ownership, fields, CRUD flags, API/UI

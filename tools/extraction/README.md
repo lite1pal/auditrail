@@ -78,7 +78,15 @@ What it does not prove yet:
 The new `packages/framework` package is the generic vocabulary seam that future
 CLI, CRUD planning, extraction validation, and AI-agent tooling should speak.
 The current extraction tooling does not generate from those contracts yet; it
-only classifies the package as reusable platform-extension code.
+only classifies the package as reusable platform-extension code. The current
+read-only planner command is:
+
+```bash
+pnpm saas plan resource tools/saas/examples/customer.resource.json
+```
+
+It validates a JSON resource spec and prints a deterministic CRUD file plan,
+but it does not write generated files yet.
 
 `pnpm saas doctor` is the first repo-local framework CLI command. It does not
 run extraction or mutate output; it inspects whether the boundary, extraction,

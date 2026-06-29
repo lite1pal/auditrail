@@ -25,6 +25,30 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-068 Add CRUD dry-run planner
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/crud-dry-run-planner
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - packages/framework/*
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tools/extraction/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A deterministic `saas plan resource` dry-run command validates a JSON resource spec and prints a grouped file plan without writing app code
+    - The planner reports warnings and manual-review items for ambiguous ownership, public API, delete support, and existing path conflicts
+    - Focused tooling tests cover valid planning, disabled CRUD omission, nav planning, existing-file detection, invalid-spec failure, JSON output, and deterministic ordering
+    - Docs explain the planner command, supported spec format, and the fact that generation is still future work
+
 - [x] T-067 Add resource definition schema
   status: done
   priority: high

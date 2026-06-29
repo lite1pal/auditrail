@@ -225,6 +225,18 @@ boundary, extraction, placeholder-validation, framework-contract, product
 definition, and quality-gate seams are still wired as expected before deeper
 tooling is added.
 
+The current read-only SaaS tooling checks are:
+
+```bash
+pnpm typecheck:saas
+pnpm test:saas
+pnpm saas plan resource tools/saas/examples/customer.resource.json
+```
+
+`pnpm saas plan resource ...` validates a JSON resource spec and prints a
+deterministic dry-run file plan only. It must not write CRUD files or mutate
+runtime code.
+
 ## Platform Module Gates
 
 Platform modules must land in this order:

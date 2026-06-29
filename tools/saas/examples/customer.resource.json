@@ -1,0 +1,45 @@
+{
+  "resource": "customer",
+  "label": "Customer",
+  "ownership": "organization",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "required": true,
+      "unique": true,
+      "sortable": true
+    },
+    {
+      "name": "status",
+      "type": "enum",
+      "required": true,
+      "values": ["active", "inactive"],
+      "default": "active"
+    }
+  ],
+  "crud": {
+    "list": true,
+    "create": true,
+    "read": true,
+    "update": true,
+    "delete": false
+  },
+  "api": {
+    "prefix": "/v1/customers"
+  },
+  "ui": {
+    "nav": true,
+    "navLabel": "Customers"
+  },
+  "permissions": {
+    "member": "read",
+    "admin": "write"
+  }
+}
