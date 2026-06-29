@@ -27,6 +27,7 @@ What it does not do:
 Commands:
 
 ```bash
+pnpm saas doctor
 pnpm check:extraction-manifest
 pnpm check:extraction
 pnpm extract:boilerplate
@@ -78,6 +79,11 @@ The new `packages/framework` package is the generic vocabulary seam that future
 CLI, CRUD planning, extraction validation, and AI-agent tooling should speak.
 The current extraction tooling does not generate from those contracts yet; it
 only classifies the package as reusable platform-extension code.
+
+`pnpm saas doctor` is the first repo-local framework CLI command. It does not
+run extraction or mutate output; it inspects whether the boundary, extraction,
+placeholder-validation, product-definition, and framework-contract seams are
+present and wired as expected.
 
 Current limitations:
 

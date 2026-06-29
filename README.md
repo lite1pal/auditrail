@@ -80,12 +80,15 @@ pnpm dev:web
 Run all checks:
 
 ```bash
+pnpm saas doctor
 pnpm verify
 ```
 
 Or separately:
 
 ```bash
+pnpm test:saas
+pnpm typecheck:saas
 pnpm --filter @auditrail/worker typecheck
 pnpm --filter @auditrail/worker test
 pnpm typecheck

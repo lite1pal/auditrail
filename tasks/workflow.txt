@@ -25,6 +25,31 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-066 Add `saas doctor`
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/saas-doctor
+  pr:
+  last_updated: 2026-06-29
+  completed: 2026-06-29
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - tools/extraction/*
+    - package.json
+    - tsconfig.tools.json
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - A deterministic local `saas doctor` command validates the current framework-candidate repo health without mutating runtime or scaffold output
+    - Focused tests cover pass, fail, warning, ordering, and exit-code behavior for the doctor check registry
+    - The command stays data-driven, repo-local, and free of CRUD generation or runtime changes
+
 - [x] T-065 Add framework contract types
   status: done
   priority: high

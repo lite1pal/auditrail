@@ -351,6 +351,18 @@ const platformCoreEntries = [
     requiredForMinimalScaffold: true
   }),
   entry({
+    path: "tools/saas/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "copy",
+    reason: "The framework doctor CLI is reusable platform-extension tooling for validating a repo before generators or agent automation are added.",
+    notes: [
+      "Keep the command deterministic, local-only, and inspection-based.",
+      "Do not add scaffold mutation or runtime code generation in this tooling slice."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
     path: "tools/check-architecture-boundaries.ts",
     pathKind: "file",
     category: "platform-core",

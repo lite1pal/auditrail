@@ -15,8 +15,12 @@
     "check:extraction:placeholder": "tsx tools/extraction/validate-placeholder-product.ts",
     "check:extraction-manifest": "tsx tools/check-extraction-manifest.ts",
     "extract:boilerplate": "tsx tools/extraction/extract.ts",
+    "saas": "node --import tsx tools/saas/cli.ts",
+    "saas:doctor": "node --import tsx tools/saas/cli.ts doctor",
     "test:extraction": "vitest run tools/extraction/__tests__",
+    "test:saas": "vitest run tools/saas/__tests__",
     "typecheck": "pnpm -r typecheck",
+    "typecheck:saas": "tsc -p tsconfig.tools.json --noEmit",
     "test": "pnpm -r test",
     "verify": "pnpm check:boundaries && pnpm typecheck && pnpm test",
     "db:generate": "drizzle-kit generate",
@@ -30,7 +34,9 @@
     "infra:down": "docker compose down"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "drizzle-kit": "^0.31.8",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }

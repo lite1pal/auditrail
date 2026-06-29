@@ -1,5 +1,19 @@
 # Change Log
 
+## 2026-06-29
+
+- Added the first repo-local framework CLI command under `tools/saas/*`.
+  `pnpm saas doctor` now inspects the repo for expected boundary, extraction,
+  placeholder-validation, framework-contract, product-definition, and
+  quality-gate seams without mutating scaffold output or runtime behavior.
+
+- Added focused doctor tests for pass, fail, warning, deterministic ordering,
+  and exit-code behavior, plus root scripts for `saas`, `saas:doctor`,
+  `test:saas`, and `typecheck:saas`.
+
+- Classified `tools/saas/**` in the extraction manifest so the new framework
+  CLI is explicit reusable tooling rather than an unknown monitored path.
+
 ## 2026-06-28
 
 - Added `packages/framework` as a pure public framework-contract package with

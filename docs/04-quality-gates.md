@@ -213,6 +213,17 @@ pnpm --filter @auditrail/framework test
 When schemas are added there, keep validation coverage focused on accepted
 generic definitions plus invalid enum or ownership rejection paths.
 
+The first repo-local framework CLI health check is:
+
+```bash
+pnpm saas doctor
+```
+
+It is deterministic, local-only, and safe for CI. It checks that the current
+boundary, extraction, placeholder-validation, framework-contract, product
+definition, and quality-gate seams are still wired as expected before deeper
+tooling is added.
+
 ## Platform Module Gates
 
 Platform modules must land in this order:

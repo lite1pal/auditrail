@@ -15,8 +15,14 @@ Keep the build vertical and incremental.
 
 1. Build the first tooling consumers on top of the framework contract layer:
    - read framework module/resource/check definitions from `packages/framework`
-   - add read-only planning or validation before any generator writes files
-   - keep CLI, CRUD templates, and code generation out of scope until the contracts prove stable
+   - keep `pnpm saas doctor` green as the first read-only framework CLI health check
+   - add richer read-only planning or validation before any generator writes files
+   - keep CRUD templates and code generation out of scope until the contracts plus doctor checks prove stable
+
+1. After `saas doctor`, add the next framework tooling slices in order:
+   - richer doctor checks driven directly from framework contract metadata
+   - read-only generator planning from framework resources and modules
+   - CRUD/resource generators only after the planning output is stable
 
 1. Add dashboard read model:
    - recent events
