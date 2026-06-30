@@ -43,14 +43,22 @@ This file tracks API runtime, platform, and data-safety work items.
     - App startup behavior remains covered by tests
     - The module boundaries are documented if they materially change architecture
 
-- [ ] T-086 Harden ingest observability, quota, and failure-path coverage
-  status: ready
+## Done
+
+- [x] T-086 Harden ingest observability, quota, and failure-path coverage
+  status: done
   priority: high
   owner: codex
-  branch:
+  branch: codex/T-086-ingest-failure-coverage
   pr:
   last_updated: 2026-06-30
+  completed: 2026-06-30
   blocked_reason:
+  notes:
+    - 2026-06-30: expanded the real-db ingest matrix to cover success, validation failure, auth failure, revoked-key failure, quota failure, and rate-limit behavior
+    - 2026-06-30: proved event writes, monthly usage updates, and durable outbox enqueue stay aligned on success and do not partially escape on rejected ingest requests
+    - 2026-06-30: kept the existing app-level request-log redaction and safe-error-policy coverage as the observability guardrail, and documented the ingest-side expectation more explicitly
+    - 2026-06-30: verified with `pnpm --filter @auditrail/api typecheck` and `pnpm --filter @auditrail/api exec vitest run --config vitest.integration.config.ts src/modules/audit-events/__tests__/routes.integration.test.ts`
   files:
     - apps/api/src/modules/audit-events/*
     - apps/api/src/modules/platform/entitlements/*
@@ -63,8 +71,6 @@ This file tracks API runtime, platform, and data-safety work items.
     - Ingest tests cover success, validation failure, auth failure, revoked key failure, quota failure, and rate-limit behavior
     - Tests prove event write plus usage update consistency and outbox enqueue consistency on success, with no outbox enqueue on failed requests
     - Request logging and safe-error behavior remain covered without leaking API keys, cookies, auth headers, or raw sensitive payload bodies
-
-## Done
 
 - [x] T-035 Enforce organization scoping at the audit-event data boundary
   status: done

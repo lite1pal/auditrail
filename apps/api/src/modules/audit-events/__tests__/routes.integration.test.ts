@@ -81,6 +81,12 @@ describe("event API integration", () => {
     });
 
     expect(ingestResponse.statusCode).toBe(202);
+    await expect(selectUsageRows()).resolves.toEqual([
+      {
+        meterKey: "events",
+        quantity: 1
+      }
+    ]);
     await expect(selectOutboxJobs()).resolves.toEqual([
       {
         name: "audit-event.created",
@@ -152,6 +158,29 @@ describe("event API integration", () => {
     expect(timeseriesResponse.statusCode).toBe(200);
     expect(timeseriesResponse.json().points).toHaveLength(1);
     expect(timeseriesResponse.json().points[0].count).toBe(1);
+  });
+
+  it("does not write events, usage, or outbox jobs when ingest validation fails", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: `Bearer ${apiKey}`
+      },
+      payload: {
+        metadata: {
+          reason: "missing event field"
+        }
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: "invalid_event_payload"
+    });
+    await expect(countAuditEvents()).resolves.toBe(0);
+    await expect(selectUsageRows()).resolves.toEqual([]);
+    await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
   it("creates project webhook deliveries and outbox jobs only for enabled subscribed endpoints", async () => {
@@ -233,6 +262,25 @@ describe("event API integration", () => {
   });
 
   it("rejects missing and invalid API keys across the event route family", async () => {
+    const missingIngestResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      payload: {
+        event: "user.deleted",
+        metadata: {}
+      }
+    });
+    const invalidIngestResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: "Bearer atl_invalid_key"
+      },
+      payload: {
+        event: "user.deleted",
+        metadata: {}
+      }
+    });
     const missingAuthResponse = await app.inject({
       method: "GET",
       url: `${API_VERSION_PREFIX}/events/stats?top=5`
@@ -245,6 +293,14 @@ describe("event API integration", () => {
       }
     });
 
+    expect(missingIngestResponse.statusCode).toBe(401);
+    expect(missingIngestResponse.json()).toEqual({
+      error: "missing_api_key"
+    });
+    expect(invalidIngestResponse.statusCode).toBe(401);
+    expect(invalidIngestResponse.json()).toEqual({
+      error: "invalid_api_key"
+    });
     expect(missingAuthResponse.statusCode).toBe(401);
     expect(missingAuthResponse.json()).toEqual({
       error: "missing_api_key"
@@ -253,6 +309,8 @@ describe("event API integration", () => {
     expect(invalidAuthResponse.json()).toEqual({
       error: "invalid_api_key"
     });
+    await expect(countAuditEvents()).resolves.toBe(0);
+    await expect(selectUsageRows()).resolves.toEqual([]);
     await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
@@ -285,6 +343,12 @@ describe("event API integration", () => {
 
     expect(response.statusCode).toBe(402);
     await expect(countAuditEvents()).resolves.toBe(0);
+    await expect(selectUsageRows()).resolves.toEqual([
+      {
+        meterKey: "events",
+        quantity: 100000
+      }
+    ]);
     await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
@@ -420,7 +484,83 @@ describe("event API integration", () => {
       error: "invalid_api_key"
     });
     await expect(countAuditEvents()).resolves.toBe(1);
+    await expect(selectUsageRows()).resolves.toEqual([
+      {
+        meterKey: "events",
+        quantity: 1
+      }
+    ]);
     await expect(countOutboxJobs()).resolves.toBe(1);
+  });
+
+  it("returns 429 for rate-limited ingest requests without writing extra state", async () => {
+    const rateLimitedApp = buildApp({
+      useInfrastructure: true,
+      infrastructure: {
+        databaseUrl
+      },
+      rateLimit: {
+        max: 1,
+        timeWindow: "1 minute"
+      }
+    });
+
+    try {
+      const firstResponse = await rateLimitedApp.inject({
+        method: "POST",
+        url: `${API_VERSION_PREFIX}/events`,
+        headers: {
+          authorization: `Bearer ${apiKey}`
+        },
+        payload: {
+          event: "user.created",
+          metadata: {
+            source: "first-request"
+          }
+        }
+      });
+      const secondResponse = await rateLimitedApp.inject({
+        method: "POST",
+        url: `${API_VERSION_PREFIX}/events`,
+        headers: {
+          authorization: `Bearer ${apiKey}`
+        },
+        payload: {
+          event: "user.created",
+          metadata: {
+            source: "rate-limited-request"
+          }
+        }
+      });
+
+      expect(firstResponse.statusCode).toBe(202);
+      expect(secondResponse.statusCode).toBe(429);
+      expect(secondResponse.json()).toMatchObject({
+        code: "FST_ERR_RATE_LIMIT",
+        error: "Too Many Requests"
+      });
+      await expect(countAuditEvents()).resolves.toBe(1);
+      await expect(selectUsageRows()).resolves.toEqual([
+        {
+          meterKey: "events",
+          quantity: 1
+        }
+      ]);
+      await expect(selectOutboxJobs()).resolves.toEqual([
+        {
+          name: "audit-event.created",
+          payload: {
+            createdAt: expect.any(String),
+            eventId: firstResponse.json().id,
+            organizationId: expect.any(String),
+            projectId: expect.any(String)
+          },
+          status: "pending"
+        }
+      ]);
+    } finally {
+      await rateLimitedApp.close();
+    }
   });
 
   it("returns only the requested project's events for session-scoped reads", async () => {
@@ -646,6 +786,24 @@ describe("event API integration", () => {
     );
 
     return result.rows;
+  }
+
+  async function selectUsageRows() {
+    const result = await pool.query<{
+      meterKey: string;
+      quantity: number;
+    }>(
+      `select
+         "meter_key" as "meterKey",
+         "quantity"
+       from "organization_monthly_usage"
+       order by "month_start" asc, "meter_key" asc`
+    );
+
+    return result.rows.map((row) => ({
+      meterKey: row.meterKey,
+      quantity: Number(row.quantity)
+    }));
   }
 
   async function countWebhookDeliveriesForEndpoint(endpointId: string) {

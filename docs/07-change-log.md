@@ -14,6 +14,12 @@
   scope against corrupted rows, and proved dashboard event routes reject
   another organization's data instead of exposing it.
 
+- Hardened ingest failure-path coverage around `POST /api/v1/events` by adding
+  real-db checks for validation, auth, revoked-key, quota, and rate-limit
+  behavior, and by proving the event write, monthly usage update, and durable
+  outbox enqueue side effects stay consistent on success and do not partially
+  escape on rejected requests.
+
 - Refactored the platform billing runtime into an internal provider registry
   and active-provider resolver, generalized the shared provider enums beyond a
   Stripe-only contract, and kept the public billing routes provider-neutral

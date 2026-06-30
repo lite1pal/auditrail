@@ -113,6 +113,11 @@ Local setup does not create a fixed development key. Create a project API key
 from the dashboard or the API key management flow before calling protected
 routes.
 
+For `POST /api/v1/events`, rejected requests such as validation failures, auth
+failures, quota failures, and rate-limit failures must not partially write an
+audit event, increment monthly usage, or enqueue outbox jobs. The success path
+must record the event and its durable outbox intent together.
+
 The browser dashboard uses the signed-in session instead of a machine API key.
 Its event reads are scoped by the selected organization and project through:
 

@@ -36,6 +36,10 @@ pnpm --filter @auditrail/api test:integration
 When a workflow now records durable outbox intent, integration coverage should
 assert both the primary write and the expected `job_outbox` side effect for the
 success and failure paths that matter.
+The ingest path is the concrete baseline: success should prove event write plus
+monthly usage update plus outbox enqueue, while validation, auth, revoked-key,
+quota, and rate-limit failures should prove that no extra write or enqueue
+side effect escaped.
 Project webhook changes follow the same rule: cover the management routes, the
 ingest-side delivery enqueue path, and the worker delivery behavior together
 instead of relying on one layer alone.
