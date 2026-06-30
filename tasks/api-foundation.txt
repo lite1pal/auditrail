@@ -4,27 +4,6 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Queue
 
-- [ ] T-038 Enforce organization scoping across platform data access paths
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-30
-  blocked_reason:
-  files:
-    - apps/api/src/modules/*
-    - packages/db/src/*
-    - apps/api/src/**/__tests__/*
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/07-change-log.md
-    - tasks/api-foundation.txt
-  acceptance:
-    - Every platform and product repository read/write path requires explicit organization scope or fails safely
-    - Tests cover the highest-risk read and write paths for missing or mismatched organization scope
-    - The architecture docs explain the tenant-isolation guarantees expected from the boilerplate
-
 - [ ] T-033 Evaluate the default Fastify rate limiter strategy
   status: ready
   priority: high
@@ -107,6 +86,32 @@ This file tracks API runtime, platform, and data-safety work items.
     - Request logging and safe-error behavior remain covered without leaking API keys, cookies, auth headers, or raw sensitive payload bodies
 
 ## Done
+
+- [x] T-038 Enforce organization scoping across platform data access paths
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/T-038-org-scoping
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: tightened platform and API-key repository contracts so organization-owned reads and writes fail closed when tenant scope is missing or mismatched
+    - 2026-06-30: added focused coverage for scoped API-key list and revoke behavior plus scoped invitation accept and revoke writes, and documented the repository-level tenant isolation rule
+    - 2026-06-30: verified with `pnpm --filter @auditrail/api exec vitest run src/modules/api-keys/__tests__/service.test.ts src/modules/api-keys/__tests__/postgres-repo.test.ts src/modules/platform/__tests__/service.test.ts src/modules/platform/__tests__/postgres-repo.test.ts` and `pnpm --filter @auditrail/api typecheck`
+  files:
+    - apps/api/src/modules/*
+    - packages/db/src/*
+    - apps/api/src/**/__tests__/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Every platform and product repository read/write path requires explicit organization scope or fails safely
+    - Tests cover the highest-risk read and write paths for missing or mismatched organization scope
+    - The architecture docs explain the tenant-isolation guarantees expected from the boilerplate
 
 - [x] T-088 Implement provider-neutral billing and project webhook delivery
   status: done

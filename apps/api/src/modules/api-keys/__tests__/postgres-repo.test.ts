@@ -28,13 +28,15 @@ describe("createPostgresApiKeyRepo", () => {
         [{ id: "project-1" }],
         [
           {
-            createdAt: new Date("2026-06-18T10:00:00.000Z"),
-            id: "key-2",
-            keyPrefix: "atldef",
-            lastUsedAt: new Date("2026-06-18T11:00:00.000Z"),
-            name: "Background worker",
-            projectId: "project-1",
-            revoked: true
+            api_keys: {
+              createdAt: new Date("2026-06-18T10:00:00.000Z"),
+              id: "key-2",
+              keyPrefix: "atldef",
+              lastUsedAt: new Date("2026-06-18T11:00:00.000Z"),
+              name: "Background worker",
+              projectId: "project-1",
+              revoked: true
+            }
           }
         ],
         [{ id: "key-2" }],
@@ -79,6 +81,7 @@ describe("createPostgresApiKeyRepo", () => {
     ).resolves.toEqual({ id: "project-1" });
     await expect(
       repo.listByProject({
+        organizationId: "org-1",
         projectId: "project-1"
       })
     ).resolves.toEqual([
@@ -95,6 +98,7 @@ describe("createPostgresApiKeyRepo", () => {
     await expect(
       repo.revoke({
         apiKeyId: "key-2",
+        organizationId: "org-1",
         projectId: "project-1"
       })
     ).resolves.toBe(true);
@@ -116,6 +120,27 @@ describe("createPostgresApiKeyRepo", () => {
         revoked: true
       }
     ]);
+  });
+
+  it("fails closed when the project does not belong to the organization scope", async () => {
+    const db = createFakeDb({
+      selectResults: [[], []]
+    });
+    const repo = createPostgresApiKeyRepo(db.asDatabase());
+
+    await expect(
+      repo.listByProject({
+        organizationId: "org-2",
+        projectId: "project-1"
+      })
+    ).resolves.toEqual([]);
+    await expect(
+      repo.revoke({
+        apiKeyId: "key-2",
+        organizationId: "org-2",
+        projectId: "project-1"
+      })
+    ).resolves.toBe(false);
   });
 });
 
@@ -146,6 +171,21 @@ function createFakeDb(options: {
           return {
             from() {
               return {
+                innerJoin() {
+                  return {
+                    where() {
+                      return {
+                        orderBy() {
+                          return {
+                            then(resolve: (value: unknown[]) => void) {
+                              resolve(selectResults.shift() ?? []);
+                            }
+                          };
+                        }
+                      };
+                    }
+                  };
+                },
                 where() {
                   async function resolveRows() {
                     return selectResults.shift() ?? [];

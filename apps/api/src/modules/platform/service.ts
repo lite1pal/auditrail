@@ -67,6 +67,7 @@ export interface PlatformRepo {
   acceptInvitation(input: {
     acceptedAt: string;
     invitationId: string;
+    organizationId: string;
   }): Promise<void>;
   findInvitationByTokenHash(tokenHash: string): Promise<Invitation | undefined>;
   findPendingInvitationForEmail(input: {
@@ -87,6 +88,7 @@ export interface PlatformRepo {
   listOrganizationsForUser(userId: string): Promise<Organization[]>;
   listProjects(organizationId: string): Promise<Project[]>;
   revokeInvitation(input: {
+    organizationId: string;
     invitationId: string;
     revokedAt: string;
   }): Promise<void>;
@@ -236,7 +238,8 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
       if (existingMembership) {
         await repo.acceptInvitation({
           acceptedAt: now.toISOString(),
-          invitationId: invitation.id
+          invitationId: invitation.id,
+          organizationId: invitation.organizationId
         });
 
         return existingMembership;
@@ -249,7 +252,8 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
       });
       await repo.acceptInvitation({
         acceptedAt: now.toISOString(),
-        invitationId: invitation.id
+        invitationId: invitation.id,
+        organizationId: invitation.organizationId
       });
 
       return membership;
@@ -286,6 +290,7 @@ export function createPlatformService(repo: PlatformRepo): PlatformService {
       assertRole(membership, ["owner", "admin"]);
 
       await repo.revokeInvitation({
+        organizationId: input.organizationId,
         invitationId: input.invitationId,
         revokedAt: new Date().toISOString()
       });

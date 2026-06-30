@@ -213,6 +213,13 @@ The API-side jobs module under `apps/api/src/modules/jobs/*` is now a thin
 re-export seam over that shared adapter so app code can keep its current import
 paths while the actual persistence logic stays package-owned and reusable.
 
+Organization-owned platform and product repositories must fail closed on tenant
+scope. For organization-scoped and project-scoped reads or writes, the
+repository contract itself must take an explicit `organizationId` and apply it
+in the persistence predicate or through a scoped lookup that can safely return
+no rows. Service-layer authorization alone is not a sufficient tenant-isolation
+boundary because ID-only repository methods are too easy to reuse incorrectly.
+
 The independently runnable worker boundary now lives under `apps/worker`. That
 app now runs a real polling loop against the shared outbox repository, uses the
 generic job-handler registry for dispatch, and now wires both the safe

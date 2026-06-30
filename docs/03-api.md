@@ -153,6 +153,12 @@ These browser-session routes use the signed-in user membership instead of a bear
 - `POST /api/v1/invitations/accept`
 - `POST /api/v1/invitations/:invitationId/revoke`
 
+The tenant-isolation rule behind these routes is stricter than the URL shape
+alone: handlers, services, and repositories must all carry the resolved
+`organizationId` through organization-owned and project-owned data access.
+Repository methods for those resources should never rely on a bare project ID,
+invitation ID, or similar opaque identifier as their only scope.
+
 ## Internal Support Lookup
 
 The following routes are reserved for authenticated internal support or admin

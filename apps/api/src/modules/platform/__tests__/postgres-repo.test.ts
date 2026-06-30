@@ -356,9 +356,41 @@ describe("createPostgresPlatformRepo", () => {
     });
     await repo.acceptInvitation({
       acceptedAt: "2026-01-01T00:00:00.000Z",
-      invitationId: "invitation-1"
+      invitationId: "invitation-1",
+      organizationId: "org-1"
     });
     await repo.revokeInvitation({
+      organizationId: "org-1",
+      invitationId: "invitation-1",
+      revokedAt: "2026-01-01T00:00:00.000Z"
+    });
+
+    expect(db.updates).toHaveLength(2);
+  });
+
+  it("accepts explicit organization scope for invitation updates", async () => {
+    const db = createFakeDb([], {
+      invitationRows: [
+        {
+          acceptedAt: null,
+          email: "user@example.com",
+          expiresAt: new Date("2026-01-01T00:00:00.000Z"),
+          id: "invitation-1",
+          organizationId: "org-1",
+          revokedAt: null,
+          role: "member"
+        }
+      ]
+    });
+    const repo = createPostgresPlatformRepo(db);
+
+    await repo.acceptInvitation({
+      acceptedAt: "2026-01-01T00:00:00.000Z",
+      invitationId: "invitation-1",
+      organizationId: "org-2"
+    });
+    await repo.revokeInvitation({
+      organizationId: "org-2",
       invitationId: "invitation-1",
       revokedAt: "2026-01-01T00:00:00.000Z"
     });

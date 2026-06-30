@@ -2,6 +2,12 @@
 
 ## 2026-06-30
 
+- Tightened tenant isolation in the platform and API-key modules by making
+  organization scope explicit in repository contracts for project API-key reads
+  and revokes plus invitation accept or revoke writes, so those paths now fail
+  closed when org scope is missing or mismatched instead of relying only on
+  upstream service checks.
+
 - Refactored the platform billing runtime into an internal provider registry
   and active-provider resolver, generalized the shared provider enums beyond a
   Stripe-only contract, and kept the public billing routes provider-neutral

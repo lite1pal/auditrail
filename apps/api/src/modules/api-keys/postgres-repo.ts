@@ -1,5 +1,5 @@
 import { apiKeys, organizationMemberships, projects } from "@auditrail/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 
 import type { AppDatabase } from "../../plugins/database.js";
 import type { ApiKeyRepo, ManagedApiKey } from "./service.js";
@@ -55,10 +55,16 @@ export function createPostgresApiKeyRepo(db: AppDatabase): ApiKeyRepo {
       const records = await db
         .select()
         .from(apiKeys)
-        .where(eq(apiKeys.projectId, input.projectId))
+        .innerJoin(projects, eq(projects.id, apiKeys.projectId))
+        .where(
+          and(
+            eq(apiKeys.projectId, input.projectId),
+            eq(projects.organizationId, input.organizationId)
+          )
+        )
         .orderBy(desc(apiKeys.createdAt), desc(apiKeys.id));
 
-      return records.map(toManagedApiKey);
+      return records.map((record) => toManagedApiKey(record.api_keys));
     },
     async revoke(input) {
       const records = await db
@@ -67,7 +73,23 @@ export function createPostgresApiKeyRepo(db: AppDatabase): ApiKeyRepo {
           revoked: true
         })
         .where(
-          and(eq(apiKeys.id, input.apiKeyId), eq(apiKeys.projectId, input.projectId))
+          and(
+            eq(apiKeys.id, input.apiKeyId),
+            inArray(
+              apiKeys.projectId,
+              db
+                .select({
+                  id: projects.id
+                })
+                .from(projects)
+                .where(
+                  and(
+                    eq(projects.id, input.projectId),
+                    eq(projects.organizationId, input.organizationId)
+                  )
+                )
+            )
+          )
         )
         .returning({
           id: apiKeys.id

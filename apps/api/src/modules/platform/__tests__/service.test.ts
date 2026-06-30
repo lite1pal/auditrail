@@ -454,6 +454,12 @@ describe("createPlatformService", () => {
     });
 
     expect(repo.revokedInvitations).toEqual(["invitation-1"]);
+    expect(repo.revokedInvitationScopes).toEqual([
+      {
+        invitationId: "invitation-1",
+        organizationId: "org-1"
+      }
+    ]);
   });
 });
 
@@ -467,6 +473,10 @@ function createInMemoryPlatformRepo(
 ): PlatformRepo & {
   invitations: Invitation[];
   memberships: Membership[];
+  revokedInvitationScopes: Array<{
+    invitationId: string;
+    organizationId: string;
+  }>;
   revokedInvitations: string[];
 } {
   const organizations: Organization[] = [...(options.organizations ?? [])];
@@ -477,6 +487,10 @@ function createInMemoryPlatformRepo(
   ];
   const invitations: Invitation[] = [];
   const revokedInvitations: string[] = [];
+  const revokedInvitationScopes: Array<{
+    invitationId: string;
+    organizationId: string;
+  }> = [];
   const organizationPlans = new Map<string, "starter" | "growth" | "scale">(
     organizations.map((organization) => [organization.id, "starter"])
   );
@@ -484,9 +498,14 @@ function createInMemoryPlatformRepo(
   return {
     invitations,
     memberships,
+    revokedInvitationScopes,
     revokedInvitations,
     async acceptInvitation(input) {
-      const invitation = invitations.find((item) => item.id === input.invitationId);
+      const invitation = invitations.find(
+        (item) =>
+          item.id === input.invitationId &&
+          item.organizationId === input.organizationId
+      );
       if (invitation) {
         invitation.acceptedAt = input.acceptedAt;
       }
@@ -559,6 +578,10 @@ function createInMemoryPlatformRepo(
     },
     async revokeInvitation(input) {
       revokedInvitations.push(input.invitationId);
+      revokedInvitationScopes.push({
+        invitationId: input.invitationId,
+        organizationId: input.organizationId
+      });
     },
     async updateOrganizationPlan(input) {
       organizationPlans.set(input.organizationId, input.planId);
@@ -566,6 +589,7 @@ function createInMemoryPlatformRepo(
   } as PlatformRepo & {
     invitations: Invitation[];
     memberships: Membership[];
+    revokedInvitationScopes: typeof revokedInvitationScopes;
     revokedInvitations: string[];
   };
 }

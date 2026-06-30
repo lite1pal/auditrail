@@ -66,6 +66,7 @@ describe("createApiKeyService", () => {
     expect(repo.revocations).toEqual([
       {
         apiKeyId: "key-1",
+        organizationId: "org-1",
         projectId: "project-1"
       }
     ]);
@@ -126,6 +127,7 @@ function createRepo(
   }> = [];
   const revocations: Array<{
     apiKeyId: string;
+    organizationId: string;
     projectId: string;
   }> = [];
   const apiKeys = overrides.apiKeys ?? [];

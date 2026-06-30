@@ -32,10 +32,12 @@ export interface ApiKeyRepo {
     projectId: string;
   }): Promise<{ id: string } | undefined>;
   listByProject(input: {
+    organizationId: string;
     projectId: string;
   }): Promise<ManagedApiKey[]>;
   revoke(input: {
     apiKeyId: string;
+    organizationId: string;
     projectId: string;
   }): Promise<boolean>;
 }
@@ -82,6 +84,7 @@ export function createApiKeyService(
       await assertProjectAccess(repo, input, ["owner", "admin", "member", "viewer"]);
 
       return repo.listByProject({
+        organizationId: input.organizationId,
         projectId: input.projectId
       });
     },
@@ -89,6 +92,7 @@ export function createApiKeyService(
       await assertProjectAccess(repo, input, ["owner", "admin"]);
       const revoked = await repo.revoke({
         apiKeyId: input.apiKeyId,
+        organizationId: input.organizationId,
         projectId: input.projectId
       });
 

@@ -48,7 +48,12 @@ export function createPostgresPlatformRepo(
         .set({
           acceptedAt: new Date(input.acceptedAt)
         })
-        .where(eq(organizationInvitations.id, input.invitationId));
+        .where(
+          and(
+            eq(organizationInvitations.id, input.invitationId),
+            eq(organizationInvitations.organizationId, input.organizationId)
+          )
+        );
     },
     async createInvitation(input) {
       const [record] = await db
@@ -366,7 +371,12 @@ export function createPostgresPlatformRepo(
         .set({
           revokedAt: new Date(input.revokedAt)
         })
-        .where(eq(organizationInvitations.id, input.invitationId));
+        .where(
+          and(
+            eq(organizationInvitations.id, input.invitationId),
+            eq(organizationInvitations.organizationId, input.organizationId)
+          )
+        );
     },
     async updateOrganizationPlan(input) {
       await db
