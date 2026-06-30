@@ -2,6 +2,19 @@
 
 ## 2026-06-30
 
+- Added an explicit post-MVP task sequence for true platform/product
+  separation: define a product-module contract, move AuditTrail behind it, add
+  installed-product state, make composition registry-driven, and then split
+  billing, entitlements, jobs, and webhook ownership cleanly for a future
+  multi-product runtime.
+
+- Added the first pure product-module manifest contracts in `packages/domain`
+  and `packages/framework`. The new schemas define product identity, chrome,
+  navigation, onboarding content, owned resources, capability declarations,
+  and runtime-registration metadata without introducing module loading or
+  installed-product persistence yet, and the current AuditTrail product
+  definition now validates against that richer contract.
+
 - Tightened tenant isolation in the platform and API-key modules by making
   organization scope explicit in repository contracts for project API-key reads
   and revokes plus invitation accept or revoke writes, so those paths now fail

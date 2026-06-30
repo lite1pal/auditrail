@@ -4,6 +4,7 @@ import {
   frameworkAgentTaskDefinitionSchema,
   frameworkGeneratorPlanSchema,
   frameworkOwnershipDefinitionSchema,
+  frameworkProductModuleManifestSchema,
   frameworkResourceDefinitionSchema,
   frameworkResourceSpecSchema,
   normalizeFrameworkResourceSpec
@@ -55,6 +56,134 @@ describe("framework contracts", () => {
         ownerField: "organizationId"
       }
     });
+  });
+
+  it("accepts a valid generic product-module manifest", () => {
+    expect(
+      frameworkProductModuleManifestSchema.parse({
+        capabilities: [
+          {
+            id: "tasks-crud",
+            kind: "resource"
+          }
+        ],
+        chrome: {
+          errorHeading: "Unable to load Tasks",
+          loadingLabel: "Loading Tasks...",
+          metadataDescription: "Task workspace",
+          metadataTitle: "Tasks"
+        },
+        emptyStateCopy: {
+          emptyStateDescription: "Create your first task.",
+          emptyStateTitle: "No tasks yet",
+          primaryCtaHref: "/tasks/create",
+          primaryCtaLabel: "Create task"
+        },
+        id: "tasks",
+        name: "Tasks",
+        navItems: [
+          {
+            href: "/tasks",
+            id: "tasks",
+            label: "Tasks"
+          }
+        ],
+        onboardingContent: {
+          completeSummaryDescription: "Setup is complete.",
+          dismissFromSidebarLabel: "Dismiss",
+          eyebrow: "Setup",
+          incompleteSummaryDescription: "Finish setup first.",
+          showInSidebarLabel: "Show setup",
+          stepContent: [
+            {
+              action: {
+                label: "Create first task",
+                target: "tasks"
+              },
+              description: "Create your first task item.",
+              stepId: "task_created",
+              title: "Create a task"
+            }
+          ],
+          title: "Getting started"
+        },
+        onboardingSteps: [
+          {
+            id: "task_created",
+            required: true
+          }
+        ],
+        resources: [
+          {
+            id: "task",
+            navigationId: "tasks",
+            ownership: "organization",
+            routeBasePath: "/api/v1/tasks"
+          }
+        ],
+        runtime: {
+          registrations: [
+            {
+              id: "tasks-api-routes",
+              surface: "api",
+              target: "tasks-routes"
+            }
+          ]
+        },
+        usageMeters: [
+          {
+            key: "tasks",
+            label: "Tasks"
+          }
+        ]
+      })
+    ).toMatchObject({
+      id: "tasks",
+      runtime: {
+        registrations: [{ id: "tasks-api-routes" }]
+      }
+    });
+  });
+
+  it("rejects a product-module manifest with duplicate runtime registration ids", () => {
+    expect(() =>
+      frameworkProductModuleManifestSchema.parse({
+        capabilities: [],
+        emptyStateCopy: {
+          emptyStateDescription: "Has description",
+          emptyStateTitle: "Has title"
+        },
+        id: "tasks",
+        name: "Tasks",
+        navItems: [],
+        onboardingContent: {
+          completeSummaryDescription: "Done.",
+          dismissFromSidebarLabel: "Dismiss",
+          eyebrow: "Setup",
+          incompleteSummaryDescription: "Needs setup.",
+          showInSidebarLabel: "Show setup",
+          stepContent: [],
+          title: "Getting started"
+        },
+        onboardingSteps: [],
+        resources: [],
+        runtime: {
+          registrations: [
+            {
+              id: "duplicate-registration",
+              surface: "api",
+              target: "tasks-routes"
+            },
+            {
+              id: "duplicate-registration",
+              surface: "web",
+              target: "tasks-navigation"
+            }
+          ]
+        },
+        usageMeters: []
+      })
+    ).toThrow(/runtime registration/i);
   });
 
   it("accepts a valid organization-owned resource spec", () => {

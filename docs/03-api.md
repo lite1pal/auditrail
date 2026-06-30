@@ -27,6 +27,15 @@ Canonical versioned base path:
 Operational health remains unversioned at `/health` for load balancers and container health checks.
 The versioned route `/api/v1/health` is available for API consumers that want a versioned health path.
 
+## Product Composition
+
+The repo now has a pure product-module manifest contract for future
+multi-product composition, but this slice does not change the public API
+surface yet. The manifest describes which resources, capabilities, navigation
+surfaces, onboarding steps, and runtime registrations a product owns; actual
+route mounting still stays under the current application composition until the
+registry-driven runtime slice lands.
+
 ## Request Correlation
 
 The API accepts an optional request correlation header:

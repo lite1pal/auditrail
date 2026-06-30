@@ -2,7 +2,7 @@
 
 Project Forge is an AI-native framework for creating production-ready
 platforms. The goal is to let a team go from an idea to a production-quality
-platform in hours instead of weeks while keeping architecture strict,
+platform in hours instead of months while keeping architecture strict,
 generation deterministic, and product code cleanly separated from platform
 code.
 

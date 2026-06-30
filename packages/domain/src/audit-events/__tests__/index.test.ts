@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { productDefinitionSchema } from "../../product/index.js";
+import {
+  productDefinitionSchema,
+  productModuleManifestSchema
+} from "../../product/index.js";
 
 import {
   auditTrailProduct,
@@ -116,6 +119,18 @@ describe("audit event schemas", () => {
     );
 
     expect(auditTrailProduct).toMatchObject({
+      capabilities: expect.arrayContaining([
+        expect.objectContaining({
+          id: "audit-event-ingest",
+          kind: "api"
+        })
+      ]),
+      chrome: {
+        errorHeading: "Unable to load AuditTrail",
+        loadingLabel: "Loading AuditTrail...",
+        metadataDescription: "AuditTrail event monitoring workspace",
+        metadataTitle: "AuditTrail"
+      },
       id: "audit-events",
       name: "AuditTrail",
       navItems: [
@@ -148,6 +163,42 @@ describe("audit event schemas", () => {
             showsIngestCommand: true
           }
         }
+      },
+      onboardingContent: {
+        stepContent: expect.arrayContaining([
+          expect.objectContaining({
+            action: {
+              label: "Create first project",
+              target: "project-settings"
+            },
+            stepId: "project_created"
+          }),
+          expect.objectContaining({
+            action: {
+              label: "Send first event",
+              target: "selected-project-settings"
+            },
+            showsIngestCommand: true,
+            stepId: "first_event_ingested"
+          })
+        ])
+      },
+      resources: expect.arrayContaining([
+        expect.objectContaining({
+          id: "audit-event",
+          navigationId: "events",
+          ownership: "organization",
+          routeBasePath: "/api/v1/events"
+        })
+      ]),
+      runtime: {
+        registrations: expect.arrayContaining([
+          expect.objectContaining({
+            id: "audit-api-routes",
+            surface: "api",
+            target: "audit-events-routes"
+          })
+        ])
       },
       appChrome: {
         errorHeading: "Unable to load AuditTrail",
@@ -196,6 +247,30 @@ describe("audit event schemas", () => {
           switchToPlanPrefix: "Switch to",
           usageWindowPrefix: "Usage is tracked by UTC calendar month from"
         }
+      }
+    });
+
+    expect(productModuleManifestSchema.parse(auditTrailProduct)).toMatchObject({
+      capabilities: expect.arrayContaining([
+        expect.objectContaining({
+          id: "audit-event-ingest",
+          kind: "api"
+        })
+      ]),
+      id: "audit-events",
+      resources: expect.arrayContaining([
+        expect.objectContaining({
+          id: "audit-event",
+          ownership: "organization"
+        })
+      ]),
+      runtime: {
+        registrations: expect.arrayContaining([
+          expect.objectContaining({
+            id: "audit-shell-navigation",
+            surface: "web"
+          })
+        ])
       }
     });
   });

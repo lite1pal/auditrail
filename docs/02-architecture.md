@@ -262,6 +262,54 @@ top-level loading/error copy, is also sourced from the audit-owned product
 definition through a small `apps/web/app/audit-product-chrome.ts` adapter. This
 keeps generic app files free of product strings while preserving the same UI.
 
+## Multi-Product Target
+
+The current repo still runs one concrete product, AuditTrail, on top of a
+growing platform core. True platform/product separation is not complete until
+product composition becomes data-driven instead of app-patch-driven.
+
+The target shape is:
+
+- `platform-core`: auth, organizations, memberships, billing primitives,
+  entitlements, generic jobs, generic shell, settings framework, runtime
+  registry, and product-install lifecycle
+- `product-module`: product identity, navigation, onboarding, owned resources,
+  route-registration metadata, capability declarations, meters, and docs
+- `platform-runtime`: loads declared product modules, resolves installed
+  products for the current organization, and composes API plus web surfaces
+  without hardcoding one product
+
+The first pure contract for that target now lives in the repo as
+`productModuleManifestSchema` under `packages/domain/src/product/*` and as the
+tooling-facing `frameworkProductModuleManifestSchema` under
+`packages/framework/src/*`. Those schemas are intentionally runtime-free: they
+describe product identity, chrome metadata, navigation, onboarding content,
+owned resources, capability declarations, and runtime-registration metadata,
+but they do not load modules, mount routes, or persist installed products yet.
+
+What is still missing from the current repo:
+
+- a first-class product-module manifest contract
+- installed-product state for organizations or workspaces
+- manifest-driven API and web composition instead of direct AuditTrail app
+  adapters
+- product-aware shell and landing resolution when more than one product is
+  installed
+- product ownership rules for billing, entitlements, jobs, events, and
+  webhook namespaces
+
+The implementation order should stay narrow:
+
+1. define the pure product-module contract
+1. move AuditTrail behind that contract without changing runtime behavior
+1. persist installed-product state
+1. make shell and API composition registry-driven
+1. split product billing, entitlement, job, and webhook ownership cleanly
+
+Until those slices land, the repo should still be described honestly as a
+framework-in-progress plus a reference product, not as a finished multi-product
+runtime host.
+
 The audit-events feature now follows the same pattern for product-facing copy.
 Audit-specific screen, dashboard, chart, empty-state, table, and detail-panel
 text is sourced from `packages/domain/src/audit-events/product.ts` through a

@@ -4,6 +4,98 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
+- [ ] T-095 Convert AuditTrail product wiring to a manifest-driven module
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - packages/domain/src/product/*
+    - packages/framework/src/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - AuditTrail navigation, onboarding, chrome metadata, and route-registration declarations move behind one product-module boundary
+    - App-level composition files consume the product-module declaration instead of hardcoding AuditTrail-specific adapters directly
+    - Focused tests prove the existing AuditTrail runtime behavior stays unchanged after the extraction
+
+- [ ] T-096 Add installed-product state and manifest registry composition
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - packages/db/src/schema/*
+    - packages/domain/src/product/*
+    - apps/api/src/modules/platform/*
+    - apps/web/src/features/organizations/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The platform persists which products are enabled for an organization or workspace
+    - Runtime composition can resolve installed products through a registry instead of assuming one product is always active
+    - API and web contracts fail closed when a product is unavailable or disabled for the current organization
+
+- [ ] T-097 Make shell and API composition product-aware for multiple installed products
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - apps/web/app/*
+    - apps/web/src/components/layout/*
+    - apps/api/src/app.ts
+    - apps/api/src/http-schemas.ts
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The shell, landing flow, and API composition can render or register more than one installed product for the same organization
+    - Shared platform surfaces remain product-neutral and derive product-specific navigation or chrome from the registry
+    - Central composition files no longer assume AuditTrail is the only product in the runtime
+
+- [ ] T-098 Split product billing, entitlements, and webhook/event ownership for multi-product runtime
+  status: ready
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - packages/domain/src/billing/*
+    - packages/domain/src/entitlements/*
+    - packages/domain/src/webhooks/*
+    - apps/api/src/modules/platform/*
+    - apps/worker/src/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Billing plans, entitlements, webhook events, and async jobs can declare product ownership cleanly instead of assuming one product namespace
+    - The platform can meter and expose capabilities per product while keeping organization-level billing and auth shared
+    - Docs explain the product-ownership rules for jobs, events, webhooks, and platform billing state
+
 - [ ] T-093 Prove generated resources end to end against Postgres
   status: ready
   priority: high
@@ -51,6 +143,34 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-094 Define the product-module contract for true platform/product separation
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: added pure product-module manifest schemas in `packages/domain` and `packages/framework` for product identity, chrome, navigation, onboarding content, owned resources, capabilities, and runtime registration metadata
+    - 2026-06-30: the current AuditTrail product definition now validates against the richer manifest contract without changing runtime behavior yet
+    - 2026-06-30: docs now describe the manifest as composition metadata only; installed-product persistence and registry loading remain future slices
+  files:
+    - packages/domain/src/product/*
+    - packages/framework/src/*
+    - packages/domain/src/audit-events/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - packages/framework/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A product-module manifest contract exists for product identity, navigation, onboarding, resource ownership, capability declarations, and runtime registration metadata
+    - The contract makes the separation between platform-owned seams and product-owned seams explicit without introducing runtime loading behavior yet
+    - Docs explain how future products will plug into the platform through the contract instead of app-level code patches
 
 - [x] T-092 Generate working Postgres CRUD repos for supported resources
   status: done

@@ -1,4 +1,7 @@
-import type { ProductDefinition } from "../product/index.js";
+import type {
+  ProductDefinition,
+  ProductModuleManifest
+} from "../product/index.js";
 
 import {
   auditOnboardingStepIds,
@@ -102,7 +105,7 @@ export interface AuditTrailWorkspaceSettingsContent {
   planUsage: AuditTrailWorkspaceSettingsPlanUsageContent;
 }
 
-type AuditTrailProductDefinition = ProductDefinition & {
+type AuditTrailProductDefinition = ProductModuleManifest & ProductDefinition & {
   appChrome: AuditTrailAppChromeContent;
   auditEvents: AuditTrailAuditEventsContent;
   onboarding: AuditTrailOnboardingContent;
@@ -119,7 +122,15 @@ export const auditTrailProduct = {
   },
   id: "audit-events",
   name: "AuditTrail",
+  description:
+    "AuditTrail is the reference product module for event ingest, investigation, onboarding, and webhook delivery on top of the shared platform.",
   appChrome: {
+    errorHeading: "Unable to load AuditTrail",
+    loadingLabel: "Loading AuditTrail...",
+    metadataDescription: "AuditTrail event monitoring workspace",
+    metadataTitle: "AuditTrail"
+  },
+  chrome: {
     errorHeading: "Unable to load AuditTrail",
     loadingLabel: "Loading AuditTrail...",
     metadataDescription: "AuditTrail event monitoring workspace",
@@ -226,6 +237,128 @@ export const auditTrailProduct = {
       }
     },
     title: "Getting started"
+  },
+  onboardingContent: {
+    completeSummaryDescription: "Required setup is complete.",
+    dismissFromSidebarLabel: "Dismiss from sidebar",
+    eyebrow: "Workspace setup",
+    incompleteSummaryDescription:
+      "Finish the required steps to complete the initial workspace setup.",
+    showInSidebarLabel: "Show in sidebar",
+    stepContent: [
+      {
+        action: {
+          label: "Create first project",
+          target: "project-settings"
+        },
+        description:
+          "Create the first project for this organization in workspace settings.",
+        stepId: "project_created",
+        title: "Create a project"
+      },
+      {
+        action: {
+          label: "Create first API key",
+          target: "api-keys"
+        },
+        description: "Generate a machine credential in the existing API keys flow.",
+        missingProjectAction: {
+          label: "Create a project first",
+          target: "project-settings"
+        },
+        stepId: "api_key_created",
+        title: "Create an API key"
+      },
+      {
+        action: {
+          label: "Send first event",
+          target: "selected-project-settings"
+        },
+        description:
+          "Send one test event through the selected project to validate the full ingest path.",
+        missingProjectAction: {
+          label: "Create a project first",
+          target: "project-settings"
+        },
+        showsIngestCommand: true,
+        stepId: "first_event_ingested",
+        title: "Send the first event"
+      },
+      {
+        action: {
+          label: "Invite teammate",
+          target: "access-settings"
+        },
+        description:
+          "Add another member from the workspace access settings when you are ready.",
+        stepId: "member_invited",
+        title: "Invite a teammate"
+      }
+    ],
+    title: "Getting started"
+  },
+  resources: [
+    {
+      id: "audit-event",
+      navigationId: "events",
+      ownership: "organization",
+      routeBasePath: "/api/v1/events"
+    }
+  ],
+  capabilities: [
+    {
+      id: "audit-event-ingest",
+      kind: "api",
+      description: "Accepts organization-scoped audit event ingestion requests."
+    },
+    {
+      id: "audit-event-investigation",
+      kind: "ui",
+      description: "Exposes dashboard investigation and event-detail surfaces."
+    },
+    {
+      id: "workspace-onboarding",
+      kind: "onboarding",
+      description: "Provides AuditTrail-specific setup guidance and onboarding milestones."
+    },
+    {
+      id: "project-webhook-delivery",
+      kind: "webhook",
+      description: "Fans out project audit events to signed outbound webhooks."
+    },
+    {
+      id: "event-metering",
+      kind: "meter",
+      description: "Tracks included event usage for quota and plan screens."
+    }
+  ],
+  runtime: {
+    registrations: [
+      {
+        id: "audit-api-routes",
+        surface: "api",
+        target: "audit-events-routes",
+        description: "Registers AuditTrail API routes into the shared API runtime."
+      },
+      {
+        id: "audit-shell-navigation",
+        surface: "web",
+        target: "audit-product-navigation",
+        description: "Provides AuditTrail shell navigation for the hosted web app."
+      },
+      {
+        id: "audit-onboarding-screen",
+        surface: "web",
+        target: "audit-product-onboarding",
+        description: "Provides AuditTrail onboarding copy and step mapping."
+      },
+      {
+        id: "audit-worker-webhook-delivery",
+        surface: "worker",
+        target: "project-webhook-delivery",
+        description: "Registers the AuditTrail webhook delivery handler in the worker."
+      }
+    ]
   },
   workspaceSettings: {
     planUsage: {

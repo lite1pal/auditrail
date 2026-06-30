@@ -5,6 +5,8 @@
 It currently provides:
 
 - generic module, route, check, agent-task, and generator-plan schemas
+- a generic product-module manifest schema for future multi-product registry
+  and composition work
 - a canonical resource-spec schema for future resource planning, generation, and AI-agent context commands
 - the canonical normalization contract now reused by `pnpm saas init resource ...` for terminal-first spec creation
 - the normalized contract consumed by the current dry-run planner command:
@@ -40,6 +42,12 @@ The schema is strict and generic:
 - no filesystem, shell, env, database, HTTP, queue, or code-generation behavior
 - validation for reserved resource names, duplicate fields, enum declarations,
   CRUD safety, and API-prefix shape
+
+The product-module manifest entrypoint is
+`frameworkProductModuleManifestSchema` from `packages/framework/src/index.ts`.
+It exists to define future product identity, chrome, navigation, onboarding,
+resource ownership, capability declarations, and runtime-registration metadata
+without introducing runtime loading behavior in the same slice.
 
 `normalizeFrameworkResourceSpec()` is available for pure defaulting:
 

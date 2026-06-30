@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export * from "./product-module.js";
+
 const nonEmptyStringSchema = z.string().trim().min(1);
 const tsIdentifierPattern = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const resourceNamePattern = /^(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)*|[a-z][A-Za-z0-9]*)$/;
