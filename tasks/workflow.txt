@@ -5,14 +5,14 @@ This file tracks task-system and agent-workflow work items.
 ## Queue
 
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
-  status: in_progress
+  status: blocked
   priority: medium
   owner: codex
   branch:
   pr:
-  last_updated: 2026-06-20
+  last_updated: 2026-06-30
   completed:
-  blocked_reason:
+  blocked_reason: post-MVP freeze; repo hygiene cleanup is not required for the hosted sign-in -> ingest -> investigate release gate
   files:
     - .gitignore
     - .github/*
@@ -24,6 +24,61 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-080 Record current release-gate status and known failures
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: `pnpm check:boundaries` passed
+    - 2026-06-30: `pnpm typecheck` passed
+    - 2026-06-30: `pnpm test` passed
+    - 2026-06-30: known gap: `apps/api/vitest.config.ts` still enforces 90% coverage thresholds even though project policy and docs target 95%
+    - 2026-06-30: latest `apps/api` coverage from `pnpm test` was 93.46% statements, 90.14% branches, 95.76% functions, and 93.64% lines
+  files:
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - tasks/workflow.txt
+  acceptance:
+    - `pnpm check:boundaries`, `pnpm typecheck`, and `pnpm test` are run from the repo root
+    - The tracker records the exact pass or fail status for each command with dates
+    - Known failures, if any, are captured without diverting into unrelated framework work
+
+- [x] T-079 Reset docs and task priorities to hosted MVP
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: reset the roadmap docs around the hosted sign-in -> setup -> ingest -> investigate MVP
+    - 2026-06-30: documented the deployed stack honestly as `web + api + postgres` with `apps/worker` undeployed
+    - 2026-06-30: documented the current API source-runtime container startup as an accepted MVP limitation
+  files:
+    - README.md
+    - docs/00-foundation.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - docs/09-operations.md
+    - tasks/workflow.txt
+    - tasks/api-foundation.txt
+    - tasks/deployment.txt
+    - tasks/auth.txt
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The roadmap docs describe the hosted MVP as the active product goal instead of extraction-first expansion
+    - The deployed stack is documented honestly as `web + api + postgres`, with the worker present in the repo but not deployed
+    - The task tracker is reset around the hosted MVP sequence and non-MVP work is explicitly frozen or deprioritized
 
 - [x] T-078 Reduce scaffold extraction manual-review area for source-repo tooling
   status: done

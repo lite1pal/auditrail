@@ -15,8 +15,11 @@ The first credible slice is:
 - ingest events through a public API
 - store events append-only in Postgres
 - search and inspect audit events in a dashboard
-- enqueue webhook work after ingestion
-- process webhook deliveries in a worker
+- inspect quota usage and over-quota behavior in the hosted UI
+
+The repo contains a worker boundary and durable outbox storage, but deployed
+worker execution and webhook delivery are future work rather than current MVP
+capabilities.
 
 ## Stack
 
@@ -27,7 +30,8 @@ Use a TypeScript monorepo with small deployable apps and shared packages.
 - Language: TypeScript
 - Web app: Next.js
 - API: Fastify
-- Worker: add only when the first background job exists
+- Worker: keep as a repo-local boundary for future async work, but do not
+  deploy it for the hosted MVP
 - Database: PostgreSQL
 - Database access: Drizzle ORM and Drizzle Kit
 - Validation: Zod
@@ -45,8 +49,9 @@ Fastify should own the public API, tenant-aware business operations, authenticat
 
 The worker should own asynchronous side effects such as webhook delivery,
 retries, and later hash-chain verification jobs once the first background slice
-exists. It must be independently runnable so the background system is visible
-in the architecture.
+exists. For the hosted MVP it remains an undeployed boundary so the product can
+prove the browser-authenticated setup flow and public ingest path before async
+runtime work is introduced.
 
 Drizzle keeps the data layer close to SQL while still giving typed schema and migrations. This is a better fit than a heavy ORM for an audit-log product where schema, indexes, and query behavior are part of the showcase.
 
@@ -172,4 +177,11 @@ The first build slice is now implemented:
 4. append event to Postgres
 5. `GET /api/v1/events` lists recent project events
 
-The next slice should add either dashboard UI or queue handoff, but not both at the same time.
+The next slice should tighten the hosted journey that already exists:
+
+1. prove sign in -> org/project setup -> API key -> first ingest -> dashboard visibility
+2. harden project and organization scoping for event reads
+3. add bounded investigation UX and release-gated smoke checks
+
+Webhook delivery and deployed worker execution remain deliberate future work
+after the hosted MVP is provable end to end.

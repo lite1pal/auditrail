@@ -5,13 +5,13 @@ This file tracks deployment and runtime work items.
 ## Queue
 
 - [ ] T-013 Trim Docker runtime dependencies for hosted deployment
-  status: todo
+  status: blocked
   priority: medium
   owner: codex
   branch:
   pr:
-  last_updated: 2026-06-18
-  blocked_reason:
+  last_updated: 2026-06-30
+  blocked_reason: optional post-MVP follow-up; image trimming is not a hosted MVP release blocker while the current stack remains stable and documented
   files:
     - Dockerfile
     - package.json
@@ -21,6 +21,31 @@ This file tracks deployment and runtime work items.
     - The final image still starts both production services correctly
 
 ## Done
+
+- [x] T-085 Add MVP release-gate and manual production smoke checklist
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: added the hosted MVP automated release-gate command list to `docs/04-quality-gates.md`
+    - 2026-06-30: added the manual hosted production smoke checklist to `docs/06-deployment.md`
+    - 2026-06-30: updated `README.md` to point operators at the hosted MVP release-gate docs first
+  files:
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/09-operations.md
+    - docs/07-change-log.md
+    - tasks/deployment.txt
+  acceptance:
+    - Docs include the hosted MVP automated release-gate command list from the repo root
+    - Docs include a manual hosted production smoke checklist covering sign-in, API key lifecycle, ingest, dashboard visibility, and revoked-key rejection
+    - The deployment shape remains explicitly `web + api + postgres`, with the worker treated as repo-local only
 
 - [x] T-015 Add production operations docs for the current hosted stack
   status: done

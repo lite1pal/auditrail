@@ -10,6 +10,22 @@ That keeps the deployment unit together without putting multiple long-running pr
 The repository now also contains `apps/worker` as a future independent runtime
 boundary, but this task does not add a deployed worker service yet.
 
+## Current MVP Stance
+
+The hosted MVP deploys only:
+
+- `web`
+- `api`
+- `postgres`
+
+`apps/worker` stays in the repo as a tested future runtime boundary, but it is
+not deployed and webhook delivery is not part of the hosted MVP release gate.
+The current API container also starts through the root source-runtime command
+`pnpm start:container`, which runs `pnpm db:migrate && pnpm --dir apps/api exec
+tsx src/server.ts`. That is an accepted documented limitation for MVP even
+though `@auditrail/api` already supports a compiled `node dist/server.js` start
+path for a later hardening task.
+
 ## Coolify setup
 
 Create one Docker Compose application in Coolify and point it at:
@@ -75,7 +91,8 @@ Docker build so the browser bundle points at the deployed API origin.
 
 - `web` builds from the root `Dockerfile`, compiles during image build, and
   runs `pnpm start:web:container`
-- `api` builds from the root `Dockerfile`
+- `api` builds from the root `Dockerfile` and currently starts from source via
+  the root `start:container` script
 - `postgres` uses `postgres:17-alpine`
 - Postgres data is persisted in `postgres-data`
 - `api` waits for healthy Postgres before starting
@@ -102,7 +119,22 @@ docker compose -f docker-compose.coolify.yml up --build
 
 `pnpm build:web:container` validates the prebuilt web artifact path, and the
 Compose command exercises the same stack definition Coolify uses in hosted
-deployments.
+deployments. It does not prove a compiled API runtime today because the API
+container still boots through `tsx`.
+
+## Manual Hosted Smoke Checklist
+
+After the automated checks pass, verify the deployed stack manually:
+
+1. `GET /health`
+2. sign in through the hosted browser flow
+3. create an organization if the account has none
+4. create a project
+5. create an API key
+6. ingest one event with that key
+7. confirm the dashboard shows the event
+8. revoke the API key
+9. confirm the revoked key is rejected on the next ingest attempt
 
 ## Health check
 
@@ -236,4 +268,5 @@ separate dev-only auth harness and is not part of the normal runtime path.
 `apps/worker` currently validates `DATABASE_URL` plus worker-only process
 settings and then idles with graceful shutdown wiring. Deployment should not
 add a separate worker container until a later change introduces real outbox
-polling or handler execution.
+polling or handler execution, and the hosted MVP should not imply that webhook
+delivery is active.

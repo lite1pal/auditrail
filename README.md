@@ -16,7 +16,8 @@ AuditTrail is a multi-tenant audit event platform for SaaS teams. The current MV
 - A dedicated `/getting-started` onboarding flow driven by derived workspace milestones
 - Organization-scoped pricing plans with monthly included-event quotas
 - Global API rate limiting, with `/health` exempt
-- API test coverage threshold of 95%
+- API coverage policy target of 95%, with current enforcement drift tracked in
+  `docs/04-quality-gates.md`
 
 ## Local Setup
 
@@ -77,7 +78,12 @@ pnpm dev:web
 
 ## Verification
 
-Run all checks:
+For the hosted MVP release gate, use the command list in
+[docs/04-quality-gates.md](/Users/denistarasenko/Work/Projects/auditrail/docs/04-quality-gates.md:1).
+That is the authoritative automated gate for the current hosted stack.
+
+Framework and scaffold tooling checks still exist, but they are not the active
+hosted-MVP release gate:
 
 ```bash
 pnpm saas doctor
@@ -111,7 +117,7 @@ Integration tests use `TEST_DATABASE_URL` and must not point at the same databas
 pnpm --filter @auditrail/api test:integration
 ```
 
-The API test command enforces coverage:
+The API test command reports coverage and enforces the current configured threshold:
 
 ```bash
 pnpm --filter @auditrail/api test
@@ -144,6 +150,9 @@ See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/0
 The repository also contains `apps/worker` as a future standalone runtime
 boundary, but the current deployment stack still ships only `web`, `api`, and
 `postgres`.
+The hosted MVP also accepts the current API source-runtime container start as a
+documented limitation until a later hardening task proves the compiled runtime
+safely in this stack.
 
 Operational procedures for backup/restore, secret rotation, migration
 rollback, rate limiting, and incident handling are documented in
@@ -247,7 +256,8 @@ Read `AGENTS.md` before making changes. The important constraints are:
 - agents must not run shell commands directly
 - all command execution is handed to the user
 - API routes require tests
-- API source coverage must stay at or above 95%
+- API source coverage policy must return to at least 95%; the current enforced
+  threshold drift is documented in `docs/04-quality-gates.md`
 - env is validated before API build/start
 - shared packages must stay narrow
 - tests must prefer injected options over shared env mutation

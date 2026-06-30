@@ -2,6 +2,18 @@
 
 ## 2026-06-30
 
+- Reset the active roadmap and task queue around the hosted AuditTrail MVP
+  instead of framework-first expansion. The current docs now make the deployed
+  contract explicit as `web + api + postgres`, keep `apps/worker` and webhook
+  delivery as future work, and treat the API container's source-runtime
+  `tsx` startup path as an accepted documented MVP limitation until a later
+  hardening slice proves the compiled runtime safely.
+
+- Added a hosted-MVP release-gate section and manual production smoke checklist
+  to the docs so sign-in, org/project setup, API key lifecycle, ingest, and
+  dashboard visibility are the concrete acceptance path instead of extraction
+  tooling expansion.
+
 - Reclassified source-repo-only extraction tooling paths
   (`tools/extraction/**`, `tools/check-extraction-manifest.ts`, and
   boundary-scanner fixtures) from scaffold `manual-review` seams to explicit

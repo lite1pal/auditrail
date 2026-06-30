@@ -4,6 +4,46 @@ This file tracks web dashboard work items.
 
 ## Queue
 
+- [ ] T-082 Add hosted happy-path smoke doc and empty-state coverage
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  blocked_reason:
+  files:
+    - apps/web/app/getting-started/*
+    - apps/web/src/features/audit-events/*
+    - apps/web/src/features/**/__tests__/*
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - Documentation proves the hosted operator happy path from sign-in through first event visibility
+    - Web tests cover readable no-project, no-key, and no-events states without requiring manual setup knowledge
+    - Any user-facing flow change is reflected in docs and tests together
+
+- [ ] T-083 Add event detail and bounded dashboard investigation UX
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  blocked_reason:
+  files:
+    - apps/web/src/features/audit-events/*
+    - apps/web/src/features/**/__tests__/*
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/web-dashboard.txt
+  acceptance:
+    - The dashboard exposes explicit first-event success and event-detail investigation states
+    - Event lists are bounded through clear limits or pagination behavior instead of unbounded growth
+    - The UI reuses the current events and stats contracts unless a minimal documented API extension is required
+
 ## Done
 
 - [x] T-051 Add billing settings UI

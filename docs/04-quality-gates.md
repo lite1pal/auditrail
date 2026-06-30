@@ -37,9 +37,37 @@ When a workflow now records durable outbox intent, integration coverage should
 assert both the primary write and the expected `job_outbox` side effect for the
 success and failure paths that matter.
 
+## Hosted MVP Release Gate
+
+The hosted MVP release gate is broader than the fast `pnpm verify` loop. Run
+these commands from the repository root before treating the hosted flow as
+ready for release:
+
+```bash
+pnpm check:boundaries
+pnpm typecheck
+pnpm test
+pnpm db:create:test
+pnpm db:migrate:test
+pnpm --filter @auditrail/api test:integration
+pnpm --filter web check:architecture
+pnpm --filter web lint
+pnpm --filter web typecheck
+pnpm --filter web test
+pnpm --filter web test:ui
+pnpm --filter @auditrail/worker typecheck
+pnpm --filter @auditrail/worker test
+pnpm build:web:container
+docker compose -f docker-compose.coolify.yml up --build
+```
+
+The deployed runtime for MVP is still `web + api + postgres`. The worker checks
+stay in the gate as a repo-health and boundary proof, but worker deployment is
+not part of MVP acceptance.
+
 ## API Coverage
 
-The API enforces at least 95% coverage for:
+Project policy requires at least 95% coverage for:
 
 - statements
 - branches
@@ -47,6 +75,15 @@ The API enforces at least 95% coverage for:
 - lines
 
 Coverage is focused on API behavior and route/runtime code. Infrastructure adapters that require external services are excluded from the fast unit coverage gate and should receive explicit integration tests when they become critical.
+
+Known gap as of 2026-06-30:
+
+- `apps/api/vitest.config.ts` still enforces `90` for statements, branches,
+  functions, and lines
+- the current `pnpm test` run passed with `apps/api` coverage at `93.46%`
+  statements, `90.14%` branches, `95.76%` functions, and `93.64%` lines
+- do not treat the 95% policy as satisfied until the Vitest thresholds are
+  raised and the suite stays green at that level
 
 ## Test Isolation
 

@@ -1,90 +1,72 @@
 # Next Steps
 
-Keep the build vertical and incremental.
+The active roadmap is the hosted AuditTrail MVP. The goal is to make the
+current sign-in -> setup -> ingest -> investigate flow provable, documented,
+and release-gated before broadening the product or the framework tooling story.
 
-## Recommended Order
+## Hosted MVP Sequence
 
-1. Keep extraction prep local and fail-closed:
-   - keep `tools/extraction/manifest.ts` current as the canonical advisory split
-   - keep `tools/extraction/dry-run.ts` green as the fail-closed plan check
-   - use `tools/extraction/extract.ts` only for ignored local candidate output
-   - keep `tools/extraction/validate-placeholder-product.ts` green as the scaffold-validation step for placeholder product wiring
-   - keep `packages/framework` limited to pure framework contract vocabulary until a later task adds read-only planning or validation consumers
-   - reduce the remaining mixed and manual-review paths before treating any generated output as reusable
-   - keep future extraction fail-closed on unknown paths
+1. Stabilize and document reality:
+   - keep the deployment shape explicit as `web + api + postgres`
+   - keep `apps/worker` repo-local and tested, but do not deploy it for MVP
+   - document the current API container limitation honestly: the hosted stack
+     still starts the API through the root `start:container` source-runtime
+     path even though `@auditrail/api` also has a compiled `dist/server.js`
+     start path
+   - record the current root release-gate status before taking on new product
+     breadth
 
-1. Build the first tooling consumers on top of the framework contract layer:
-   - read framework module/resource/check definitions from `packages/framework`
-   - keep the canonical resource-spec schema in `packages/framework` as the source of truth for future resource planners and generators
-   - keep `pnpm saas doctor` green as the first read-only framework CLI health check
-   - keep `pnpm saas plan resource ...` green as the read-only resource planner contract
-   - keep `pnpm saas add resource ... --output ...` green as the first preview-only CRUD generator for one narrow organization-owned resource
-   - keep `pnpm saas agent context resource ...` green as the first AI-agent context compiler for generated-resource tasks
-   - keep `pnpm saas agent recipe resource-install ...` green as the first full generated-resource AI installation workflow
-   - keep `pnpm saas plan scaffold ...` green as the first planning-only create-app scaffold contract
-   - keep `pnpm saas generate scaffold ... --output ...` green as the first local candidate scaffold writer
-   - keep `pnpm saas check scaffold ...` green so scaffold candidate output is proven structurally usable in isolated preview form
-   - keep `pnpm saas check generators` green so generated-resource output stays reproducible and reviewable through committed golden fixtures
-   - keep `pnpm saas check generated-resource` green so fixture output is proven structurally usable in isolated preview form before any real runtime registration work
-   - keep `pnpm saas apply resource ... --target ...` green as the first opt-in isolated apply path while central runtime patching stays fail-closed
+1. Prove the hosted happy path:
+   - sign in with a browser session
+   - create an organization
+   - create a project
+   - create an API key
+   - ingest an event
+   - confirm the event appears in the dashboard
+   - revoke the key
+   - confirm the revoked key is rejected
 
-1. After `saas doctor`, add the next framework tooling slices in order:
-   - richer doctor checks driven directly from framework contract metadata
-   - reduce scaffold extraction `manual-review` seams so local candidate output gets closer to a reusable create-app baseline
-   - harden generated-resource apply so API runtime registration and migration seams can be patched safely instead of falling back to manual review
-   - broaden CRUD/resource generator support beyond the first org-owned subset only after the golden-fixture check stays stable across intentional updates
-   - harden machine-readable recipe and context output so future tooling can consume them without widening generated-resource scope
+1. Tighten dashboard usefulness after the first event:
+   - keep `GET /api/v1/events` and `GET /api/v1/events/stats` as the primary
+     read contract
+   - add explicit empty states, first-event success states, and event-detail
+     investigation UX
+   - keep event lists bounded through pagination or explicit limits
+   - add new filters only when they are indexed or clearly justified
 
-1. Add dashboard read model:
-   - recent events
-   - event count
-   - top event types
+1. Harden ingest as a release-critical public surface:
+   - cover success, validation failure, auth failure, revoked-key failure,
+     quota failure, and rate-limit behavior
+   - prove project and organization scoping at the event data boundary
+   - prove outbox intent is written only on successful ingest
+   - keep request logging and safe-error behavior free of API keys, cookies,
+     auth headers, and raw sensitive payload bodies
 
-This is now partially implemented through:
+1. Turn the MVP into a release gate:
+   - keep `pnpm check:boundaries`, `pnpm typecheck`, and `pnpm test` green
+   - run the hosted verification set in [docs/04-quality-gates.md](./04-quality-gates.md)
+   - keep a manual production smoke checklist for the hosted sign-in, API key,
+     ingest, and revocation flow
 
-- `GET /api/v1/events`
-- `GET /api/v1/events/stats`
+## Post-MVP Freeze
 
-The next API-only extension should prefer one of:
+The following work is explicitly not an MVP release blocker unless it starts
+breaking the hosted journey above:
 
-1. event-count time buckets for charts
-1. top actors / top targets summaries
-1. saved filter presets
+- deployed worker rollout
+- webhook delivery
+- API compiled-runtime hardening
+- Docker image trimming
+- session inventory and MFA foundations
+- broader extraction or scaffold expansion
 
-1. Add richer event filters only if backed by indexes or clear product need:
-   - environment
-   - project id for internal admin views
-   - actor/target type if introduced into the schema
+## Follow-Up After MVP
 
-1. Add web dashboard:
-   - call `GET /api/v1/events`
-   - show recent event table
-   - add event detail drawer
+After the hosted MVP is provable end to end, the next deliberate slices are:
 
-1. Add queue package and worker:
-   - BullMQ
-   - `audit-event.created` job
-   - placeholder webhook delivery processor
-
-1. Add tamper-evident hash chain:
-   - previous hash
-   - event hash
-   - verification endpoint or job
-
-1. Harden container runtime:
-   - run compiled JavaScript instead of `tsx` source
-   - reduce image size
-   - remove dev dependencies from runtime
-   - clean up workspace package builds first
-   - keep the Coolify stack shape unchanged while doing this; only harden the `api` image/runtime
-
-## Not Yet
-
-Do not add these before the dashboard and queue slice are working:
-
-- ClickHouse
-- billing
-- SSO
-- Kubernetes
-- published SDK packages
-- complex RBAC
+1. deploy the worker only when real outbox polling or handler execution lands
+1. add webhook delivery on top of that worker runtime
+1. harden the API container runtime to use compiled JavaScript safely
+1. decide whether richer dashboard summaries need a minimal API extension
+1. revisit framework or scaffold extraction work only when it no longer
+   competes with hosted product proof

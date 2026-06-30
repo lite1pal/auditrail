@@ -4,6 +4,22 @@ This runbook describes the current Coolify + Postgres + API + Web production
 shape honestly. It does not assume a worker service, backup automation,
 object storage, or secret-management tooling that the repo does not yet have.
 
+## Current Production Shape
+
+The current hosted MVP runtime is:
+
+- `web`
+- `api`
+- `postgres`
+
+`apps/worker` stays repo-local, tested, and undeployed. Webhook delivery is not
+part of the current production contract.
+
+The API container also still boots through the root source-runtime command
+instead of the compiled `@auditrail/api start` path. Treat that as a known MVP
+limitation when diagnosing startup or image-size issues; do not assume the
+container runtime is already hardened beyond the current documented flow.
+
 ## Environment Checklist
 
 Before a production deploy, verify these values are set and aligned:
