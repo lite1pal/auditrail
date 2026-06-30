@@ -220,6 +220,13 @@ in the persistence predicate or through a scoped lookup that can safely return
 no rows. Service-layer authorization alone is not a sufficient tenant-isolation
 boundary because ID-only repository methods are too easy to reuse incorrectly.
 
+Audit-event persistence has one extra tenant-isolation rule because the table
+stores both `organization_id` and `project_id` as independent foreign keys.
+The repository must verify that the project actually belongs to the requested
+organization on both reads and writes instead of trusting those columns to stay
+consistent forever. That keeps corrupted or manually inserted rows from
+becoming a cross-organization data leak.
+
 The independently runnable worker boundary now lives under `apps/worker`. That
 app now runs a real polling loop against the shared outbox repository, uses the
 generic job-handler registry for dispatch, and now wires both the safe

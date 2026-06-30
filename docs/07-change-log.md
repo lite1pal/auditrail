@@ -8,6 +8,12 @@
   closed when org scope is missing or mismatched instead of relying only on
   upstream service checks.
 
+- Tightened the audit-event data boundary by making the Postgres repo verify
+  that a project belongs to the requested organization before event reads or
+  writes proceed, added direct integration coverage for mismatched org-project
+  scope against corrupted rows, and proved dashboard event routes reject
+  another organization's data instead of exposing it.
+
 - Refactored the platform billing runtime into an internal provider registry
   and active-provider resolver, generalized the shared provider enums beyond a
   Stripe-only contract, and kept the public billing routes provider-neutral

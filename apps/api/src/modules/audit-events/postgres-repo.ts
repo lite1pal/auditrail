@@ -3,6 +3,7 @@ import {
   jobOutbox,
   organizationMonthlyUsage,
   organizations,
+  projects,
   projectWebhookDeliveries,
   projectWebhookEndpoints
 } from "@auditrail/db/schema";
@@ -66,6 +67,12 @@ export function createPostgresAuditEventRepo(
       const window = getUtcMonthWindow(currentTime);
 
       return db.transaction(async (tx) => {
+        const project = await findScopedProject(tx, tenant);
+
+        if (!project) {
+          throw new Error("project_not_found");
+        }
+
         const quota = options?.quota;
         let planId = quota?.id as PricingPlanId | undefined;
         let includedEvents = quota?.includedEvents;
@@ -245,8 +252,11 @@ export function createPostgresAuditEventRepo(
           createdAt: auditEvents.createdAt
         })
         .from(auditEvents)
+        .innerJoin(projects, eq(projects.id, auditEvents.projectId))
         .where(
           and(
+            eq(projects.id, tenant.projectId),
+            eq(projects.organizationId, tenant.organizationId),
             eq(auditEvents.organizationId, tenant.organizationId),
             eq(auditEvents.projectId, tenant.projectId),
             filters.eventTypes && filters.eventTypes.length > 0
@@ -289,6 +299,8 @@ export function createPostgresAuditEventRepo(
     },
     async summarize(tenant: AuditEventTenant, filters: AuditEventSummaryFilters) {
       const whereClause = and(
+        eq(projects.id, tenant.projectId),
+        eq(projects.organizationId, tenant.organizationId),
         eq(auditEvents.organizationId, tenant.organizationId),
         eq(auditEvents.projectId, tenant.projectId),
         filters.from ? gte(auditEvents.createdAt, new Date(filters.from)) : undefined,
@@ -300,6 +312,7 @@ export function createPostgresAuditEventRepo(
           count: countExpression
         })
         .from(auditEvents)
+        .innerJoin(projects, eq(projects.id, auditEvents.projectId))
         .where(whereClause);
       const topEventTypes = await db
         .select({
@@ -307,6 +320,7 @@ export function createPostgresAuditEventRepo(
           count: countExpression
         })
         .from(auditEvents)
+        .innerJoin(projects, eq(projects.id, auditEvents.projectId))
         .where(whereClause)
         .groupBy(auditEvents.eventType)
         .orderBy(desc(countExpression), auditEvents.eventType)
@@ -332,8 +346,11 @@ export function createPostgresAuditEventRepo(
           count: countExpression
         })
         .from(auditEvents)
+        .innerJoin(projects, eq(projects.id, auditEvents.projectId))
         .where(
           and(
+            eq(projects.id, tenant.projectId),
+            eq(projects.organizationId, tenant.organizationId),
             eq(auditEvents.organizationId, tenant.organizationId),
             eq(auditEvents.projectId, tenant.projectId),
             gte(auditEvents.createdAt, new Date(filters.from)),
@@ -346,4 +363,24 @@ export function createPostgresAuditEventRepo(
       return rows;
     }
   };
+}
+
+async function findScopedProject(
+  db: AppDatabase,
+  tenant: AuditEventTenant
+): Promise<{ id: string } | undefined> {
+  const [project] = await db
+    .select({
+      id: projects.id
+    })
+    .from(projects)
+    .where(
+      and(
+        eq(projects.id, tenant.projectId),
+        eq(projects.organizationId, tenant.organizationId)
+      )
+    )
+    .limit(1);
+
+  return project;
 }

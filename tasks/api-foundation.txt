@@ -43,27 +43,6 @@ This file tracks API runtime, platform, and data-safety work items.
     - App startup behavior remains covered by tests
     - The module boundaries are documented if they materially change architecture
 
-- [ ] T-035 Enforce organization scoping at the audit-event data boundary
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-30
-  blocked_reason:
-  files:
-    - apps/api/src/modules/audit-events/*
-    - packages/db/src/*
-    - apps/api/src/modules/audit-events/__tests__/*
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/07-change-log.md
-    - tasks/api-foundation.txt
-  acceptance:
-    - Audit-event reads cannot accidentally return cross-organization data when an org scope is omitted upstream
-    - Tests prove the data access path rejects or safely constrains missing organization scope
-    - The scoping guarantee is documented at the API or architecture boundary
-
 - [ ] T-086 Harden ingest observability, quota, and failure-path coverage
   status: ready
   priority: high
@@ -86,6 +65,33 @@ This file tracks API runtime, platform, and data-safety work items.
     - Request logging and safe-error behavior remain covered without leaking API keys, cookies, auth headers, or raw sensitive payload bodies
 
 ## Done
+
+- [x] T-035 Enforce organization scoping at the audit-event data boundary
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/T-035-audit-event-org-scoping
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: hardened the audit-event Postgres repo so it verifies the org-project relationship directly and fails closed on mismatched tenant scope for both reads and writes
+    - 2026-06-30: added direct integration coverage for corrupted cross-org event rows plus dashboard route coverage that rejects another organization's event data
+    - 2026-06-30: documented the extra audit-event tenant-isolation rule for the independent org and project foreign keys
+    - 2026-06-30: verified with `pnpm --filter @auditrail/api typecheck` and `pnpm --filter @auditrail/api exec vitest run --config vitest.integration.config.ts src/modules/audit-events/__tests__/routes.integration.test.ts src/modules/audit-events/__tests__/postgres-repo.integration.test.ts`
+  files:
+    - apps/api/src/modules/audit-events/*
+    - packages/db/src/*
+    - apps/api/src/modules/audit-events/__tests__/*
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Audit-event reads cannot accidentally return cross-organization data when an org scope is omitted upstream
+    - Tests prove the data access path rejects or safely constrains missing organization scope
+    - The scoping guarantee is documented at the API or architecture boundary
 
 - [x] T-038 Enforce organization scoping across platform data access paths
   status: done

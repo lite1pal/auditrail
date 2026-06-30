@@ -526,6 +526,61 @@ describe("event API integration", () => {
     });
   });
 
+  it("does not expose another organization's events through session-scoped reads", async () => {
+    const session = await createSessionMember();
+    const otherOrganization = await createOrganization("OtherCo");
+    const otherProject = await createProject({
+      environment: "production",
+      name: "OtherCo Production",
+      organizationId: otherOrganization.id
+    });
+    const otherKey = await createApiKeyForProject(otherProject.id, "OtherCo prod key");
+
+    await ingestEvent(otherKey.rawKey, {
+      actor: "other_admin",
+      event: "user.created",
+      metadata: {
+        organization: "other"
+      },
+      target: "user_other"
+    });
+
+    const listResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${otherOrganization.id}/projects/${otherProject.id}/events`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+    const statsResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${otherOrganization.id}/projects/${otherProject.id}/events/stats?top=5`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+    const timeseriesResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${otherOrganization.id}/projects/${otherProject.id}/events/timeseries?from=2026-01-01T00:00:00.000Z&to=2100-01-01T00:00:00.000Z&bucket=hour`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(listResponse.statusCode).toBe(403);
+    expect(listResponse.json()).toEqual({
+      error: "forbidden"
+    });
+    expect(statsResponse.statusCode).toBe(403);
+    expect(statsResponse.json()).toEqual({
+      error: "forbidden"
+    });
+    expect(timeseriesResponse.statusCode).toBe(403);
+    expect(timeseriesResponse.json()).toEqual({
+      error: "forbidden"
+    });
+  });
+
   async function truncateAll() {
     await pool.query(`
       TRUNCATE TABLE
@@ -648,6 +703,19 @@ describe("event API integration", () => {
        values ($1, $2, $3)
        returning "id"`,
       [input.organizationId, input.name, input.environment]
+    );
+
+    return {
+      id: result.rows[0]!.id
+    };
+  }
+
+  async function createOrganization(name: string) {
+    const result = await pool.query<{ id: string }>(
+      `insert into "organizations" ("name")
+       values ($1)
+       returning "id"`,
+      [name]
     );
 
     return {

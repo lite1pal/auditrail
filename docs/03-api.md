@@ -159,6 +159,14 @@ alone: handlers, services, and repositories must all carry the resolved
 Repository methods for those resources should never rely on a bare project ID,
 invitation ID, or similar opaque identifier as their only scope.
 
+For audit-event reads specifically, the repository also verifies that the
+requested project belongs to the requested organization before returning list,
+stats, or timeseries data. A signed-in user who names another organization's
+project route should receive `403 forbidden`, and a caller who is in the
+organization but names a project that does not belong to that organization
+should receive `404 project_not_found`, rather than an empty or leaky
+cross-tenant response built from mismatched identifiers.
+
 ## Internal Support Lookup
 
 The following routes are reserved for authenticated internal support or admin
