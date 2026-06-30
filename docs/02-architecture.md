@@ -558,6 +558,7 @@ Current examples captured there:
   vocabulary for future non-runtime tooling
 - product-specific: audit-event API modules, audit-event web features, and `packages/domain/src/audit-events/**`
 - template replacements: product definition config, nav adapters, onboarding copy adapters, app chrome, and other AuditTrail-branded surfaces
+- explicit exclude: source-repo-only extraction preparation tooling such as `tools/extraction/**`, `tools/check-extraction-manifest.ts`, and boundary-scanner fixtures stay out of candidate boilerplate output entirely
 - manual review: the remaining mixed `packages/db/**` surfaces such as the audit-event schema file and any migration history without explicit ownership, plus route composition files, docs, deployment files, and workspace config
 
 Recent extraction-prep progress in `packages/db`:

@@ -1,5 +1,16 @@
 # Change Log
 
+## 2026-06-30
+
+- Reclassified source-repo-only extraction tooling paths
+  (`tools/extraction/**`, `tools/check-extraction-manifest.ts`, and
+  boundary-scanner fixtures) from scaffold `manual-review` seams to explicit
+  `exclude` entries in the extraction manifest so local candidate output does
+  not treat repo-prep tooling as pending boilerplate work.
+
+- Added a focused extraction-manifest test covering the explicit exclusion
+  policy for source-repo-only tooling paths.
+
 ## 2026-06-29
 
 - Added `pnpm saas check scaffold <app-name>` as the first isolated scaffold

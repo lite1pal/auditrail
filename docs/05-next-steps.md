@@ -10,7 +10,7 @@ Keep the build vertical and incremental.
    - use `tools/extraction/extract.ts` only for ignored local candidate output
    - keep `tools/extraction/validate-placeholder-product.ts` green as the scaffold-validation step for placeholder product wiring
    - keep `packages/framework` limited to pure framework contract vocabulary until a later task adds read-only planning or validation consumers
-   - reduce mixed and manual-review paths before treating any generated output as reusable
+   - reduce the remaining mixed and manual-review paths before treating any generated output as reusable
    - keep future extraction fail-closed on unknown paths
 
 1. Build the first tooling consumers on top of the framework contract layer:

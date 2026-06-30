@@ -25,6 +25,26 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-078 Reduce scaffold extraction manual-review area for source-repo tooling
+  status: done
+  priority: high
+  owner: codex
+  branch: codex/extraction-tooling-excludes
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  files:
+    - tools/extraction/*
+    - docs/02-architecture.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Source-repo-only extraction preparation tooling and fixtures move from `manual-review` to explicit exclusion where the boilerplate should not copy them at all
+    - The extraction dry-run reports a smaller scaffold manual-review set without changing AuditTrail runtime behavior or scaffold generation semantics
+    - Focused extraction tests cover the new explicit exclusion behavior and docs explain the narrower manual-review scope
+
 - [x] T-077 Add scaffold smoke validation
   status: done
   priority: high

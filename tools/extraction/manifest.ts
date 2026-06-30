@@ -906,6 +906,42 @@ const replaceWithTemplateEntries = [
   })
 ] as const satisfies readonly ExtractionManifestEntry[];
 
+const repoToolingExcludeEntries = [
+  entry({
+    path: "tools/check-extraction-manifest.ts",
+    pathKind: "file",
+    category: "repo-tooling",
+    extractionAction: "exclude",
+    reason: "Extraction-manifest validation is source-repo preparation tooling and should stay out of generic boilerplate output.",
+    notes: [
+      "Keep it with the source repo unless a later task deliberately ships self-auditing extraction tooling with the scaffold."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "tools/architecture-boundaries/__fixtures__/**",
+    pathKind: "glob",
+    category: "repo-tooling",
+    extractionAction: "exclude",
+    reason: "Boundary-scanner fixtures are source-repo-only test assets and should not be copied into extracted scaffold candidates.",
+    notes: [
+      "Keep fixture-only scanner inputs with the source repo unless the scaffold also adopts the same boundary test suite."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "tools/extraction/**",
+    pathKind: "glob",
+    category: "repo-tooling",
+    extractionAction: "exclude",
+    reason: "Extraction planning and output tooling are source-repo preparation tools, not scaffold runtime or app-source output.",
+    notes: [
+      "Keep extraction tooling with the source repo unless a later task explicitly promotes it into shipped framework tooling."
+    ],
+    requiredForMinimalScaffold: false
+  })
+] as const satisfies readonly ExtractionManifestEntry[];
+
 const manualReviewEntries = [
   entry({
     path: "apps/api/src/__tests__/**",
@@ -1139,39 +1175,6 @@ const manualReviewEntries = [
     requiredForMinimalScaffold: false
   }),
   entry({
-    path: "tools/check-extraction-manifest.ts",
-    pathKind: "file",
-    category: "repo-tooling",
-    extractionAction: "manual-review",
-    reason: "Extraction-manifest validation is source-repo preparation tooling and may not belong in the extracted boilerplate.",
-    notes: [
-      "Keep it with the source repo unless the boilerplate also needs self-auditing extraction metadata."
-    ],
-    requiredForMinimalScaffold: false
-  }),
-  entry({
-    path: "tools/architecture-boundaries/__fixtures__/**",
-    pathKind: "glob",
-    category: "repo-tooling",
-    extractionAction: "manual-review",
-    reason: "Boundary-scanner fixtures are source-repo-only test assets and should not be silently copied into a future boilerplate.",
-    notes: [
-      "Keep these fixtures with the source repo unless the extracted boilerplate also ships the same scanner test suite."
-    ],
-    requiredForMinimalScaffold: false
-  }),
-  entry({
-    path: "tools/extraction/**",
-    pathKind: "glob",
-    category: "repo-tooling",
-    extractionAction: "manual-review",
-    reason: "Extraction planning and dry-run tooling are source-repo preparation tools rather than runtime boilerplate output.",
-    notes: [
-      "Keep this tooling with the source product repo unless a later task deliberately ships it as standalone repo tooling."
-    ],
-    requiredForMinimalScaffold: false
-  }),
-  entry({
     path: "docker-compose.yml",
     pathKind: "file",
     category: "deployment",
@@ -1225,7 +1228,8 @@ const copyToBoilerplateEntries = [
 ] as const satisfies readonly ExtractionManifestEntry[];
 
 const excludeFromBoilerplateEntries = [
-  ...productSpecificEntries
+  ...productSpecificEntries,
+  ...repoToolingExcludeEntries
 ] as const satisfies readonly ExtractionManifestEntry[];
 
 export const extractionManifest = {

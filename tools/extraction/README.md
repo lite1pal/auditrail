@@ -238,6 +238,9 @@ present and wired as expected.
 
 Current limitations:
 
+- source-repo-only extraction tooling and boundary fixtures are now explicit
+  excludes rather than manual-review seams because the scaffold should not copy
+  them at all
 - manual-review files still block any claim that the generated output is a
   reusable published boilerplate
 - the placeholder overlay is a validation fixture only; it is not a real second
