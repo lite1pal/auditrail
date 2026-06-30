@@ -52,7 +52,6 @@ and release-gated before broadening the product or the framework tooling story.
 The following work is explicitly not a hosted release blocker unless it starts
 breaking the hosted journey above:
 
-- webhook delivery
 - API compiled-runtime hardening
 - Docker image trimming
 - session inventory and MFA foundations
@@ -62,7 +61,12 @@ breaking the hosted journey above:
 
 After the hosted MVP is provable end to end, the next deliberate slices are:
 
-1. add webhook delivery on top of the current worker runtime
+1. turn generated resources into a production-ready vertical slice:
+   - generate working Postgres CRUD repos for the supported organization-owned
+     resource subset instead of TODO persistence stubs
+   - prove one generated resource end to end against Postgres so
+     `init -> plan -> add -> install -> migrate -> test` becomes a documented
+     reusable product path
 1. harden the API container runtime to use compiled JavaScript safely
 1. harden the worker container runtime to use compiled JavaScript safely
 1. decide whether richer dashboard summaries need a minimal API extension

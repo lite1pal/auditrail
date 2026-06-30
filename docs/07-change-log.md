@@ -137,6 +137,11 @@
   normalization, and keeps defaults aligned with the current generator-safe
   resource slice.
 
+- Generated-resource apply and install now also emit deterministic SQL
+  migrations plus Drizzle journal updates for the supported resource slice, so
+  install no longer stops at a manual migration placeholder before runtime
+  promotion.
+
 - Added focused apply-mode tests covering isolated-target success, overwrite
   safety, unsupported central patch failure, forbidden-import rejection,
   planner-block failure, deterministic central-file updates, repeated apply

@@ -52,6 +52,18 @@ describe("saas resource apply", () => {
         ".generated/apply-preview/customer/packages/domain/package.json"
       )
     ).toContain('"./generated/customer"');
+    expect(
+      readGenerated(
+        repoRoot,
+        ".generated/apply-preview/customer/packages/db/src/migrations/0000_customer.sql"
+      )
+    ).toContain('create table if not exists "customers"');
+    expect(
+      readGenerated(
+        repoRoot,
+        ".generated/apply-preview/customer/packages/db/src/migrations/meta/_journal.json"
+      )
+    ).toContain('"tag": "0000_customer"');
   });
 
   it("keeps preview mode as the default add behavior", () => {
@@ -131,6 +143,16 @@ describe("saas resource apply", () => {
 
   it("patches supported central files deterministically with force", () => {
     const repoRoot = createSeededRepo(createdRoots, {
+      ".generated/apply-preview/customer/packages/db/src/migrations/0003_alpha.sql":
+        "create table if not exists alpha ();\n",
+      ".generated/apply-preview/customer/packages/db/src/migrations/meta/_journal.json":
+        migrationJournal([
+          {
+            idx: 3,
+            tag: "0003_alpha",
+            when: 1781716827000
+          }
+        ]),
       ".generated/apply-preview/customer/packages/db/src/schema/index.ts":
         'export * from "./identity.js";\n',
       ".generated/apply-preview/customer/packages/domain/package.json": JSON.stringify(
@@ -171,6 +193,14 @@ describe("saas resource apply", () => {
       repoRoot,
       ".generated/apply-preview/customer/packages/db/src/schema/index.ts"
     );
+    const firstMigration = readGenerated(
+      repoRoot,
+      ".generated/apply-preview/customer/packages/db/src/migrations/0004_customer.sql"
+    );
+    const firstJournal = readGenerated(
+      repoRoot,
+      ".generated/apply-preview/customer/packages/db/src/migrations/meta/_journal.json"
+    );
     const second = applyResourceFromFile({
       force: true,
       repoRoot,
@@ -197,6 +227,18 @@ describe("saas resource apply", () => {
         ".generated/apply-preview/customer/packages/db/src/schema/index.ts"
       )
     ).toBe(firstDbIndex);
+    expect(
+      readGenerated(
+        repoRoot,
+        ".generated/apply-preview/customer/packages/db/src/migrations/0004_customer.sql"
+      )
+    ).toBe(firstMigration);
+    expect(
+      readGenerated(
+        repoRoot,
+        ".generated/apply-preview/customer/packages/db/src/migrations/meta/_journal.json"
+      )
+    ).toBe(firstJournal);
     expect(second.changes.some((change) => change.action === "skip")).toBe(true);
   });
 
@@ -305,6 +347,14 @@ describe("saas resource apply", () => {
   it("installs a generated resource into the repo root and patches app wiring", () => {
     const repoRoot = createSeededRepo(createdRoots, {
       "apps/api/src/app.ts": seededApiAppSource(),
+      "packages/db/src/migrations/0010_project_webhooks.sql": "select 1;\n",
+      "packages/db/src/migrations/meta/_journal.json": migrationJournal([
+        {
+          idx: 10,
+          tag: "0010_project_webhooks",
+          when: 1782835200000
+        }
+      ]),
       "packages/db/src/schema/index.ts": 'export * from "./identity.js";\n',
       "packages/domain/package.json": JSON.stringify(
         {
@@ -331,7 +381,7 @@ describe("saas resource apply", () => {
       targetPath: "."
     });
 
-    expect(result.status).toBe("warn");
+    expect(result.status).toBe("pass");
     expect(readGenerated(repoRoot, "apps/api/src/app.ts")).toContain(
       'import { createPostgresCustomerRepo } from "./modules/generated/customer/postgres-repo.js";'
     );
@@ -344,6 +394,12 @@ describe("saas resource apply", () => {
     expect(
       readGenerated(repoRoot, "packages/domain/src/generated/customer/index.ts")
     ).toContain("export const customerFieldSchema");
+    expect(
+      readGenerated(repoRoot, "packages/db/src/migrations/0011_customer.sql")
+    ).toContain('create table if not exists "customers"');
+    expect(
+      readGenerated(repoRoot, "packages/db/src/migrations/meta/_journal.json")
+    ).toContain('"tag": "0011_customer"');
   });
 
   it("supports the CLI apply command", () => {
@@ -477,6 +533,24 @@ function walkFixtureDirectory(root: string, currentPath = ""): string[] {
 
 function readGenerated(repoRoot: string, path: string) {
   return readFileSync(resolve(repoRoot, path), "utf8");
+}
+
+function migrationJournal(
+  entries: Array<{ idx: number; tag: string; when: number }>
+) {
+  return `${JSON.stringify(
+    {
+      version: "7",
+      dialect: "postgresql",
+      entries: entries.map((entry) => ({
+        ...entry,
+        breakpoints: true,
+        version: "7"
+      }))
+    },
+    null,
+    2
+  )}\n`;
 }
 
 function seededApiAppSource() {

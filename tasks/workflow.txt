@@ -4,6 +4,57 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
+- [ ] T-092 Generate working Postgres CRUD repos for supported resources
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/api/src/**/__tests__/*
+    - packages/db/src/schema/*
+    - packages/domain/src/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The generated Postgres repo template implements create, list, read, and update for the currently supported organization-owned resource slice instead of throwing TODO errors
+    - Generated API routes and services can execute against the repo without hand-written persistence glue for supported resource specs
+    - Focused tests cover generated repo behavior, organization scoping, uniqueness handling, and unsupported generator cases that must still fail closed
+
+- [ ] T-093 Prove generated resources end to end against Postgres
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed:
+  blocked_reason:
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/api/src/**/__tests__/*
+    - packages/db/src/*
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - One generated resource can be initialized, planned, previewed, installed, migrated, and exercised through API integration tests without manual runtime code edits beyond supported seams
+    - The verification path is documented from the repo root and becomes the release-quality proof that the supported generated-resource slice is production-usable
+    - Tests fail clearly when generated-resource install, migration generation, or repo generation drift out of sync
+
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
   status: blocked
   priority: medium
@@ -24,6 +75,34 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-091 Generate real DB migrations from resource specs
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: generated-resource apply and install now emit deterministic SQL migration files plus Drizzle journal updates for the supported organization-owned resource slice
+    - 2026-06-30: root install no longer reports the migration placeholder as unresolved manual review for supported resources
+    - 2026-06-30: focused apply tests now cover migration naming, journal updates, deterministic reruns, and the root-install status change from warn to pass
+  files:
+    - tools/saas/resource-migration.ts
+    - tools/saas/resource-apply.ts
+    - tools/saas/__tests__/resource-apply.test.ts
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - packages/framework/README.md
+    - tasks/workflow.txt
+  acceptance:
+    - A resource-driven install/apply path generates a deterministic Drizzle SQL migration and required journal metadata from a validated resource spec
+    - Generated-resource install no longer leaves `packages/db/src/migrations/<next>_<resource>.sql` as manual-review for the supported resource slice
+    - Focused tests cover migration naming, SQL output shape, overwrite safety, and deterministic rerun behavior
 
 - [x] T-090 Add terminal-first resource spec initialization command
   status: done

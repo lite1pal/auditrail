@@ -104,8 +104,9 @@ conservative: it can write generated files into an isolated target tree plus
 patch stable domain and DB registration files. A companion root install command
 now exists as `pnpm saas install resource <resource-spec.json>`, and that path
 adds one deterministic runtime seam for `apps/api/src/app.ts` route
-registration. Any central runtime file outside those explicit seams must still
-fail closed rather than being guessed.
+registration and now also emits a deterministic SQL migration plus Drizzle
+journal update for the supported resource slice. Any central runtime file
+outside those explicit seams must still fail closed rather than being guessed.
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.

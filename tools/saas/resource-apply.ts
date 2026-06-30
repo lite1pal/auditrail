@@ -22,6 +22,7 @@ import {
   type ResourceGeneratorFile,
   type ResourceGeneratorResult
 } from "./resource-generator.js";
+import { createResourceMigrationWrites } from "./resource-migration.js";
 import {
   createResourcePlanFromFile,
   type ResourcePlanAdvisory,
@@ -322,6 +323,13 @@ function createApplyWrites(input: {
       exportLine: `export * from "./${toKebabCase(input.plan.resource.resource)}.js";`,
       path: "packages/db/src/schema/index.ts",
       repoRoot: input.repoRoot,
+      targetPath: input.targetPath
+    })
+  );
+  writes.push(
+    ...createResourceMigrationWrites({
+      repoRoot: input.repoRoot,
+      resource: input.plan.resource,
       targetPath: input.targetPath
     })
   );
@@ -633,7 +641,9 @@ function createApplyManualReview(input: {
   repoRoot: string;
   targetPath: string;
 }) {
-  const items: ResourcePlanAdvisory[] = [...input.plan.manualReview];
+  const items: ResourcePlanAdvisory[] = input.plan.manualReview.filter(
+    (item) => item.code !== "migration-placeholder"
+  );
   const apiAppPath = "apps/api/src/app.ts";
   const apiAppAbsolutePath = resolve(
     input.repoRoot,

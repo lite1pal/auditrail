@@ -399,7 +399,7 @@ What it does not prove yet:
 - it does not prove that repo-root installation is safe for every future
   runtime composition shape
 - it does not register API routes, web routes, DB schema barrels, nav entries, or exports
-- it does not generate or apply real migrations
+- it does not prove the generated migration itself has been applied successfully to a real database
 - it does not run a full standalone typecheck or build for the isolated output
 
 The first opt-in apply path is now:
@@ -421,6 +421,7 @@ Current apply policy:
 - repo-root install is explicit and reuses the same planner, generator, and validation flow
 - apply reuses the generator plus smoke validation before writing
 - apply and install may patch only deterministic central files in the current slice
+- apply and install now emit a deterministic SQL migration and Drizzle journal update for the supported resource slice
 - root install currently supports one explicit `apps/api/src/app.ts` registration seam
 - unsupported or ambiguous central runtime files must fail closed before writes
 

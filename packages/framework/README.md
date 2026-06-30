@@ -112,5 +112,5 @@ Current apply consumer scope:
 - `pnpm saas install resource ...` reuses that flow for repo-root installation when the target runtime matches the supported seams
 - apply stays explicit and target-scoped; preview generation remains the default
 - the current safe patch surface is intentionally narrow and deterministic
-- repo-root install currently supports domain exports, DB schema barrels, and one deterministic `apps/api/src/app.ts` route-registration seam
+- repo-root install currently supports domain exports, DB schema barrels, deterministic migration SQL plus Drizzle journal updates, and one deterministic `apps/api/src/app.ts` route-registration seam
 - unsupported central runtime files must fail closed rather than being guessed
