@@ -7,6 +7,7 @@ import { loadEnvFiles } from "../../../env-files.js";
 import { buildApp } from "../../../app.js";
 import { loadConfig } from "../../../config.js";
 import { hashApiKey } from "../../api-keys/keys.js";
+import { hashToken } from "../../auth/tokens.js";
 import { seedDemoProject } from "../../../../../../packages/db/src/seed.js";
 
 const config = loadConfig(loadEnvFiles());
@@ -17,6 +18,7 @@ const integrationEnv = z
   .parse(loadEnvFiles());
 const databaseUrl = integrationEnv.TEST_DATABASE_URL;
 const apiKeyPepper = config.API_KEY_PEPPER;
+const authTokenSecret = config.AUTH_TOKEN_SECRET;
 const apiKey = "atl_integration_test_key";
 
 describe("event API integration", () => {
@@ -208,10 +210,260 @@ describe("event API integration", () => {
     await expect(countOutboxJobs()).resolves.toBe(0);
   });
 
+  it("creates and revokes an API key through the real session flow, and revoked keys can no longer ingest", async () => {
+    const session = await createSessionMember();
+    const createResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/api-keys`,
+      headers: {
+        cookie: session.cookie
+      },
+      payload: {
+        name: "Hosted ingest"
+      }
+    });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const createPayload = createResponse.json();
+    const rawKey = createPayload.rawKey as string;
+
+    expect(createPayload.apiKey).toMatchObject({
+      id: expect.any(String),
+      name: "Hosted ingest",
+      projectId: session.projectId,
+      revoked: false
+    });
+    expect(rawKey).toMatch(/^atl[a-zA-Z0-9]+_/);
+
+    const listResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/api-keys`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(listResponse.statusCode).toBe(200);
+    expect(listResponse.json()).toEqual({
+      apiKeys: [
+        {
+          createdAt: expect.any(String),
+          id: createPayload.apiKey.id,
+          keyPrefix: createPayload.apiKey.keyPrefix,
+          name: "Hosted ingest",
+          projectId: session.projectId,
+          revoked: false
+        },
+        {
+          createdAt: expect.any(String),
+          id: expect.any(String),
+          keyPrefix: "atl",
+          name: "Seeded API key",
+          projectId: session.projectId,
+          revoked: false
+        }
+      ]
+    });
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: `Bearer ${rawKey}`
+      },
+      payload: {
+        event: "api_key.created",
+        actor: "user_1",
+        metadata: {
+          source: "integration"
+        }
+      }
+    });
+
+    expect(ingestResponse.statusCode).toBe(202);
+
+    const revokeResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/api-keys/${createPayload.apiKey.id}/revoke`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(revokeResponse.statusCode).toBe(204);
+
+    const revokedListResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/api-keys`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(revokedListResponse.statusCode).toBe(200);
+    expect(revokedListResponse.json()).toEqual({
+      apiKeys: [
+        {
+          createdAt: expect.any(String),
+          id: createPayload.apiKey.id,
+          keyPrefix: createPayload.apiKey.keyPrefix,
+          name: "Hosted ingest",
+          projectId: session.projectId,
+          revoked: true
+        },
+        {
+          createdAt: expect.any(String),
+          id: expect.any(String),
+          keyPrefix: "atl",
+          name: "Seeded API key",
+          projectId: session.projectId,
+          revoked: false
+        }
+      ]
+    });
+
+    const revokedIngestResponse = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: `Bearer ${rawKey}`
+      },
+      payload: {
+        event: "api_key.revoked",
+        metadata: {
+          source: "integration"
+        }
+      }
+    });
+
+    expect(revokedIngestResponse.statusCode).toBe(401);
+    expect(revokedIngestResponse.json()).toEqual({
+      error: "invalid_api_key"
+    });
+    await expect(countAuditEvents()).resolves.toBe(1);
+    await expect(countOutboxJobs()).resolves.toBe(1);
+  });
+
+  it("returns only the requested project's events for session-scoped reads", async () => {
+    const session = await createSessionMember();
+    const secondProject = await createProject({
+      environment: "staging",
+      name: "AcmeCRM Staging",
+      organizationId: session.organizationId
+    });
+    const firstKey = await createApiKeyForProject(session.projectId, "Acme prod key");
+    const secondKey = await createApiKeyForProject(secondProject.id, "Acme staging key");
+
+    await ingestEvent(firstKey.rawKey, {
+      actor: "admin_prod",
+      event: "user.deleted",
+      metadata: {
+        project: "production"
+      },
+      target: "user_prod"
+    });
+    await ingestEvent(secondKey.rawKey, {
+      actor: "admin_stage",
+      event: "user.created",
+      metadata: {
+        project: "staging"
+      },
+      target: "user_stage"
+    });
+
+    const projectEventsResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/events`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(projectEventsResponse.statusCode).toBe(200);
+    expect(projectEventsResponse.json()).toEqual({
+      events: [
+        {
+          actor: "admin_prod",
+          createdAt: expect.any(String),
+          event: "user.deleted",
+          id: expect.any(String),
+          metadata: {
+            project: "production"
+          },
+          target: "user_prod"
+        }
+      ],
+      pageInfo: {
+        hasMore: false,
+        nextCursor: null
+      }
+    });
+
+    const projectStatsResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${session.projectId}/events/stats?top=5`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(projectStatsResponse.statusCode).toBe(200);
+    expect(projectStatsResponse.json()).toMatchObject({
+      totalEvents: 1,
+      topEventTypes: [
+        {
+          count: 1,
+          event: "user.deleted"
+        }
+      ]
+    });
+
+    const secondProjectEventsResponse = await app.inject({
+      method: "GET",
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/projects/${secondProject.id}/events`,
+      headers: {
+        cookie: session.cookie
+      }
+    });
+
+    expect(secondProjectEventsResponse.statusCode).toBe(200);
+    expect(secondProjectEventsResponse.json()).toEqual({
+      events: [
+        {
+          actor: "admin_stage",
+          createdAt: expect.any(String),
+          event: "user.created",
+          id: expect.any(String),
+          metadata: {
+            project: "staging"
+          },
+          target: "user_stage"
+        }
+      ],
+      pageInfo: {
+        hasMore: false,
+        nextCursor: null
+      }
+    });
+  });
+
   async function truncateAll() {
-    await pool.query(
-      'TRUNCATE TABLE "job_outbox", audit_events, api_keys, projects, organizations RESTART IDENTITY CASCADE'
-    );
+    await pool.query(`
+      TRUNCATE TABLE
+        "job_outbox",
+        audit_events,
+        api_keys,
+        auth_sessions,
+        auth_magic_links,
+        organization_memberships,
+        organization_invitations,
+        user_organization_onboarding_states,
+        projects,
+        organizations,
+        users
+      RESTART IDENTITY CASCADE
+    `);
   }
 
   async function countOutboxJobs() {
@@ -240,5 +492,92 @@ describe("event API integration", () => {
     );
 
     return result.rows;
+  }
+
+  async function createSessionMember() {
+    const seeded = await seedDemoProject({
+      databaseUrl
+    });
+    const user = await pool.query<{ id: string }>(
+      `insert into "users" ("email")
+       values ($1)
+       returning "id"`,
+      ["integration-owner@example.com"]
+    );
+    const userId = user.rows[0]!.id;
+
+    await pool.query(
+      `insert into "organization_memberships" ("organization_id", "user_id", "role")
+       values ($1, $2, 'owner')`,
+      [seeded.organizationId, userId]
+    );
+
+    const sessionToken = "integration-session-token";
+
+    await pool.query(
+      `insert into "auth_sessions" ("user_id", "token_hash", "expires_at")
+       values ($1, $2, now() + interval '30 day')`,
+      [userId, hashToken(sessionToken, { secret: authTokenSecret })]
+    );
+
+    return {
+      cookie: `${config.AUTH_SESSION_COOKIE_NAME}=${sessionToken}`,
+      organizationId: seeded.organizationId,
+      projectId: seeded.projectId,
+      userId
+    };
+  }
+
+  async function createProject(input: {
+    environment: string;
+    name: string;
+    organizationId: string;
+  }) {
+    const result = await pool.query<{ id: string }>(
+      `insert into "projects" ("organization_id", "name", "environment")
+       values ($1, $2, $3)
+       returning "id"`,
+      [input.organizationId, input.name, input.environment]
+    );
+
+    return {
+      id: result.rows[0]!.id
+    };
+  }
+
+  async function createApiKeyForProject(projectId: string, name: string) {
+    const rawKey = `${apiKey}_${projectId.replace(/-/g, "").slice(0, 8)}`;
+    const keyHash = hashApiKey(rawKey, apiKeyPepper);
+
+    await pool.query(
+      `insert into "api_keys" ("project_id", "key_hash", "key_prefix", "name")
+       values ($1, $2, $3, $4)`,
+      [projectId, keyHash, rawKey.split("_")[0], name]
+    );
+
+    return {
+      rawKey
+    };
+  }
+
+  async function ingestEvent(
+    rawKey: string,
+    payload: {
+      actor?: string;
+      event: string;
+      metadata: Record<string, unknown>;
+      target?: string;
+    }
+  ) {
+    const response = await app.inject({
+      method: "POST",
+      url: `${API_VERSION_PREFIX}/events`,
+      headers: {
+        authorization: `Bearer ${rawKey}`
+      },
+      payload
+    });
+
+    expect(response.statusCode).toBe(202);
   }
 });

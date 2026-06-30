@@ -4,27 +4,6 @@ This file tracks API runtime, platform, and data-safety work items.
 
 ## Queue
 
-- [ ] T-084 Add API integration coverage for API key happy path and revocation
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-30
-  blocked_reason:
-  files:
-    - apps/api/src/modules/api-keys/*
-    - apps/api/src/modules/audit-events/*
-    - apps/api/src/**/__tests__/*
-    - docs/03-api.md
-    - docs/04-quality-gates.md
-    - docs/07-change-log.md
-    - tasks/api-foundation.txt
-  acceptance:
-    - Integration coverage proves API key create, API key revoke, ingest with a valid key, and ingest rejection with a revoked key
-    - Project-scoped event reads are covered with explicit no-cross-project leakage assertions
-    - Any API contract change regenerates web API types through the existing workflow and updates API docs in the same change
-
 - [ ] T-038 Enforce organization scoping across platform data access paths
   status: ready
   priority: high
@@ -128,6 +107,31 @@ This file tracks API runtime, platform, and data-safety work items.
     - Request logging and safe-error behavior remain covered without leaking API keys, cookies, auth headers, or raw sensitive payload bodies
 
 ## Done
+
+- [x] T-084 Add API integration coverage for API key happy path and revocation
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-06-30
+  completed: 2026-06-30
+  blocked_reason:
+  notes:
+    - 2026-06-30: added real DB integration coverage for session-backed API key create and revoke, valid-key ingest, revoked-key rejection, and project-scoped event reads
+    - 2026-06-30: verified the focused integration file after refreshing the test DB migrations because the local test database schema was behind the tracked migrations
+  files:
+    - apps/api/src/modules/api-keys/*
+    - apps/api/src/modules/audit-events/*
+    - apps/api/src/**/__tests__/*
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/api-foundation.txt
+  acceptance:
+    - Integration coverage proves API key create, API key revoke, ingest with a valid key, and ingest rejection with a revoked key
+    - Project-scoped event reads are covered with explicit no-cross-project leakage assertions
+    - Any API contract change regenerates web API types through the existing workflow and updates API docs in the same change
 
 - [x] T-064 Add billing provider adapter seam
   status: done
