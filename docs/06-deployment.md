@@ -9,6 +9,10 @@ Deploy AuditTrail to Coolify as one Docker Compose stack with four services:
 
 That keeps the deployment unit together without putting multiple long-running processes into one container.
 
+The isolated `apps/landing` Project Forge marketing site is not part of this
+stack yet. It should be treated as a separate static site or future dedicated
+deployment path rather than bundled into the authenticated product runtime.
+
 ## Current Runtime Stance
 
 The hosted runtime deploys:
@@ -17,6 +21,8 @@ The hosted runtime deploys:
 - `api`
 - `worker`
 - `postgres`
+
+It does not currently deploy `apps/landing`.
 
 The current API container also starts through the root source-runtime command
 `pnpm start:container`, which runs `pnpm db:migrate && pnpm --dir apps/api exec

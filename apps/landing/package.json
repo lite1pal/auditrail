@@ -1,0 +1,48 @@
+{
+  "name": "landing",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Project Forge public landing site built on Astro",
+  "keywords": ["astro", "landing-page", "framework", "project-forge"],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "start": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "typecheck": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "astro": "astro",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "astro": "^6.1.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "eslint": "^10.2.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "prettier": "^3.8.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "sharp": "^0.34.4",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.1",
+    "vite": "^7.3.6"
+  },
+  "overrides": {
+    "vite": "^7"
+  }
+}

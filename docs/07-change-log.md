@@ -1,5 +1,13 @@
 # Change Log
 
+## 2026-07-01
+
+- Added `apps/landing` as an isolated Astro marketing app for Project Forge,
+  then replaced the first trial template with the user-selected
+  MIT-licensed `Tailcast` Astro theme, reduced it to a single framework-focused
+  page, and kept the landing deployment and docs clearly separate from the
+  authenticated product runtime.
+
 ## 2026-06-30
 
 - Added an explicit post-MVP task sequence for true platform/product

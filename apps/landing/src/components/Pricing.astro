@@ -1,0 +1,149 @@
+---
+import CheckArrowIcon from '../assets/icons/CheckArrowIcon.astro';
+
+const platformFoundations = [
+  'Platform and product boundaries documented in code',
+  'Reference product proving auth, billing, webhooks, jobs, and ingestion',
+  'Terminal-first landing point for new resource generation',
+];
+
+const builderWorkflow = [
+  'Spec initialization, planning, preview, install, and migration generation',
+  'Generated Postgres repo support for the current safe resource slice',
+  'Agent-facing context and bounded implementation recipes',
+];
+
+const releaseProof = [
+  'Architecture boundary checks and typecheck gates',
+  'Unit, route, integration, and worker verification paths',
+  'Docs and change-log updates treated as part of the slice',
+];
+---
+
+<section class="bg-bgDark2 relative flex w-full justify-center" id="proof">
+  <div class="content-container bg-bgDark2 pt-12 pb-20">
+    <div class="fade-in">
+      <div>
+        <div class="mx-auto mb-16 max-w-2xl text-center">
+          <span class="block-subtitle">What exists already</span>
+          <h2 class="font-heading text-primaryText mt-6 mb-6 text-4xl font-bold lg:text-5xl">
+            Built to move from idea to release
+          </h2>
+          <p class="text-secondaryText mb-6">
+            Project Forge is not selling seats here. This landing is showing the three platform
+            layers that already work in the repository today.
+          </p>
+        </div>
+        <div class="-mx-4 mt-20 flex flex-col flex-wrap items-center lg:flex-row">
+          <div
+            class="mb-8 w-full max-w-[21.875rem] px-4 sm:max-w-[23.75rem] lg:mb-0 lg:w-1/3 lg:max-w-none"
+          >
+            <div class="card rounded-3xl p-8">
+              <h3 class="font-heading text-primaryText mb-2 text-left text-xl font-bold">
+                Core platform
+              </h3>
+              <div class="flex items-end justify-start">
+                <div class="text-primaryText mt-4 mr-2 text-left text-3xl font-bold sm:text-4xl">
+                  Shared seams
+                </div>
+              </div>
+              <p class="mt-4 mb-6 text-left leading-loose text-gray-500 2xl:mb-10">
+                The reusable substrate: auth, organizations, billing, jobs, webhooks, and product
+                module contracts.
+              </p>
+              <ul class="text-primaryText mb-2 2xl:mb-6">
+                {
+                  platformFoundations.map((text) => (
+                    <li class="mb-4 flex text-sm 2xl:text-base">
+                      <CheckArrowIcon />
+                      <span>{text}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a
+                class="contained-button mt-16 inline-block w-full rounded-xl rounded-t-xl px-4 py-2 text-center leading-loose font-bold"
+                href="https://github.com/denistarasenko/auditrail"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open the Project Forge repository"
+              >
+                Inspect the code
+              </a>
+            </div>
+          </div>
+          <div
+            class="mb-8 w-full max-w-[21.875rem] px-4 sm:max-w-[23.75rem] lg:mb-0 lg:w-1/3 lg:max-w-none"
+          >
+            <div class="card rounded-3xl px-8 py-8">
+              <h3 class="font-heading text-primaryText mb-2 text-left text-2xl font-bold 2xl:mb-4">
+                Builder workflow
+              </h3>
+              <div class="flex items-end justify-start">
+                <div class="text-primaryText mt-4 mr-2 text-left text-3xl font-bold sm:text-4xl">
+                  CLI to runtime
+                </div>
+              </div>
+              <p class="mt-8 mb-8 text-left leading-loose text-gray-500 2xl:mb-12">
+                The current generator slice is meant to make new product resources cheap to stand
+                up without hand-editing every layer.
+              </p>
+              <ul class="text-primaryText mb-14">
+                {
+                  builderWorkflow.map((text) => (
+                    <li class="mb-4 flex text-sm 2xl:text-base">
+                      <CheckArrowIcon />
+                      <span>{text}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a
+                class="contained-button mt-20 inline-block w-full px-4 py-2 text-center leading-loose transition duration-200"
+                href="/#workflow"
+                aria-label="Jump to workflow details"
+              >
+                Review the flow
+              </a>
+            </div>
+          </div>
+          <div
+            class="mb-8 w-full max-w-[21.875rem] px-4 sm:max-w-[23.75rem] lg:mb-0 lg:w-1/3 lg:max-w-none"
+          >
+            <div class="card rounded-3xl p-8">
+              <h3 class="font-heading text-primaryText mb-2 text-left text-xl font-bold">
+                Release discipline
+              </h3>
+              <div class="flex items-end justify-start">
+                <div class="text-primaryText mt-4 mr-2 text-left text-3xl font-bold sm:text-4xl">
+                  Proof included
+                </div>
+              </div>
+              <p class="mt-4 mb-6 text-left leading-loose text-gray-500 2xl:mb-10">
+                The reference product stays useful because every slice is expected to land with
+                tests, docs, and operational clarity.
+              </p>
+              <ul class="text-primaryText mb-2 2xl:mb-6">
+                {
+                  releaseProof.map((text) => (
+                    <li class="mb-4 flex text-sm 2xl:text-base">
+                      <CheckArrowIcon />
+                      <span>{text}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a
+                class="contained-button mt-16 inline-block w-full rounded-xl rounded-t-xl px-4 py-2 text-center leading-loose font-bold"
+                href="/#faq"
+                aria-label="Jump to the FAQ section"
+              >
+                Read the caveats
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

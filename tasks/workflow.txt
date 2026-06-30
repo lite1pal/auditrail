@@ -144,6 +144,34 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-099 Replace the Project Forge landing app with the Tailcast template
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: removed the previous landing app entirely and replaced it with the MIT-licensed Tailcast Astro template under `apps/landing`
+    - 2026-07-01: reduced the template to a single Project Forge landing page, removed dead multi-page startup content, and rewrote the copy, metadata, README, and robots settings for the framework
+    - 2026-07-01: pinned the landing app's Vite dependency to match Astro, added build-time `sharp`, and verified the landing with `pnpm --filter landing typecheck` and `pnpm --filter landing build`
+  files:
+    - apps/landing/*
+    - package.json
+    - pnpm-lock.yaml
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/06-deployment.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The previous landing template is removed completely and replaced with the Tailcast-based landing app
+    - The landing copy reflects Project Forge rather than the upstream template defaults
+    - Repo scripts and docs still describe the landing app honestly, including any deployment or licensing caveats
+
 - [x] T-094 Define the product-module contract for true platform/product separation
   status: done
   priority: high

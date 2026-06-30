@@ -134,6 +134,11 @@ pnpm check:boundaries
 
 `apps/web` owns the hosted MVP user journey. It should call the API instead of importing API internals.
 
+`apps/landing` owns the public marketing site for Project Forge. It should stay
+isolated from authenticated product runtime composition, must not become a
+shared dumping ground for app-shell code, and should treat framework messaging
+as public copy rather than as a source of runtime contracts.
+
 `apps/worker` owns the background-job runtime boundary. It now validates worker
 env, polls the durable outbox, dispatches registered handlers, retries failed
 jobs through the shared outbox semantics, shuts down gracefully, and now owns
@@ -143,6 +148,7 @@ ingest.
 Current classification:
 
 - `apps/api`: mixed `platform-core` and `audit-product`, with boundaries kept at the module level
+- `apps/landing`: `platform-extension`
 - `apps/web`: mixed `platform-core` and `audit-product`, with boundaries kept at the feature level
 - `apps/worker`: `platform-extension`
 

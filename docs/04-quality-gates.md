@@ -76,6 +76,15 @@ The deployed runtime now includes `web + api + worker + postgres`. Worker
 checks now prove the real outbox polling loop and handler dispatch path, not
 just config parsing and idle startup.
 
+The landing app is intentionally outside that hosted runtime gate today. It is
+marketing-only, not part of the signed-in product flow, and should be checked
+independently with:
+
+```bash
+pnpm --filter landing typecheck
+pnpm --filter landing build
+```
+
 ## API Coverage
 
 Project policy requires at least 95% coverage for:

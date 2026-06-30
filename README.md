@@ -50,6 +50,7 @@ resource and let the framework generate the surrounding platform slice:
 
 Today, Project Forge already includes working terminal-first framework seams:
 
+- an isolated `apps/landing` Astro marketing site for Project Forge
 - scaffold planning, generation, and smoke validation for new platform
   candidates
 - resource spec initialization from the terminal
@@ -133,6 +134,12 @@ Start the worker:
 pnpm dev:worker
 ```
 
+Start the landing site:
+
+```bash
+pnpm dev:landing
+```
+
 ## Framework Commands
 
 Project Forge is currently driven from the terminal.
@@ -163,10 +170,18 @@ Health and tooling checks:
 
 ```bash
 pnpm saas doctor
+pnpm build:landing
 pnpm test:saas
 pnpm typecheck:saas
 pnpm verify
 ```
+
+Landing provenance:
+
+- `apps/landing` now adapts the MIT-licensed upstream `Tailcast` Astro theme
+- the landing has been reduced to a single Project Forge marketing page
+- it remains separate from the authenticated product runtime and should be
+  deployed independently
 
 ## Verification
 
