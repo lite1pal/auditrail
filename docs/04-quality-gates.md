@@ -76,6 +76,16 @@ The deployed runtime now includes `web + api + worker + postgres`. Worker
 checks now prove the real outbox polling loop and handler dispatch path, not
 just config parsing and idle startup.
 
+The worker now follows the same fast-vs-integration split as the API:
+
+```bash
+pnpm --filter @auditrail/worker test
+pnpm --filter @auditrail/worker test:integration
+```
+
+Use the integration command for tests that require `TEST_DATABASE_URL`, real
+Postgres state, or a real socket such as project webhook delivery.
+
 The landing app is intentionally outside that hosted runtime gate today. It is
 marketing-only, not part of the signed-in product flow, and should be checked
 independently with:

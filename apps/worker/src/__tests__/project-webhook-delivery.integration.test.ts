@@ -1,5 +1,6 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import http from "node:http";
+
+import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { createDatabaseClient } from "@auditrail/db";
@@ -101,7 +102,7 @@ describe("createProjectWebhookDeliveryHandler", () => {
     });
     await expect(selectDelivery(fixture.deliveryId)).resolves.toMatchObject({
       attemptCount: 1,
-      deliveredAt: expect.any(String),
+      deliveredAt: expect.any(Date),
       responseStatusCode: 202,
       status: "succeeded"
     });
@@ -140,7 +141,7 @@ describe("createProjectWebhookDeliveryHandler", () => {
     await expect(selectDelivery(fixture.deliveryId)).resolves.toMatchObject({
       attemptCount: 1,
       lastError: "webhook_delivery_failed:503",
-      nextRetryAt: expect.any(String),
+      nextRetryAt: expect.any(Date),
       responseStatusCode: 503,
       status: "pending"
     });
@@ -272,16 +273,17 @@ async function seedWebhookDeliveryFixture(input: { url: string }) {
         },
         id: auditEventId,
         organizationId,
-        projectId,
         productId: "audit-events",
+        projectId,
         type: "audit.event.created"
       })
     ]
   );
+  const deliveryId = deliveryResult.rows[0]!.id;
 
   return {
     auditEventId,
-    deliveryId: deliveryResult.rows[0]!.id,
+    deliveryId,
     endpointId,
     organizationId,
     projectId
@@ -291,17 +293,17 @@ async function seedWebhookDeliveryFixture(input: { url: string }) {
 async function selectDelivery(deliveryId: string) {
   const result = await pool.query<{
     attemptCount: number;
-    deliveredAt: string | null;
+    deliveredAt: Date | null;
     lastError: string | null;
-    nextRetryAt: string | null;
+    nextRetryAt: Date | null;
     responseStatusCode: number | null;
     status: string;
   }>(
     `select
        "attempt_count" as "attemptCount",
-       to_char("delivered_at", 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "deliveredAt",
+       "delivered_at" as "deliveredAt",
        "last_error" as "lastError",
-       to_char("next_retry_at", 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "nextRetryAt",
+       "next_retry_at" as "nextRetryAt",
        "response_status_code" as "responseStatusCode",
        "status"
      from "project_webhook_deliveries"

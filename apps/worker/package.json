@@ -9,6 +9,7 @@
     "start": "pnpm validate:env && node dist/index.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "validate:env": "tsx src/validate-env.ts"
   },
   "dependencies": {
