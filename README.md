@@ -171,10 +171,71 @@ Health and tooling checks:
 ```bash
 pnpm saas doctor
 pnpm build:landing
+pnpm release:dry-run
 pnpm test:saas
 pnpm typecheck:saas
 pnpm verify
 ```
+
+## GitHub Releases
+
+Project Anvil now publishes repo-level GitHub prereleases automatically from
+the `alpha` branch through `semantic-release`.
+
+Current release posture:
+
+- source branch: `main`
+- prerelease branch: `alpha`
+- channel: `alpha`
+- tag format: `v<version>`
+- no npm publish step yet
+- no changelog commit-back step yet
+
+The workflow creates Git tags and GitHub Releases only after `pnpm verify`
+passes in CI on `alpha`.
+
+Branch promotion:
+
+- pushes to `main` automatically trigger a GitHub Action that merges `main`
+  into `alpha`
+- pushes to `alpha` then run the prerelease workflow
+- if `main -> alpha` conflicts, the sync workflow fails and the conflict must
+  be resolved explicitly on `alpha`
+
+One-time branch bootstrap:
+
+```bash
+git checkout -b alpha
+git push -u origin alpha
+```
+
+Commit format matters because release creation is commit-driven:
+
+- `feat: ...` -> patch prerelease bump
+- `fix: ...` -> patch prerelease bump
+- `perf: ...` -> patch prerelease bump
+- `refactor: ...` -> patch prerelease bump
+- `feat!: ...` or `BREAKING CHANGE:` -> minor prerelease bump
+
+Examples:
+
+```text
+feat: add project-module prerelease automation
+fix: prevent webhook delivery retries from losing status
+refactor: simplify platform entitlement resolver
+feat!: change generated resource install contract
+```
+
+Local dry run:
+
+```bash
+pnpm install --no-frozen-lockfile
+pnpm release:dry-run
+```
+
+`pnpm release:dry-run` still needs access to the configured GitHub remote, and
+full GitHub-plugin verification is most reliable when `GITHUB_TOKEN` is set in
+the shell.
 
 Landing provenance:
 

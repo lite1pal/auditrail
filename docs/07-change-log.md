@@ -2,6 +2,19 @@
 
 ## 2026-07-01
 
+- Added the first repo-level GitHub prerelease automation for Project Anvil.
+  The repo now uses `semantic-release` plus a GitHub Actions workflow on the
+  `alpha` branch to run `pnpm verify`, calculate an `alpha` prerelease from
+  Conventional Commit messages, and publish Git tags plus GitHub Releases
+  without introducing npm publishing or changelog commit-back yet. `main`
+  remains available as the future stable-release branch.
+
+- Added a second GitHub Actions workflow that promotes `main` into `alpha`
+  automatically. The current release posture is now: merge into `main`, let
+  CI sync `alpha`, and let the prerelease workflow publish from `alpha` after
+  the verification gate passes. Merge conflicts fail the sync step instead of
+  being resolved automatically in CI.
+
 - Renamed the framework-facing repo and landing copy from Project Forge to
   Project Anvil so the README, landing app, and framework docs describe one
   consistent platform identity while AuditTrail remains the reference product.

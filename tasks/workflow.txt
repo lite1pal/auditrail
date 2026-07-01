@@ -52,6 +52,58 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-101 Add automatic `main` to `alpha` release-branch promotion
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: added a GitHub Actions workflow that syncs `main` into `alpha` after pushes so prereleases can be promoted without manual branch juggling
+    - 2026-07-01: kept conflict handling explicit by failing the workflow on merge conflicts instead of inventing automatic resolution policy
+    - 2026-07-01: updated release docs and root ignore rules so repo-level workflow files can be committed while nested template `.github` folders stay ignored
+  files:
+    - .gitignore
+    - .github/workflows/sync-alpha.yml
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Pushes to `main` automatically attempt to merge into `alpha`
+    - Successful syncs leave `alpha` ready for the prerelease workflow
+    - Merge conflicts fail closed and require an explicit human resolution
+
+- [x] T-100 Add automated GitHub alpha prereleases for the framework repo
+  status: done
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: added a repo-level `semantic-release` configuration plus a GitHub Actions workflow that runs `pnpm verify` and publishes GitHub prereleases from `alpha`
+    - 2026-07-01: kept the first release lane intentionally narrow by creating only Git tags and GitHub Releases, with no npm publish or changelog commit-back step yet
+    - 2026-07-01: documented the `main` plus `alpha` branch strategy, commit-message rules, and local `pnpm release:dry-run` verification path
+  files:
+    - .gitignore
+    - .github/workflows/release.yml
+    - .releaserc.json
+    - package.json
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Pushes to `alpha` can publish GitHub alpha prereleases automatically after the repo verification gate passes
+    - The repo has a documented local dry-run command for semantic-release decisions
+    - Release automation stays repo-level only and does not publish packages yet
+
 - [x] T-098 Split product billing, entitlements, and webhook/event ownership for multi-product runtime
   status: done
   priority: medium

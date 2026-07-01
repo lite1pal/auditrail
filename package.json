@@ -17,6 +17,8 @@
     "check:extraction:placeholder": "tsx tools/extraction/validate-placeholder-product.ts",
     "check:extraction-manifest": "tsx tools/check-extraction-manifest.ts",
     "extract:boilerplate": "tsx tools/extraction/extract.ts",
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run --no-ci",
     "saas": "node --import tsx tools/saas/cli.ts",
     "saas:doctor": "node --import tsx tools/saas/cli.ts doctor",
     "test:extraction": "vitest run tools/extraction/__tests__/*.test.ts",
@@ -37,8 +39,13 @@
     "infra:down": "docker compose down"
   },
   "devDependencies": {
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^20.19.43",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "drizzle-kit": "^0.31.8",
+    "semantic-release": "^24.2.7",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"

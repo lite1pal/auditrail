@@ -85,6 +85,43 @@ pnpm --filter landing typecheck
 pnpm --filter landing build
 ```
 
+## GitHub Prerelease Gate
+
+The repo now has one automated GitHub prerelease lane under
+`.github/workflows/release.yml`.
+
+Current policy:
+
+- `main` is the source branch for ongoing development
+- pushes to `alpha` publish the current GitHub prerelease stream automatically
+- pushes to `main` first trigger the `sync-alpha` workflow, which merges
+  `main` into `alpha`
+- the release lane runs `pnpm verify` before tagging
+- successful publishes create Git tags and GitHub prereleases only
+- the current channel is `alpha`
+- the workflow does not publish npm packages or push changelog commits yet
+
+Before relying on the CI workflow for a structural release change, validate
+the semantic-release decision locally:
+
+```bash
+pnpm install --no-frozen-lockfile
+pnpm release:dry-run
+```
+
+This dry run still needs network access to the configured Git remote. For the
+closest match to CI, export a GitHub token in the shell before running it.
+
+Release creation is commit-driven. At the current 0.x framework stage:
+
+- `feat`, `fix`, `perf`, and `refactor` trigger patch prerelease bumps
+- breaking changes trigger minor prerelease bumps
+- commits such as `docs`, `test`, or `chore` do not publish by themselves
+
+The sync policy is intentionally strict. If the automated `main -> alpha`
+merge conflicts, the workflow should fail and a human should resolve the
+branch divergence explicitly instead of letting CI guess.
+
 ## API Coverage
 
 Project policy requires at least 95% coverage for:
