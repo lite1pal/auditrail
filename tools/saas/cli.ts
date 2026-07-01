@@ -166,7 +166,7 @@ export function executeSaasCli(input: {
       "Unknown or missing command.",
       "Usage:",
       "  pnpm saas doctor",
-      "  pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
+      "  pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--relation <name:belongs-to:target[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
       "  pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
       "  pnpm saas generate scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--force]",
@@ -258,7 +258,7 @@ function executeInitResourceCommand(input: {
   try {
     const parsedArgs = parseCommandArguments(input.args, {
       booleanOptions: ["--force", "--nav", "--public", "--no-timestamps"],
-      multiValueOptions: ["--field"],
+      multiValueOptions: ["--field", "--relation"],
       valueOptions: [
         "--api-prefix",
         "--crud",
@@ -274,7 +274,7 @@ function executeInitResourceCommand(input: {
       return {
         exitCode: 1,
         stderr:
-          "Missing resource name. Usage: pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
+          "Missing resource name. Usage: pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--relation <name:belongs-to:target[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
         stdout: ""
       };
     }
@@ -290,6 +290,7 @@ function executeInitResourceCommand(input: {
       ownership: parsedArgs.optionsWithValues.get("--ownership"),
       pluralLabel: parsedArgs.optionsWithValues.get("--plural-label"),
       publicApi: parsedArgs.options.has("--public"),
+      relationSpecs: parsedArgs.optionsWithMultipleValues.get("--relation") ?? [],
       repoRoot: input.repoRoot,
       resourceName,
       timestamps: parsedArgs.options.has("--no-timestamps") ? false : undefined

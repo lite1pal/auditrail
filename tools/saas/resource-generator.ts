@@ -196,9 +196,15 @@ export function getResourceGeneratorSupportMetadata() {
       "docs/resources/<resource>-customization.md"
     ] as const,
     supportedFieldTypes: resourceGeneratorSupportedFieldTypes,
+    supportedRelationTargets: {
+      generated: "existing generated resources",
+      platform: ["organization", "project", "user"]
+    } as const,
     supportedOwnership: "organization" as const,
     unsupportedBehaviors: [
       "delete generation",
+      "nested relation reads",
+      "relation graph traversal",
       "public API generation",
       "product navigation wiring",
       "index generation",
@@ -256,6 +262,17 @@ function validateSupportedResource(resource: FrameworkResourceSpec) {
         `Field '${field.name}' uses unsupported type '${field.type}'. Supported types: ${Array.from(
           supportedFieldTypes
         ).join(", ")}.`
+      );
+    }
+  }
+
+  for (const relation of resource.relations) {
+    if (
+      relation.targetScope === "platform" &&
+      !["organization", "project", "user"].includes(relation.target)
+    ) {
+      throw new Error(
+        `Unsupported platform relation target '${relation.target}'. Supported targets: organization, project, user.`
       );
     }
   }
@@ -352,6 +369,9 @@ function createTemplateContext(plan: ResourcePlanReport) {
   const pluralLabel = resource.pluralLabel;
   const apiBasePath = `/api${resource.api.prefix}`;
   const createFields = resource.fields.filter((field) => !field.readonly);
+  const relationByField = new Map(
+    resource.relations.map((relation) => [relation.field, relation] as const)
+  );
   const updateFields = createFields.filter((field) => field.name !== "id");
 
   return {
@@ -362,6 +382,7 @@ function createTemplateContext(plan: ResourcePlanReport) {
     pluralLabel,
     pluralPascalName,
     plan,
+    relationByField,
     resource,
     resourcePath,
     resourceSlug,
@@ -448,15 +469,29 @@ function renderDomainIndex(context: ReturnType<typeof createTemplateContext>) {
 
 function renderDbSchema(context: ReturnType<typeof createTemplateContext>) {
   const imports = new Set(["index", "pgTable", "text", "timestamp", "uuid"]);
+  const schemaImports = new Map<string, Set<string>>();
   const fieldLines: string[] = [
-    '    id: uuid("id").primaryKey().defaultRandom(),',
-    '    organizationId: uuid("organization_id").notNull().references(() => organizations.id),'
+    '    id: uuid("id").primaryKey().defaultRandom(),'
   ];
+
+  addSchemaImport(schemaImports, "./identity.js", "organizations");
+  fieldLines.push(
+    '    organizationId: uuid("organization_id").notNull().references(() => organizations.id),'
+  );
 
   for (const field of context.resource.fields) {
     imports.add(getDrizzleImport(field.type));
     fieldLines.push(
-      `    ${field.name}: ${renderDbColumn(field)}`
+      `    ${field.name}: ${renderDbColumn(context, field)}`
+    );
+  }
+
+  for (const relation of context.resource.relations) {
+    const targetReference = resolveRelationTargetReference(relation);
+    addSchemaImport(
+      schemaImports,
+      targetReference.importPath,
+      targetReference.symbol
     );
   }
 
@@ -465,10 +500,23 @@ function renderDbSchema(context: ReturnType<typeof createTemplateContext>) {
     '    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()'
   );
 
+  const indexLines = [
+    `    index("${context.resourcePath}s_organization_id_idx").on(table.organizationId)`,
+    ...context.resource.relations.map(
+      (relation) =>
+        `    index("${context.resourcePath}s_${toSnakeCase(relation.field)}_idx").on(table.${relation.field})`
+    )
+  ];
+
   return [
     `import { ${Array.from(imports).sort().join(", ")} } from "drizzle-orm/pg-core";`,
     "",
-    'import { organizations } from "./identity.js";',
+    ...Array.from(schemaImports.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(
+        ([path, names]) =>
+          `import { ${Array.from(names).sort().join(", ")} } from "${path}";`
+      ),
     "",
     `export const ${context.resource.resource}Table = pgTable(`,
     `  "${context.resourcePath}s",`,
@@ -476,7 +524,7 @@ function renderDbSchema(context: ReturnType<typeof createTemplateContext>) {
     fieldLines.join("\n"),
     "  },",
     "  (table) => [",
-    `    index("${context.resourcePath}s_organization_id_idx").on(table.organizationId)`,
+    indexLines.join(",\n"),
     "  ]",
     ");"
   ].join("\n");
@@ -1632,9 +1680,13 @@ function getDrizzleImport(type: FrameworkResourceSpec["fields"][number]["type"])
   }
 }
 
-function renderDbColumn(field: FrameworkResourceSpec["fields"][number]) {
+function renderDbColumn(
+  context: ReturnType<typeof createTemplateContext>,
+  field: FrameworkResourceSpec["fields"][number]
+) {
   const notNullSuffix = field.required ? ".notNull()" : "";
   const uniqueSuffix = field.unique ? ".unique()" : "";
+  const relation = context.relationByField.get(field.name);
 
   switch (field.type) {
     case "boolean":
@@ -1642,6 +1694,12 @@ function renderDbColumn(field: FrameworkResourceSpec["fields"][number]) {
     case "datetime":
       return `timestamp("${toSnakeCase(field.name)}", { withTimezone: true })${notNullSuffix}${uniqueSuffix},`;
     case "uuid":
+      if (relation) {
+        const targetReference = resolveRelationTargetReference(relation);
+
+        return `uuid("${toSnakeCase(field.name)}")${notNullSuffix}.references(() => ${targetReference.symbol}.id)${uniqueSuffix},`;
+      }
+
       return `uuid("${toSnakeCase(field.name)}")${notNullSuffix}${uniqueSuffix},`;
     default:
       return `text("${toSnakeCase(field.name)}")${notNullSuffix}${uniqueSuffix},`;
@@ -1849,4 +1907,59 @@ function toLabel(value: string) {
     .split("-")
     .map((segment) => segment[0]?.toUpperCase() + segment.slice(1))
     .join(" ");
+}
+
+function addSchemaImport(
+  imports: Map<string, Set<string>>,
+  path: string,
+  name: string
+) {
+  const existing = imports.get(path);
+
+  if (existing) {
+    existing.add(name);
+    return;
+  }
+
+  imports.set(path, new Set([name]));
+}
+
+function resolveRelationTargetReference(
+  relation: FrameworkResourceSpec["relations"][number]
+) {
+  if (relation.targetScope === "platform") {
+    const platformTargetMap: Record<
+      string,
+      { importPath: string; symbol: string }
+    > = {
+      organization: {
+        importPath: "./identity.js",
+        symbol: "organizations"
+      },
+      project: {
+        importPath: "./identity.js",
+        symbol: "projects"
+      },
+      user: {
+        importPath: "./identity.js",
+        symbol: "users"
+      }
+    };
+    const mapped = platformTargetMap[relation.target];
+
+    if (!mapped) {
+      throw new Error(
+        `Unsupported platform relation target '${relation.target}'. Supported targets: organization, project, user.`
+      );
+    }
+
+    return mapped;
+  }
+
+  const targetPath = toKebabCase(relation.target);
+
+  return {
+    importPath: `./${targetPath}.js`,
+    symbol: `${relation.target}Table`
+  };
 }

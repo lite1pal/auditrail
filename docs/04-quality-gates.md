@@ -367,6 +367,8 @@ deterministic and fail-closed:
 
 - it reuses the canonical framework resource schema for normalization and validation
 - it requires one or more repeated `--field <name:type[:modifier...]>` flags
+- it also supports repeated `--relation <name:belongs-to:target[:modifier...]>`
+  flags for bounded UUID foreign-key generation
 - it defaults to `specs/<resource>.json` and fails on unsafe output paths or accidental overwrites without `--force`
 - it keeps defaults aligned with the current generator path, including organization-owned API prefixes and `ui.nav: false`
 
@@ -385,6 +387,8 @@ The generator must stay fail-closed:
 - it validates the spec through the canonical framework schema
 - it reuses the dry-run planner before writing preview files
 - it supports one narrow organization-owned subset only
+- it supports `belongs-to` relations only, with scalar UUID fields and bounded
+  platform targets (`organization`, `project`, `user`)
 - it writes under `.generated/` or `tmp/`, not real app source
 - it fails on unsupported ownership, unsupported field types, blocking planner issues, or existing target files unless `--force` is passed
 
@@ -518,6 +522,7 @@ What this proof now covers:
 - deterministic resource init, plan, preview generation, golden-fixture drift detection, and isolated smoke validation
 - repo-root install through supported seams only: generated files, domain barrel, DB schema barrel, migration journal, and `apps/api/src/app.ts`
 - generated route auth and organization-access policy in unit tests
+- relation fixture coverage for required and optional belongs-to foreign keys
 - generated API module type safety through `pnpm --filter @auditrail/api typecheck`
 - real Postgres migration plus route execution through the installed
   `customer` integration test

@@ -57,7 +57,11 @@ describe("generated resource smoke check", () => {
     const repoRoot = createSeededRepo(createdRoots);
 
     const report = runGeneratedResourceSmokeCheck({
-      afterGenerate({ outputPaths, repoRoot: currentRepoRoot }) {
+      afterGenerate({ fixture, outputPaths, repoRoot: currentRepoRoot }) {
+        if (fixture.id !== "customer") {
+          return;
+        }
+
         unlinkSync(
           resolve(
             currentRepoRoot,
@@ -84,7 +88,11 @@ describe("generated resource smoke check", () => {
     const repoRoot = createSeededRepo(createdRoots);
 
     const report = runGeneratedResourceSmokeCheck({
-      afterGenerate({ outputPaths, repoRoot: currentRepoRoot }) {
+      afterGenerate({ fixture, outputPaths, repoRoot: currentRepoRoot }) {
+        if (fixture.id !== "customer") {
+          return;
+        }
+
         const path = resolve(
           currentRepoRoot,
           outputPaths[0],
@@ -115,7 +123,11 @@ describe("generated resource smoke check", () => {
     const repoRoot = createSeededRepo(createdRoots);
 
     const report = runGeneratedResourceSmokeCheck({
-      afterGenerate({ outputPaths, repoRoot: currentRepoRoot }) {
+      afterGenerate({ fixture, outputPaths, repoRoot: currentRepoRoot }) {
+        if (fixture.id !== "customer") {
+          return;
+        }
+
         const path = resolve(
           currentRepoRoot,
           outputPaths[0],
@@ -286,7 +298,9 @@ function createSeededRepo(
     "tools/saas/__fixtures__/resources/customer.json": readFixtureResource(
       "customer.json"
     ),
+    "tools/saas/__fixtures__/resources/task.json": readFixtureResource("task.json"),
     ...readFixtureDirectory("customer"),
+    ...readFixtureDirectory("task"),
     ...extraFiles
   });
 }

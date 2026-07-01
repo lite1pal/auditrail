@@ -156,6 +156,7 @@ Create and install a generated resource:
 
 ```bash
 pnpm saas init resource achievement --field title:string:required --field slug:string:required:unique
+pnpm saas init resource task --field title:string:required --relation project:belongs-to:project:required:platform --relation assignee:belongs-to:user:optional:platform
 pnpm saas plan resource specs/achievement.json
 pnpm saas add resource specs/achievement.json --output .generated/resource-preview/achievement
 pnpm saas agent context resource specs/achievement.json
@@ -181,6 +182,14 @@ pnpm --filter @auditrail/api exec vitest run --config vitest.integration.config.
 
 The current proof resource is `customer`. It is already installed in this repo,
 so rerunning the install step uses `--force` intentionally.
+
+The current relation slice is intentionally narrow:
+
+- `belongs-to` only
+- relation fields normalize to UUID foreign keys such as `projectId`
+- supported platform targets are `organization`, `project`, and `user`
+- generated-to-generated relations require the target resource to already be installed
+- generated routes still return scalar IDs only; nested relation loading stays manual
 
 Health and tooling checks:
 

@@ -182,10 +182,13 @@ function renderMigrationJournal(input: {
 
 function renderMigrationSql(resource: FrameworkResourceSpec) {
   const tableName = getTableName(resource);
+  const relationByField = new Map(
+    resource.relations.map((relation) => [relation.field, relation] as const)
+  );
   const columnLines = [
     '  "id" uuid primary key default gen_random_uuid() not null',
     '  "organization_id" uuid not null references "organizations"("id")',
-    ...resource.fields.map((field) => renderSqlColumn(field)),
+    ...resource.fields.map((field) => renderSqlColumn(field, relationByField.get(field.name))),
     '  "created_at" timestamp with time zone default now() not null',
     '  "updated_at" timestamp with time zone default now() not null'
   ];
@@ -202,11 +205,19 @@ function renderMigrationSql(resource: FrameworkResourceSpec) {
     ");",
     "--> statement-breakpoint",
     `create index if not exists "${tableName}_organization_id_idx"`,
-    `  on "${tableName}" ("organization_id");`
+    `  on "${tableName}" ("organization_id");`,
+    ...resource.relations.flatMap((relation) => [
+      "--> statement-breakpoint",
+      `create index if not exists "${tableName}_${toSnakeCase(relation.field)}_idx"`,
+      `  on "${tableName}" ("${toSnakeCase(relation.field)}");`
+    ])
   ].join("\n");
 }
 
-function renderSqlColumn(field: FrameworkResourceSpec["fields"][number]) {
+function renderSqlColumn(
+  field: FrameworkResourceSpec["fields"][number],
+  relation?: FrameworkResourceSpec["relations"][number]
+) {
   const columnName = toSnakeCase(field.name);
   const notNullClause = field.required ? " not null" : "";
 
@@ -216,10 +227,39 @@ function renderSqlColumn(field: FrameworkResourceSpec["fields"][number]) {
     case "datetime":
       return `  "${columnName}" timestamp with time zone${notNullClause}`;
     case "uuid":
+      if (relation) {
+        const targetTable = resolveSqlRelationTargetTable(relation);
+
+        return `  "${columnName}" uuid references "${targetTable}"("id")${notNullClause}`;
+      }
+
       return `  "${columnName}" uuid${notNullClause}`;
     default:
       return `  "${columnName}" text${notNullClause}`;
   }
+}
+
+function resolveSqlRelationTargetTable(
+  relation: FrameworkResourceSpec["relations"][number]
+) {
+  if (relation.targetScope === "platform") {
+    const platformTargetTables: Record<string, string> = {
+      organization: "organizations",
+      project: "projects",
+      user: "users"
+    };
+    const tableName = platformTargetTables[relation.target];
+
+    if (!tableName) {
+      throw new Error(
+        `Unsupported platform relation target '${relation.target}'. Supported targets: organization, project, user.`
+      );
+    }
+
+    return tableName;
+  }
+
+  return `${toKebabCase(relation.target)}s`;
 }
 
 function createWrite(input: {

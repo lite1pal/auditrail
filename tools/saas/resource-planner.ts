@@ -693,24 +693,38 @@ function countEntriesByGroup(
 }
 
 function collectAssumptions(resource: FrameworkResourceSpec) {
+  const assumptions: string[] = [];
+
   switch (resource.ownership) {
     case "organization":
-      return [
+      assumptions.push(
         "Organization-owned resources assume organization-scoped API authorization and workspace-aware web routing."
-      ];
+      );
+      break;
     case "user":
-      return [
+      assumptions.push(
         "User-owned resources assume user-scoped API authorization and current-user web context."
-      ];
+      );
+      break;
     case "global":
-      return [
+      assumptions.push(
         "Global resources assume an explicit admin or support-only access model before runtime generation."
-      ];
+      );
+      break;
     case "none":
-      return [
+      assumptions.push(
         "Resources with no ownership assume a deliberate shared-access model and should be reviewed before runtime generation."
-      ];
+      );
+      break;
   }
+
+  if (resource.relations.length > 0) {
+    assumptions.push(
+      "Belongs-to relations currently generate UUID foreign-key fields and database references only; nested reads, join expansion, and graph traversal remain manual product work."
+    );
+  }
+
+  return assumptions;
 }
 
 function collectWarnings(input: {
@@ -761,6 +775,22 @@ function collectWarnings(input: {
       message:
         "Existing repo modules already use the resource path outside the generated-resource namespace.",
       relatedPaths: conflictingPaths
+    });
+  }
+
+  const missingGeneratedTargets = input.resource.relations
+    .filter((relation) => relation.targetScope === "generated")
+    .filter((relation) => !generatedRelationTargetExists(input.repoRoot, relation.target))
+    .map((relation) => relation.target);
+
+  if (missingGeneratedTargets.length > 0) {
+    warnings.push({
+      code: "generated-relation-target-missing",
+      message:
+        "Generated relation targets must already exist in the repo before install/typecheck. Install parent generated resources first.",
+      relatedPaths: missingGeneratedTargets.map(
+        (target) => `packages/db/src/schema/${toKebabCase(target)}.ts`
+      )
     });
   }
 
@@ -819,6 +849,17 @@ function collectManualReview(input: {
   }
 
   return manualReview;
+}
+
+function generatedRelationTargetExists(repoRoot: string, target: string) {
+  const targetPath = toKebabCase(target);
+
+  return (
+    existsSync(resolve(repoRoot, `packages/db/src/schema/${targetPath}.ts`)) &&
+    existsSync(
+      resolve(repoRoot, `packages/domain/src/generated/${targetPath}/index.ts`)
+    )
+  );
 }
 
 function resolvePlanSourcePath(input: {

@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
+import { applyResourceFromFile } from "../resource-apply.js";
 import { executeSaasCli } from "../cli.js";
 import { generateResourceFromFile } from "../resource-generator.js";
 import { createResourcePlanFromFile } from "../resource-planner.js";
@@ -259,6 +260,114 @@ describe("saas resource generator", () => {
     expect(postgresRepo).toContain("db.select().from(customerTable)");
     expect(postgresRepo).toContain("db.update(customerTable)");
     expect(postgresRepo).not.toContain("TODO: implement customer");
+  });
+
+  it("renders platform belongs-to relations as foreign keys in schema and migrations", () => {
+    const repoRoot = createRepo(createdRoots, {
+      "specs/task.json": resourceSpecJson({
+        fields: [
+          { name: "title", required: true, type: "string" }
+        ],
+        label: "Task",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "project",
+            required: true,
+            target: "project",
+            targetScope: "platform"
+          },
+          {
+            kind: "belongs-to",
+            name: "assignee",
+            required: false,
+            target: "user",
+            targetScope: "platform"
+          }
+        ],
+        resource: "task"
+      })
+    });
+
+    generateResourceFromFile({
+      outputPath: ".generated/task-preview",
+      repoRoot,
+      specPath: "specs/task.json"
+    });
+    applyResourceFromFile({
+      force: true,
+      repoRoot,
+      specPath: "specs/task.json",
+      targetPath: ".generated/task-applied"
+    });
+
+    const dbSchema = readGenerated(
+      repoRoot,
+      ".generated/task-preview/packages/db/src/schema/task.ts"
+    );
+    const domainIndex = readGenerated(
+      repoRoot,
+      ".generated/task-preview/packages/domain/src/generated/task/index.ts"
+    );
+    const migration = readGenerated(
+      repoRoot,
+      ".generated/task-applied/packages/db/src/migrations/0000_task.sql"
+    );
+
+    expect(dbSchema).toContain('import { organizations, projects, users } from "./identity.js";');
+    expect(dbSchema).toContain(
+      'projectId: uuid("project_id").notNull().references(() => projects.id),'
+    );
+    expect(dbSchema).toContain(
+      'assigneeId: uuid("assignee_id").references(() => users.id),'
+    );
+    expect(dbSchema).toContain(
+      'index("tasks_project_id_idx").on(table.projectId)'
+    );
+    expect(domainIndex).toContain("projectId: z.string().uuid()");
+    expect(domainIndex).toContain("assigneeId: z.string().uuid().optional()");
+    expect(migration).toContain('"project_id" uuid references "projects"("id") not null');
+    expect(migration).toContain('"assignee_id" uuid references "users"("id")');
+  });
+
+  it("renders generated-resource belongs-to targets with local schema imports", () => {
+    const repoRoot = createRepo(createdRoots, {
+      "specs/comment.json": resourceSpecJson({
+        fields: [
+          { name: "body", required: true, type: "text" }
+        ],
+        label: "Comment",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "task",
+            required: true,
+            target: "task"
+          }
+        ],
+        resource: "comment"
+      }),
+      "packages/db/src/schema/task.ts": "export const taskTable = { id: 'id' };\n",
+      "packages/domain/src/generated/task/index.ts": "export const taskDomain = true;\n"
+    });
+
+    generateResourceFromFile({
+      outputPath: ".generated/comment-preview",
+      repoRoot,
+      specPath: "specs/comment.json"
+    });
+
+    const dbSchema = readGenerated(
+      repoRoot,
+      ".generated/comment-preview/packages/db/src/schema/comment.ts"
+    );
+
+    expect(dbSchema).toContain('import { taskTable } from "./task.js";');
+    expect(dbSchema).toContain(
+      'taskId: uuid("task_id").notNull().references(() => taskTable.id),'
+    );
   });
 });
 

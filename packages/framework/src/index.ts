@@ -44,6 +44,18 @@ export const frameworkFieldTypes = [
 
 export type FrameworkFieldType = (typeof frameworkFieldTypes)[number];
 
+export const frameworkRelationKinds = ["belongs-to"] as const;
+
+export type FrameworkRelationKind = (typeof frameworkRelationKinds)[number];
+
+export const frameworkRelationTargetScopes = [
+  "generated",
+  "platform"
+] as const;
+
+export type FrameworkRelationTargetScope =
+  (typeof frameworkRelationTargetScopes)[number];
+
 export const frameworkCrudFlags = [
   "list",
   "create",
@@ -134,6 +146,21 @@ export interface FrameworkFieldDefinition {
   unique?: boolean;
 }
 
+export interface FrameworkRelationDefinition {
+  field: string;
+  hidden?: boolean;
+  kind: FrameworkRelationKind;
+  label?: string;
+  name: string;
+  readonly?: boolean;
+  required: boolean;
+  searchable?: boolean;
+  sortable?: boolean;
+  target: string;
+  targetScope: FrameworkRelationTargetScope;
+  unique?: boolean;
+}
+
 export interface FrameworkCrudDefinition {
   enabledOperations: readonly FrameworkCrudFlag[];
   routeBasePath?: string;
@@ -219,6 +246,12 @@ export const frameworkModuleKindSchema = z.enum(frameworkModuleKinds);
 export const frameworkOwnershipModeSchema = z.enum(frameworkOwnershipModes);
 
 export const frameworkFieldTypeSchema = z.enum(frameworkFieldTypes);
+
+export const frameworkRelationKindSchema = z.enum(frameworkRelationKinds);
+
+export const frameworkRelationTargetScopeSchema = z.enum(
+  frameworkRelationTargetScopes
+);
 
 export const frameworkCrudFlagSchema = z.enum(frameworkCrudFlags);
 
@@ -442,6 +475,38 @@ export const frameworkResourceFieldSpecSchema = z
     validateFieldDefaultValue(value, context);
   });
 
+export const frameworkResourceRelationSpecSchema = z
+  .object({
+    field: frameworkFieldNameSchema.optional(),
+    hidden: z.boolean().optional(),
+    kind: frameworkRelationKindSchema,
+    label: nonEmptyStringSchema.optional(),
+    name: frameworkFieldNameSchema,
+    readonly: z.boolean().optional(),
+    required: z.boolean().optional(),
+    searchable: z.boolean().optional(),
+    sortable: z.boolean().optional(),
+    target: z
+      .string()
+      .trim()
+      .regex(
+        resourceNamePattern,
+        "relation targets must be lower camelCase or lowercase kebab-case"
+      ),
+    targetScope: frameworkRelationTargetScopeSchema.optional(),
+    unique: z.boolean().optional()
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.field && value.field === "organizationId") {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "relation fields cannot shadow organizationId",
+        path: ["field"]
+      });
+    }
+  });
+
 export const frameworkResourceCrudSpecSchema = z
   .object({
     create: z.boolean().optional(),
@@ -546,6 +611,7 @@ export const frameworkResourceSpecInputSchema = z
     ownership: frameworkOwnershipModeSchema,
     permissions: frameworkResourcePermissionsSpecSchema.optional(),
     pluralLabel: nonEmptyStringSchema.optional(),
+    relations: z.array(frameworkResourceRelationSpecSchema).optional(),
     resource: z
       .string()
       .trim()
@@ -567,6 +633,14 @@ export const frameworkResourceSpecInputSchema = z
     }
 
     const duplicateFields = findDuplicates(value.fields.map((field) => field.name));
+    const duplicateRelationNames = findDuplicates(
+      (value.relations ?? []).map((relation) => relation.name)
+    );
+    const duplicateRelationFields = findDuplicates(
+      (value.relations ?? []).map((relation) =>
+        relation.field ?? defaultRelationFieldName(relation.name)
+      )
+    );
 
     if (duplicateFields.length > 0) {
       context.addIssue({
@@ -576,9 +650,44 @@ export const frameworkResourceSpecInputSchema = z
       });
     }
 
+    if (duplicateRelationNames.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `relation names must be unique: ${duplicateRelationNames.join(", ")}`,
+        path: ["relations"]
+      });
+    }
+
+    if (duplicateRelationFields.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `relation fields must be unique: ${duplicateRelationFields.join(", ")}`,
+        path: ["relations"]
+      });
+    }
+
+    for (const relation of value.relations ?? []) {
+      const relationField = relation.field ?? defaultRelationFieldName(relation.name);
+
+      if (value.fields.some((field) => field.name === relationField)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `relation field ${relationField} conflicts with an explicitly declared field`,
+          path: ["relations"]
+        });
+      }
+    }
+
+    const availableFieldNames = new Set([
+      ...value.fields.map((field) => field.name),
+      ...(value.relations ?? []).map((relation) =>
+        relation.field ?? defaultRelationFieldName(relation.name)
+      )
+    ]);
+
     for (const [index, resourceIndex] of (value.indexes ?? []).entries()) {
       for (const fieldName of resourceIndex.fields) {
-        if (!value.fields.some((field) => field.name === fieldName)) {
+        if (!availableFieldNames.has(fieldName)) {
           context.addIssue({
             code: z.ZodIssueCode.custom,
             message: `index references unknown field ${fieldName}`,
@@ -589,7 +698,7 @@ export const frameworkResourceSpecInputSchema = z
     }
 
     for (const fieldName of value.api?.filters ?? []) {
-      if (!value.fields.some((field) => field.name === fieldName)) {
+      if (!availableFieldNames.has(fieldName)) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           message: `API filter references unknown field ${fieldName}`,
@@ -601,6 +710,9 @@ export const frameworkResourceSpecInputSchema = z
 
 export type FrameworkResourceFieldSpec = z.infer<
   typeof frameworkResourceFieldSpecSchema
+>;
+export type FrameworkResourceRelationSpec = z.infer<
+  typeof frameworkResourceRelationSpecSchema
 >;
 export type FrameworkResourceCrudSpec = z.infer<
   typeof frameworkResourceCrudSpecSchema
@@ -638,6 +750,29 @@ const normalizedFrameworkResourceFieldSpecSchema = z
     type: frameworkFieldTypeSchema,
     unique: z.boolean(),
     values: z.array(nonEmptyStringSchema).min(1).optional()
+  })
+  .strict();
+
+const normalizedFrameworkResourceRelationSpecSchema = z
+  .object({
+    field: frameworkFieldNameSchema,
+    hidden: z.boolean(),
+    kind: frameworkRelationKindSchema,
+    label: nonEmptyStringSchema.optional(),
+    name: frameworkFieldNameSchema,
+    readonly: z.boolean(),
+    required: z.boolean(),
+    searchable: z.boolean(),
+    sortable: z.boolean(),
+    target: z
+      .string()
+      .trim()
+      .regex(
+        resourceNamePattern,
+        "relation targets must be lower camelCase or lowercase kebab-case"
+      ),
+    targetScope: frameworkRelationTargetScopeSchema,
+    unique: z.boolean()
   })
   .strict();
 
@@ -747,6 +882,7 @@ export const normalizedFrameworkResourceSpecSchema = z
     ownership: frameworkOwnershipModeSchema,
     permissions: frameworkResourcePermissionsSpecSchema,
     pluralLabel: nonEmptyStringSchema,
+    relations: z.array(normalizedFrameworkResourceRelationSpecSchema),
     resource: z
       .string()
       .trim()
@@ -768,6 +904,12 @@ export const normalizedFrameworkResourceSpecSchema = z
     }
 
     const duplicateFields = findDuplicates(value.fields.map((field) => field.name));
+    const duplicateRelationNames = findDuplicates(
+      value.relations.map((relation) => relation.name)
+    );
+    const duplicateRelationFields = findDuplicates(
+      value.relations.map((relation) => relation.field)
+    );
 
     if (duplicateFields.length > 0) {
       context.addIssue({
@@ -775,6 +917,32 @@ export const normalizedFrameworkResourceSpecSchema = z
         message: `field names must be unique: ${duplicateFields.join(", ")}`,
         path: ["fields"]
       });
+    }
+
+    if (duplicateRelationNames.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `relation names must be unique: ${duplicateRelationNames.join(", ")}`,
+        path: ["relations"]
+      });
+    }
+
+    if (duplicateRelationFields.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `relation fields must be unique: ${duplicateRelationFields.join(", ")}`,
+        path: ["relations"]
+      });
+    }
+
+    for (const relation of value.relations) {
+      if (!value.fields.some((field) => field.name === relation.field)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `relation field ${relation.field} is missing from normalized fields`,
+          path: ["relations"]
+        });
+      }
     }
 
     for (const [index, resourceIndex] of value.indexes.entries()) {
@@ -825,6 +993,29 @@ export function normalizeFrameworkResourceSpec(
     sortable: field.sortable ?? false,
     unique: field.unique ?? false
   }));
+  const relations = (input.relations ?? []).map((relation) => ({
+    ...relation,
+    field: relation.field ?? defaultRelationFieldName(relation.name),
+    hidden: relation.hidden ?? false,
+    readonly: relation.readonly ?? false,
+    required: relation.required ?? false,
+    searchable: relation.searchable ?? false,
+    sortable: relation.sortable ?? false,
+    targetScope: relation.targetScope ?? "generated",
+    unique: relation.unique ?? false
+  }));
+  const relationFields = relations.map((relation) => ({
+    description: `Reference to ${relation.label ?? toTitleCase(relation.name)}`,
+    hidden: relation.hidden,
+    label: relation.label,
+    name: relation.field,
+    readonly: relation.readonly,
+    required: relation.required,
+    searchable: relation.searchable,
+    sortable: relation.sortable,
+    type: "uuid" as const,
+    unique: relation.unique
+  }));
   const ui = {
     createPage: input.ui?.createPage ?? crud.create,
     detailPage: input.ui?.detailPage ?? crud.read,
@@ -846,22 +1037,28 @@ export function normalizeFrameworkResourceSpec(
     },
     crud,
     description: input.description,
-    fields,
+    fields: [...fields, ...relationFields],
     indexes: input.indexes ?? [],
     label: input.label,
     ownership: input.ownership,
     permissions: input.permissions ?? {},
     pluralLabel,
+    relations,
     resource: input.resource,
     timestamps: normalizeTimestamps(input.timestamps),
     ui
   });
 }
 
-export const frameworkResourceSpecSchema = z.preprocess(
-  (value) => normalizeFrameworkResourceSpec(frameworkResourceSpecInputSchema.parse(value)),
-  normalizedFrameworkResourceSpecSchema
-);
+export const frameworkResourceSpecSchema = z.preprocess((value) => {
+  const normalized = normalizedFrameworkResourceSpecSchema.safeParse(value);
+
+  if (normalized.success) {
+    return normalized.data;
+  }
+
+  return normalizeFrameworkResourceSpec(frameworkResourceSpecInputSchema.parse(value));
+}, normalizedFrameworkResourceSpecSchema);
 
 export const frameworkGeneratedFilePlanSchema = z.object({
   action: frameworkGeneratedFileActionSchema,
@@ -918,6 +1115,10 @@ function findDuplicates(values: readonly string[]) {
   return [...duplicates];
 }
 
+function defaultRelationFieldName(name: string) {
+  return `${name}Id`;
+}
+
 function isReservedResourceName(resourceName: string) {
   const normalizedName = normalizeReservedName(resourceName);
 
@@ -935,6 +1136,14 @@ function toKebabCase(value: string) {
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .replace(/_/g, "-")
     .toLowerCase();
+}
+
+function toTitleCase(value: string) {
+  return toKebabCase(value)
+    .split("-")
+    .filter(Boolean)
+    .map((segment) => segment[0]?.toUpperCase() + segment.slice(1))
+    .join(" ");
 }
 
 function pluralizeLabel(label: string) {

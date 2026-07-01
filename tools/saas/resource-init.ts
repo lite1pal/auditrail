@@ -34,6 +34,7 @@ export function initializeResourceSpec(input: {
   ownership?: string;
   pluralLabel?: string;
   publicApi?: boolean;
+  relationSpecs?: readonly string[];
   repoRoot: string;
   resourceName: string;
   timestamps?: boolean;
@@ -69,6 +70,9 @@ export function initializeResourceSpec(input: {
     label,
     ownership: ownership as FrameworkResourceSpecInput["ownership"],
     pluralLabel: input.pluralLabel?.trim(),
+    relations: (input.relationSpecs ?? []).map((relationSpec) =>
+      parseRelationSpec(relationSpec)
+    ),
     resource: resourceName,
     timestamps: input.timestamps ?? true,
     ui: {
@@ -290,6 +294,100 @@ function parseFieldSpec(spec: string): FrameworkResourceSpecInput["fields"][numb
   }
 
   return field;
+}
+
+function parseRelationSpec(
+  spec: string
+): NonNullable<FrameworkResourceSpecInput["relations"]>[number] {
+  const trimmed = spec.trim();
+
+  if (trimmed.length === 0) {
+    throw new Error("Relation specs cannot be empty.");
+  }
+
+  const segments = trimmed.split(":");
+  const [name, kind, target, ...modifiers] = segments;
+
+  if (!name || !kind || !target) {
+    throw new Error(
+      `Invalid relation spec '${spec}'. Expected <name>:<kind>:<target>[:modifier...].`
+    );
+  }
+
+  if (kind !== "belongs-to") {
+    throw new Error(
+      `Unsupported relation kind '${kind}' in '${spec}'. Supported values: belongs-to.`
+    );
+  }
+
+  const relation: NonNullable<FrameworkResourceSpecInput["relations"]>[number] = {
+    kind: "belongs-to",
+    name,
+    target
+  };
+
+  for (const modifier of modifiers) {
+    if (modifier === "required") {
+      relation.required = true;
+      continue;
+    }
+
+    if (modifier === "optional") {
+      relation.required = false;
+      continue;
+    }
+
+    if (modifier === "unique") {
+      relation.unique = true;
+      continue;
+    }
+
+    if (modifier === "searchable") {
+      relation.searchable = true;
+      continue;
+    }
+
+    if (modifier === "sortable") {
+      relation.sortable = true;
+      continue;
+    }
+
+    if (modifier === "readonly") {
+      relation.readonly = true;
+      continue;
+    }
+
+    if (modifier === "hidden") {
+      relation.hidden = true;
+      continue;
+    }
+
+    if (modifier === "platform") {
+      relation.targetScope = "platform";
+      continue;
+    }
+
+    if (modifier === "generated") {
+      relation.targetScope = "generated";
+      continue;
+    }
+
+    if (modifier.startsWith("field=")) {
+      relation.field = modifier.slice("field=".length).trim();
+      continue;
+    }
+
+    if (modifier.startsWith("label=")) {
+      relation.label = modifier.slice("label=".length).trim();
+      continue;
+    }
+
+    throw new Error(
+      `Unsupported relation modifier '${modifier}' in '${spec}'.`
+    );
+  }
+
+  return relation;
 }
 
 function parseFieldDefaultValue(input: {
