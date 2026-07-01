@@ -69,10 +69,14 @@ The live reference stack in this repo is still AuditTrail:
 - platform features such as auth, organizations, API keys, billing, webhooks,
   and onboarding
 - an AuditTrail-specific event ingest and investigation product layered on top
+- a minimal `projects` product module that proves the shared manifest and
+  runtime seams can host a second product without patching bootstrap code per
+  organization route or shell screen
 
-This means the repo is not yet a true multi-product runtime host. It is a
-framework codebase plus a reference product proving the platform and generator
-seams.
+This means the repo now has a real multi-product registration proof, but not a
+full second production product yet. It is still a framework codebase plus a
+reference product, with a deliberately small second product module proving the
+platform and generator seams.
 
 ## Local Setup
 
@@ -315,12 +319,17 @@ For low-context agent work, start with:
 See [docs/06-deployment.md](/Users/denistarasenko/Work/Projects/auditrail/docs/06-deployment.md:1)
 for the current deployed stack and required env vars.
 
-The current deployment reality is still the AuditTrail reference product:
+The current deployment reality is still centered on the AuditTrail reference
+product:
 
 - `web`
 - `api`
 - `worker`
 - `postgres`
+
+The repo also carries the minimal `projects` product proof in the same
+runtime, but hosted operations and release gates are still anchored on the
+AuditTrail flow.
 
 The API and worker containers still use source-runtime startup commands today.
 Compiled-runtime hardening remains a later framework slice.

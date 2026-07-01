@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
 import {
-  auditTrailProductModule,
-  isAuditTrailOnboardingStepId
-} from "@auditrail/domain/audit-events";
-import { createProductManifestRegistry } from "@auditrail/domain/product";
+  createProductManifestRegistry,
+  type RegisteredProductModule
+} from "@auditrail/domain/product";
+import { auditTrailProductModule } from "@auditrail/domain/audit-events";
+import { projectsProductModule } from "@auditrail/domain/projects";
 
 import type {
   OnboardingScreenCopy,
@@ -12,42 +13,6 @@ import type {
 } from "@/src/features/onboarding/domain/onboarding-screen";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import type { WorkspaceSettingsProductCopy } from "@/src/features/organizations/components/workspace-settings-screen.types";
-
-interface WebProductModule {
-  buildOnboardingStepViews(input: {
-    activeOnboarding: CurrentUserResponse["memberships"][number]["onboarding"];
-    activeOrganizationId: string;
-    activeProjectId?: string;
-  }): OnboardingStepView[];
-  getChrome(): {
-    errorHeading: string;
-    loadingLabel: string;
-    metadataDescription: string;
-    metadataTitle: string;
-  };
-  getOnboardingScreenCopy(): OnboardingScreenCopy;
-  getRuntimeRegistrations(surface: "api" | "web" | "worker"): ReadonlyArray<{
-    id: string;
-    surface: "api" | "web" | "worker";
-    target: string;
-  }>;
-  getShellProductConfig(input: {
-    activeOrganizationId?: string;
-    activeProjectId?: string;
-  }): {
-    navItems: readonly {
-      href: string;
-      id: string;
-      label: string;
-    }[];
-    productName: string;
-  };
-  getWorkspaceSettingsCopy(): WorkspaceSettingsProductCopy;
-  manifest: {
-    id: string;
-    name: string;
-  };
-}
 
 export interface ShellProductEntry {
   href: string;
@@ -67,10 +32,13 @@ export interface ShellProductConfig {
   productName: string;
 }
 
-const registeredProductModules = [auditTrailProductModule] as const satisfies readonly WebProductModule[];
+const registeredProductModules = [
+  auditTrailProductModule,
+  projectsProductModule
+] as const satisfies readonly RegisteredProductModule[];
 
 export function createWebProductRuntime(
-  productModules: readonly WebProductModule[] = registeredProductModules
+  productModules: readonly RegisteredProductModule[] = registeredProductModules
 ) {
   const productRegistry = createProductManifestRegistry(
     productModules.map((productModule) => productModule.manifest)
@@ -184,16 +152,16 @@ const webProductRuntime = createWebProductRuntime();
 
 export const currentProductId = webProductRuntime.currentProductId;
 
-export function getProductMetadata() {
-  return webProductRuntime.getProductMetadata();
+export function getProductMetadata(productId?: string) {
+  return webProductRuntime.getProductMetadata(productId);
 }
 
-export function getProductLoadingLabel() {
-  return webProductRuntime.getProductLoadingLabel();
+export function getProductLoadingLabel(productId?: string) {
+  return webProductRuntime.getProductLoadingLabel(productId);
 }
 
-export function getProductErrorHeading() {
-  return webProductRuntime.getProductErrorHeading();
+export function getProductErrorHeading(productId?: string) {
+  return webProductRuntime.getProductErrorHeading(productId);
 }
 
 export function getShellProductConfig(input: {
@@ -205,31 +173,25 @@ export function getShellProductConfig(input: {
   return webProductRuntime.getShellProductConfig(input);
 }
 
-export function getOnboardingScreenCopy() {
-  return webProductRuntime.getOnboardingScreenCopy();
+export function getOnboardingScreenCopy(productId?: string) {
+  return webProductRuntime.getOnboardingScreenCopy(productId);
 }
 
 export function buildOnboardingStepViews(input: {
   activeOnboarding: CurrentUserResponse["memberships"][number]["onboarding"];
   activeOrganizationId: string;
   activeProjectId?: string;
+  productId?: string;
 }): OnboardingStepView[] {
-  return auditTrailProductModule.buildOnboardingStepViews({
-    ...input,
-    activeOnboarding: {
-      steps: input.activeOnboarding.steps.map((step) => {
-        if (!isAuditTrailOnboardingStepId(step.id)) {
-          throw new Error(`unsupported_audit_onboarding_step:${step.id}`);
-        }
+  const productModule = webProductRuntime.requireProductModule(
+    input.productId ?? currentProductId
+  );
 
-        return step;
-      })
-    }
-  });
+  return productModule.buildOnboardingStepViews(input);
 }
 
-export function getWorkspaceSettingsProductCopy() {
-  return webProductRuntime.getWorkspaceSettingsProductCopy();
+export function getWorkspaceSettingsProductCopy(productId?: string) {
+  return webProductRuntime.getWorkspaceSettingsProductCopy(productId);
 }
 
 export function hasCurrentProductInstalled(

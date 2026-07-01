@@ -36,6 +36,10 @@
       "types": "./src/product/index.ts",
       "import": "./src/product/index.ts"
     },
+    "./projects": {
+      "types": "./src/projects/index.ts",
+      "import": "./src/projects/index.ts"
+    },
     "./generated/customer": {
       "import": "./src/generated/customer/index.ts",
       "types": "./src/generated/customer/index.ts"

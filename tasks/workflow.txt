@@ -23,32 +23,6 @@ This file tracks task-system and agent-workflow work items.
     - The repo ignores both directories going forward
     - The removal is reflected in the task tracker
 
-- [ ] T-103 Scaffold a second product module from the manifest/runtime seams
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-07-01
-  completed:
-  blocked_reason:
-  files:
-    - packages/domain/src/product/*
-    - packages/framework/src/*
-    - apps/api/src/product-module.ts
-    - apps/web/app/product-module.ts
-    - apps/web/src/components/layout/*
-    - README.md
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/05-next-steps.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - The framework can register a second concrete product module without patching shared bootstrap code by hand
-    - Product-owned identity, onboarding, route registration, and chrome metadata follow the existing manifest contract
-    - The second product module remains intentionally minimal but proves the platform can host a materially different product than AuditTrail
-
 - [ ] T-104 Prove a minimal project-manager product vertical slice
   status: ready
   priority: high
@@ -78,6 +52,36 @@ This file tracks task-system and agent-workflow work items.
     - The final docs describe what was framework-generated, what was still manual, and what gaps remain before broader production reuse
 
 ## Done
+
+- [x] T-103 Scaffold a second product module from the manifest/runtime seams
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: added shared registered-product runtime contracts so API and web composition can iterate concrete product modules instead of assuming AuditTrail only
+    - 2026-07-01: added a minimal `projects` product proof with manifest-owned chrome, settings copy, runtime registrations, a workspace summary API route, and a web entrypoint
+    - 2026-07-01: updated extraction metadata and scaffold smoke coverage so the second-product proof does not pollute default scaffold output while `pnpm test:saas` stays green
+  files:
+    - packages/domain/src/product/*
+    - packages/framework/src/*
+    - apps/api/src/product-module.ts
+    - apps/web/app/product-module.ts
+    - apps/web/src/components/layout/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The framework can register a second concrete product module without patching shared bootstrap code by hand
+    - Product-owned identity, onboarding, route registration, and chrome metadata follow the existing manifest contract
+    - The second product module remains intentionally minimal but proves the platform can host a materially different product than AuditTrail
 
 - [x] T-102 Add relation support to generated resources
   status: done

@@ -1028,6 +1028,50 @@ const generatedProofExcludeEntries = [
       "Do not copy proof-resource schema into extracted boilerplate by default."
     ],
     requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/api/src/modules/projects/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "exclude",
+    reason: "The Projects API module is the committed second-product proof slice and should not become default scaffold runtime code.",
+    notes: [
+      "Keep the runtime registration seam, but do not preinstall this proof product in extracted scaffolds."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/web/app/projects/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "exclude",
+    reason: "The Projects app routes prove multi-product registration and should not ship as default scaffold pages.",
+    notes: [
+      "Downstream products should add their own web entrypoints deliberately."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "apps/web/src/features/projects/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "exclude",
+    reason: "The Projects feature UI is proof output for the second-product seam, not baseline scaffold UI.",
+    notes: [
+      "Keep proof-product UI out of the extracted framework default."
+    ],
+    requiredForMinimalScaffold: false
+  }),
+  entry({
+    path: "packages/domain/src/projects/**",
+    pathKind: "glob",
+    category: "platform-extension",
+    extractionAction: "exclude",
+    reason: "The Projects domain package proves multi-product registration and should remain opt-in example product code.",
+    notes: [
+      "Preserve the shared product contracts, but do not copy this example product into boilerplate."
+    ],
+    requiredForMinimalScaffold: false
   })
 ] as const satisfies readonly ExtractionManifestEntry[];
 

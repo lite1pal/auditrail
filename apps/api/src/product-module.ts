@@ -1,27 +1,46 @@
 import type { FastifyInstance } from "fastify";
 
+import {
+  createProductManifestRegistry,
+  type RegisteredProductModule
+} from "@auditrail/domain/product";
 import { auditTrailProductModule } from "@auditrail/domain/audit-events";
-import { createProductManifestRegistry } from "@auditrail/domain/product";
+import { projectsProductModule } from "@auditrail/domain/projects";
 
 import {
   registerEventRoutes,
-  type EventRoutesOptions
 } from "./modules/audit-events/routes.js";
+import {
+  registerProjectsProductRoutes,
+  type ProjectsProductRoutesOptions
+} from "./modules/projects/routes.js";
 
-export interface ProductApiRouteRegistrationOptions extends EventRoutesOptions {
+export interface ProductApiRouteRegistrationOptions
+  extends Pick<ProjectsProductRoutesOptions, "platformService"> {
   prefix: string;
+  productAccess?: {
+    assertProductInstalledForOrganization(input: {
+      organizationId: string;
+      productId: string;
+    }): Promise<void>;
+  };
+  productId?: string;
+  projectAccess?: {
+    resolveTenantForUser(input: {
+      organizationId: string;
+      projectId: string;
+      userId: string;
+    }): Promise<{
+      organizationId: string;
+      projectId: string;
+    }>;
+  };
 }
 
-export interface ApiProductModule<
-  TManifest extends { id: string; name: string } = { id: string; name: string }
-> {
-  getRuntimeRegistrations(surface: "api" | "web" | "worker"): ReadonlyArray<{
-    id: string;
-    surface: "api" | "web" | "worker";
-    target: string;
-  }>;
-  manifest: TManifest;
-}
+type ApiProductModule = Pick<
+  RegisteredProductModule,
+  "getRuntimeRegistrations" | "manifest"
+>;
 
 type ProductApiRouteHandler = (
   app: FastifyInstance,
@@ -33,10 +52,16 @@ type ProductApiRouteHandler = (
 const productApiRouteHandlers: Record<string, ProductApiRouteHandler> = {
   "audit-events-routes": async (app, options) => {
     await app.register(registerEventRoutes, options);
+  },
+  "projects-routes": async (app, options) => {
+    await app.register(registerProjectsProductRoutes, options);
   }
 };
 
-const registeredProductModules = [auditTrailProductModule] as const;
+const registeredProductModules = [
+  auditTrailProductModule,
+  projectsProductModule
+] as const satisfies readonly ApiProductModule[];
 
 export function createApiProductRuntime(
   productModules: readonly ApiProductModule[] = registeredProductModules,
@@ -93,8 +118,8 @@ export function createApiProductRuntime(
           }
 
           await handler(app, {
-            ...routeOptions,
-            productId: productModule.manifest.id
+            productId: productModule.manifest.id,
+            ...routeOptions
           });
         }
       }

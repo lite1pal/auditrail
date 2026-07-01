@@ -29,13 +29,13 @@ The versioned route `/api/v1/health` is available for API consumers that want a 
 
 ## Product Composition
 
-The repo now has a manifest registry plus installed-product state for future
-multi-product composition. Product modules are still registered in the current
-application runtime, but organization context now carries which products are
-enabled so the API and web layers can fail closed when a selected organization
-does not have a given product installed. The public `GET /api` descriptor also
-reports the centrally registered product list, while the web shell derives its
-available product links from the same installed-product state.
+The repo now has a manifest registry plus installed-product state for real
+multi-product composition. Product modules are registered centrally in the
+current runtime, organization context carries which products are enabled, and
+the API plus web layers fail closed when a selected organization does not have
+the target product installed. The public `GET /api` descriptor reports the
+registered product list, while the web shell derives its available product
+links from the same installed-product state.
 
 ## Request Correlation
 
@@ -153,6 +153,7 @@ These browser-session routes use the signed-in user membership instead of a bear
 - `GET /api/v1/organizations`
 - `GET /api/v1/organizations/:organizationId/billing`
 - `GET /api/v1/organizations/:organizationId/projects`
+- `GET /api/v1/organizations/:organizationId/projects/workspace`
 - `GET /api/v1/organizations/:organizationId/projects/:projectId/webhooks`
 - `GET /api/v1/organizations/:organizationId/members`
 - `POST /api/v1/organizations`
@@ -184,8 +185,31 @@ cross-tenant response built from mismatched identifiers.
 
 Product-scoped routes add one more fail-closed rule: when the organization does
 not have the target product installed and enabled, the route should return
-`404 product_not_installed` rather than falling back to another organization or
+`403 product_not_installed` rather than falling back to another organization or
 serving product data from a globally registered module.
+
+The first explicit non-AuditTrail proof route is:
+
+- `GET /api/v1/organizations/:organizationId/projects/workspace`
+
+It requires a browser session, verifies that the signed-in user can access the
+organization, verifies that the `projects` product is installed for that
+organization, and returns a minimal workspace summary:
+
+```json
+{
+  "organizationId": "org-1",
+  "productId": "projects",
+  "projectCount": 1,
+  "projects": [
+    {
+      "id": "project-1",
+      "name": "Roadmap",
+      "organizationId": "org-1"
+    }
+  ]
+}
+```
 
 ## `GET /api/v1/me`
 
@@ -207,6 +231,10 @@ Each membership now includes the installed-product set for that organization:
       "installedProducts": [
         {
           "productId": "audit-events",
+          "enabled": true
+        },
+        {
+          "productId": "projects",
           "enabled": true
         }
       ],
