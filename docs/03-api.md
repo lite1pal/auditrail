@@ -1049,6 +1049,7 @@ organization-owned resources:
 - `POST /api/v1/organizations/:organizationId/todos`
 - `GET /api/v1/organizations/:organizationId/todos/:id`
 - `PATCH /api/v1/organizations/:organizationId/todos/:id`
+- `DELETE /api/v1/organizations/:organizationId/todos/:id`
 
 Current contract:
 
@@ -1060,9 +1061,11 @@ Current contract:
 - `GET /customers` returns `{ "items": CustomerRecord[] }`
 - `GET /todos` returns `{ "items": TodoRecord[] }`
 - `POST`, `GET /:id`, and `PATCH /:id` return one `CustomerRecord`
+- `DELETE /todos/:id` returns `204` on success
 - the todo product-owned web proof route `/todo/todos` loads that same
-  installed API contract through the generated server client and server action
-- `GET /:id` and `PATCH /:id` return `404 not_found` when the record is absent
+  installed API contract through generated server clients and server actions
+- `GET /:id`, `PATCH /:id`, and `DELETE /:id` return `404 not_found` when the
+  record is absent
 - generated belongs-to relations remain scalar UUID fields in request and
   response bodies; the generated API does not expand related resources
 

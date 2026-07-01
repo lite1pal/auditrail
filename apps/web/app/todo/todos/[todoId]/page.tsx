@@ -2,7 +2,7 @@ import { AppShell } from "@/src/components/layout/app-shell";
 import { requireCurrentUser } from "@/src/features/auth/server/auth-server";
 
 import { getShellProductConfig } from "@/app/product-module";
-import { loadTodoWorkspaceDetailPage } from "@/src/features/todo-product/server/todo-workspace";
+import { deleteTodoWorkspaceAction, loadTodoWorkspaceDetailPage } from "@/src/features/todo-product/server/todo-workspace";
 
 interface ResourceDetailPageProps {
   params: Promise<{ todoId: string }>;
@@ -58,6 +58,9 @@ export default async function ResourceDetailPage({
             </div>
           </div>
         </header>
+        {data.feedback ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>
+        ) : null}
         {data.item ? (
           <section className="grid gap-4 rounded-xl border border-[var(--border)] bg-[var(--panel)] px-4 py-4">
             <div className="grid gap-1">
@@ -76,6 +79,12 @@ export default async function ResourceDetailPage({
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Due At</p>
               <p>{data.item?.dueAt?.toString() ?? "Not set"}</p>
             </div>
+            <form action={deleteTodoWorkspaceAction} className="pt-2">
+              <input name="todoId" type="hidden" value={data.item.id} />
+              <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />
+              <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />
+              <button className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium" type="submit">Delete Todo</button>
+            </form>
           </section>
         ) : (
           <section className="rounded-xl border border-dashed border-[var(--border)] px-4 py-4 text-sm text-[var(--muted)]">

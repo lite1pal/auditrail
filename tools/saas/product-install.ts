@@ -652,6 +652,7 @@ function renderProductResourceServerFile(
     "",
     'import { revalidatePath } from "next/cache";',
     'import { redirect } from "next/navigation";',
+    'import { ZodError } from "zod";',
     "",
     `import { create${pascalResource}InputSchema, update${pascalResource}InputSchema } from "@auditrail/domain/generated/${toKebabCase(resourceId)}";`,
     "",
@@ -685,6 +686,8 @@ function renderProductResourceServerFile(
     "    : [];",
     "",
     "  return {",
+    "    draftValues: readDraftValues(searchParams),",
+    "    feedback: readFeedback(searchParams),",
     "    items,",
     "    workspace",
     "  };",
@@ -717,6 +720,8 @@ function renderProductResourceServerFile(
     "    : null;",
     "",
     "  return {",
+    "    draftValues: readDraftValues(input.searchParams),",
+    "    feedback: readFeedback(input.searchParams),",
     "    item,",
     "    workspace",
     "  };",
@@ -728,20 +733,29 @@ function renderProductResourceServerFile(
     '  const organizationId = String(formData.get("organizationId") ?? "");',
     '  const projectId = coerceString(formData.get("projectId"));',
     "",
-    `  const payload = create${pascalResource}InputSchema.parse({`,
+    `  try {`,
+    `    const payload = create${pascalResource}InputSchema.parse({`,
     ...renderCreateActionObjectLines(resourceEntry.resource).map(
-      (line: string) => `    ${line}`
+      (line: string) => `      ${line}`
     ),
-    "  });",
+    "    });",
     "",
-    "  await createResourceClient(createServerApiClient()).create(",
-    "    organizationId,",
-    "    payload",
-    "  );",
+    "    await createResourceClient(createServerApiClient()).create(",
+    "      organizationId,",
+    "      payload",
+    "    );",
     "",
-    `  const nextPath = ${JSON.stringify(resourceEntry.listPath)} + buildWorkspaceSuffix(organizationId, projectId);`,
-    "  revalidatePath(nextPath);",
-    "  redirect(nextPath as never);",
+    `    const nextPath = ${JSON.stringify(resourceEntry.listPath)} + buildWorkspaceSuffix(organizationId, projectId);`,
+    "    revalidatePath(nextPath);",
+    "    redirect(nextPath as never);",
+    "  } catch (error) {",
+    "    redirect(",
+    `      buildFailurePath(${JSON.stringify(resourceEntry.listPath)}, organizationId, projectId, {`,
+    "        draftValues: buildDraftValues(formData),",
+    '        feedback: getFeedbackMessage(error, "Unable to create this record right now.")',
+    "      }) as never",
+    "    );",
+    "  }",
     "}",
     "",
     `export async function update${pascalResource}WorkspaceAction(formData: FormData) {`,
@@ -751,24 +765,62 @@ function renderProductResourceServerFile(
     '  const organizationId = String(formData.get("organizationId") ?? "");',
     '  const projectId = coerceString(formData.get("projectId"));',
     "",
-    `  const payload = update${pascalResource}InputSchema.parse({`,
+    `  try {`,
+    `    const payload = update${pascalResource}InputSchema.parse({`,
     ...renderCreateActionObjectLines(resourceEntry.resource).map(
-      (line: string) => `    ${line}`
+      (line: string) => `      ${line}`
     ),
-    "  });",
+    "    });",
     "",
-    "  await createResourceClient(createServerApiClient()).update(",
-    "    organizationId,",
-    `    ${paramName},`,
-    "    payload",
-    "  );",
+    "    await createResourceClient(createServerApiClient()).update(",
+    "      organizationId,",
+    `      ${paramName},`,
+    "      payload",
+    "    );",
     "",
-    `  const nextPath = buildResourcePath(${JSON.stringify(detailPath)}, ${paramName}, organizationId, projectId);`,
-    `  const listPath = ${JSON.stringify(resourceEntry.listPath)} + buildWorkspaceSuffix(organizationId, projectId);`,
-    "  revalidatePath(nextPath);",
-    "  revalidatePath(listPath);",
-    "  redirect(nextPath as never);",
+    `    const nextPath = buildResourcePath(${JSON.stringify(detailPath)}, ${paramName}, organizationId, projectId);`,
+    `    const listPath = ${JSON.stringify(resourceEntry.listPath)} + buildWorkspaceSuffix(organizationId, projectId);`,
+    "    revalidatePath(nextPath);",
+    "    revalidatePath(listPath);",
+    "    redirect(nextPath as never);",
+    "  } catch (error) {",
+    "    redirect(",
+    `      buildFailurePath(buildResourceEditPath(${JSON.stringify(detailPath)}, ${paramName}), organizationId, projectId, {`,
+    "        draftValues: buildDraftValues(formData),",
+    '        feedback: getFeedbackMessage(error, "Unable to save changes right now.")',
+    "      }) as never",
+    "    );",
+    "  }",
     "}",
+    resourceEntry.resource.crud.delete
+      ? [
+          "",
+          `export async function delete${pascalResource}WorkspaceAction(formData: FormData) {`,
+          '  "use server";',
+          "",
+          `  const ${paramName} = String(formData.get(${JSON.stringify(paramName)}) ?? "");`,
+          '  const organizationId = String(formData.get("organizationId") ?? "");',
+          '  const projectId = coerceString(formData.get("projectId"));',
+          "",
+          "  try {",
+          "    await createResourceClient(createServerApiClient()).delete(",
+          "      organizationId,",
+          `      ${paramName}`,
+          "    );",
+          "",
+          `    const listPath = ${JSON.stringify(resourceEntry.listPath)} + buildWorkspaceSuffix(organizationId, projectId);`,
+          "    revalidatePath(listPath);",
+          "    redirect(listPath as never);",
+          "  } catch (error) {",
+          "    redirect(",
+          `      buildFailurePath(buildResourcePath(${JSON.stringify(detailPath)}, ${paramName}, organizationId, projectId), organizationId, projectId, {`,
+          '        feedback: getFeedbackMessage(error, "Unable to delete this record right now.")',
+          "      }) as never",
+          "    );",
+          "  }",
+          "}"
+        ].join("\n")
+      : "",
     "",
     "function buildWorkspaceSuffix(",
     "  organizationId: string,",
@@ -792,8 +844,61 @@ function renderProductResourceServerFile(
     "  return `${basePath}/${id}${buildWorkspaceSuffix(organizationId, projectId)}`;",
     "}",
     "",
+    "function buildResourceEditPath(basePath: string, id: string) {",
+    "  return `${basePath}/${id}/edit`;",
+    "}",
+    "",
+    "function buildFailurePath(",
+    "  basePath: string,",
+    "  organizationId: string,",
+    "  projectId: string | undefined,",
+    "  input: {",
+    "    draftValues?: Record<string, string | undefined>;",
+    "    feedback: string;",
+    "  }",
+    ") {",
+    "  const query = new URLSearchParams({ organizationId });",
+    "",
+    "  if (projectId) {",
+    '    query.set("projectId", projectId);',
+    "  }",
+    "",
+    '  query.set("feedback", input.feedback);',
+    "",
+    "  for (const [key, value] of Object.entries(input.draftValues ?? {})) {",
+    "    if (value !== undefined && value.length > 0) {",
+    '      query.set(`draft_${key}`, value);',
+    "    }",
+    "  }",
+    "",
+    "  return `${basePath}?${query.toString()}`;",
+    "}",
+    "",
     "function getSearchValue(value: string | string[] | undefined) {",
     '  return Array.isArray(value) ? value[0] : value;',
+    "}",
+    "",
+    "function readFeedback(searchParams: Record<string, string | string[] | undefined>) {",
+    '  const feedback = getSearchValue(searchParams.feedback);',
+    "",
+    "  return feedback ? feedback : undefined;",
+    "}",
+    "",
+    "function readDraftValues(searchParams: Record<string, string | string[] | undefined>) {",
+    "  return compactDraftValues({",
+    ...renderDraftSearchValueLines(resourceEntry.resource).map((line) => `    ${line}`),
+    "  });",
+    "}",
+    "",
+    "function buildDraftValues(formData: FormData) {",
+    "  return {",
+    ...renderDraftFormValueLines(resourceEntry.resource).map((line) => `    ${line}`),
+    "  };",
+    "}",
+    "function compactDraftValues<T extends Record<string, unknown>>(values: T) {",
+    "  return Object.fromEntries(",
+    "    Object.entries(values).filter(([, value]) => value !== undefined)",
+    "  ) as Partial<T>;",
     "}",
     "",
     "function coerceString(value: FormDataEntryValue | null) {",
@@ -814,8 +919,24 @@ function renderProductResourceServerFile(
     "",
     "function coerceBoolean(value: FormDataEntryValue | null) {",
     '  return value === "on";',
+    "}",
+    "",
+    "function getFeedbackMessage(error: unknown, fallback: string) {",
+    "  if (error instanceof ZodError) {",
+    "    const issue = error.issues[0];",
+    "",
+    "    return issue?.message ?? fallback;",
+    "  }",
+    "",
+    "  if (error instanceof Error && error.message.length > 0) {",
+    "    return error.message;",
+    "  }",
+    "",
+    "  return fallback;",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderProductResourceListPage(
@@ -873,9 +994,12 @@ function renderProductResourceListPage(
     `          <h1 className="text-3xl font-semibold text-[var(--foreground)]">${resourceEntry.navLabel}</h1>`,
     `          <p className="max-w-2xl text-sm text-[var(--muted)]">This generated product route loads real ${resourceEntry.resource.pluralLabel.toLowerCase()} through the API seam and allows inline creation.</p>`,
     "        </header>",
-    `        <${pascalResource}Form action={create${pascalResource}WorkspaceAction} submitLabel="Create ${resourceEntry.resource.label}">`,
+    `        <${pascalResource}Form action={create${pascalResource}WorkspaceAction} defaultValues={data.draftValues} submitLabel="Create ${resourceEntry.resource.label}">`,
     '          <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />',
     '          <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />',
+    "          {data.feedback ? (",
+    '            <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>',
+    "          ) : null}",
     `        </${pascalResource}Form>`,
     `        <${pascalResource}Screen`,
     "          items={data.items}",
@@ -904,7 +1028,7 @@ function renderProductResourceDetailPage(
     'import { requireCurrentUser } from "@/src/features/auth/server/auth-server";',
     "",
     'import { getShellProductConfig } from "@/app/product-module";',
-    `import { load${pascalResource}WorkspaceDetailPage } from "@/src/features/${product.id}-product/server/${toKebabCase(
+    `import { ${resourceEntry.resource.crud.delete ? `delete${pascalResource}WorkspaceAction, ` : ""}load${pascalResource}WorkspaceDetailPage } from "@/src/features/${product.id}-product/server/${toKebabCase(
       resourceId
     )}-workspace";`,
     "",
@@ -964,9 +1088,24 @@ function renderProductResourceDetailPage(
     "            </div>",
     "          </div>",
     "        </header>",
+    "        {data.feedback ? (",
+    '          <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>',
+    "        ) : null}",
     "        {data.item ? (",
     '          <section className="grid gap-4 rounded-xl border border-[var(--border)] bg-[var(--panel)] px-4 py-4">',
     ...renderProductResourceDetailFields(resourceEntry),
+    resourceEntry.resource.crud.delete
+      ? [
+          '            <form action={delete' + pascalResource + 'WorkspaceAction} className="pt-2">',
+          `              <input name="${paramName}" type="hidden" value={data.item.id} />`,
+          '              <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />',
+          '              <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />',
+          '              <button className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium" type="submit">Delete ' +
+            resourceEntry.resource.label +
+            "</button>",
+          "            </form>"
+        ].join("\n")
+      : "",
     "          </section>",
     "        ) : (",
     '          <section className="rounded-xl border border-dashed border-[var(--border)] px-4 py-4 text-sm text-[var(--muted)]">',
@@ -1057,9 +1196,12 @@ function renderProductResourceEditPage(
     `          <h1 className="text-3xl font-semibold text-[var(--foreground)]">Edit ${resourceEntry.resource.label}</h1>`,
     `          <p className="max-w-2xl text-sm text-[var(--muted)]">Update the generated ${resourceEntry.resource.label.toLowerCase()} record through the existing API seam.</p>`,
     "        </header>",
+    "        {data.feedback ? (",
+    '          <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>',
+    "        ) : null}",
     `        <${pascalResource}Form`,
     `          action={update${pascalResource}WorkspaceAction}`,
-    "          defaultValues={data.item ?? undefined}",
+    `          defaultValues={${renderDraftPresenceExpression(resourceEntry.resource)} ? { ...(data.item ?? {}), ...data.draftValues } : data.item ?? undefined}`,
     `          submitLabel="Save ${resourceEntry.resource.label}"`,
     "        >",
     `          <input name="${paramName}" type="hidden" value={data.item?.id ?? resolvedParams.${paramName}} />`,
@@ -1104,6 +1246,52 @@ function renderFormDataAccessor(
         ? `String(formData.get(${JSON.stringify(field.name)}) ?? "")`
         : `coerceString(formData.get(${JSON.stringify(field.name)}))`;
   }
+}
+
+function renderDraftSearchValueLines(resource: GeneratedProductResource["resource"]) {
+  return resource.fields
+    .filter((field) => !field.hidden)
+    .map((field) => {
+      const queryKey = `draft_${field.name}`;
+
+      if (field.type === "boolean") {
+        return `${field.name}: getSearchValue(searchParams.${queryKey}) === "true" ? true : getSearchValue(searchParams.${queryKey}) === "false" ? false : undefined,`;
+      }
+
+      if (field.type === "enum" && field.values) {
+        return `${field.name}: ${JSON.stringify(field.values)}.includes(getSearchValue(searchParams.${queryKey}) ?? "") ? (getSearchValue(searchParams.${queryKey}) as ${field.values
+          .map((value) => JSON.stringify(value))
+          .join(" | ")}) : undefined,`;
+      }
+
+      return `${field.name}: getSearchValue(searchParams.${queryKey}) ?? undefined,`;
+    });
+}
+
+function renderDraftFormValueLines(resource: GeneratedProductResource["resource"]) {
+  return resource.fields
+    .filter((field) => !field.hidden)
+    .map((field) => {
+      if (field.type === "boolean") {
+        return `${field.name}: formData.get(${JSON.stringify(field.name)}) === "on" ? "true" : undefined,`;
+      }
+
+      if (field.type === "datetime") {
+        return `${field.name}: coerceString(formData.get(${JSON.stringify(field.name)})),`;
+      }
+
+      return `${field.name}: coerceString(formData.get(${JSON.stringify(field.name)})),`;
+    });
+}
+
+function renderDraftPresenceExpression(
+  resource: GeneratedProductResource["resource"]
+) {
+  const expressions = resource.fields
+    .filter((field) => !field.hidden)
+    .map((field) => `data.draftValues?.${field.name} !== undefined`);
+
+  return expressions.length > 0 ? expressions.join(" || ") : "false";
 }
 
 function getProductResourceParamName(resourceEntry: GeneratedProductResource) {

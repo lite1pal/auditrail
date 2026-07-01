@@ -1,11 +1,9 @@
 import type { ApiClient } from "@/src/lib/api/api-client";
 import { customerRecordSchema } from "@/src/features/customer/domain/schemas";
 import { z } from "zod";
-
 const customerListResponseSchema = z.object({
   items: z.array(customerRecordSchema)
 });
-
 export function createResourceClient(apiClient: ApiClient) {
   return {
     async create(organizationId: string, body: Record<string, unknown>) {
@@ -39,6 +37,6 @@ export function createResourceClient(apiClient: ApiClient) {
           path: `/api/v1/organizations/${organizationId}/customers/${id}` as never
         })
       );
-    }
+    },
   };
 }

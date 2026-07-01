@@ -8,6 +8,7 @@ import type { TodoRecord } from "@/src/features/todo/domain/schemas";
 import ResourcePage from "@/app/todo/todos/page";
 import {
   createTodoWorkspaceAction,
+  deleteTodoWorkspaceAction,
   loadTodoWorkspaceDetailPage,
   loadTodoWorkspacePage,
   updateTodoWorkspaceAction
@@ -73,6 +74,9 @@ vi.mock("@/src/features/todo/api/todo-client", () => ({
         items: [...records]
       };
     },
+    async delete() {
+      records.splice(0, records.length);
+    },
     async update(
       _organizationId: string,
       _id: string,
@@ -109,7 +113,7 @@ describe("generated todo product flow", () => {
     requireCurrentUserMock.mockResolvedValue(createCurrentUser());
   });
 
-  it("loads the workspace, creates a todo, opens detail, edits it, and lists the updated record", async () => {
+  it("loads the workspace, surfaces validation feedback, creates a todo, opens detail, edits it, deletes it, and returns to an empty list", async () => {
     const currentUser = createCurrentUser();
     const emptyPage = await loadTodoWorkspacePage(
       {
@@ -124,6 +128,48 @@ describe("generated todo product flow", () => {
     expect(emptyPage.workspace.activeOrganizationId).toBe("org-1");
     expect(emptyPage.workspace.activeProjectId).toBe("project-1");
     expect(emptyPage.items).toEqual([]);
+
+    const invalidFormData = new FormData();
+    invalidFormData.set("organizationId", "org-1");
+    invalidFormData.set("projectId", "project-1");
+    invalidFormData.set("title", "");
+    invalidFormData.set("details", "Create and list one todo through the generated page");
+    invalidFormData.set("status", "todo");
+    invalidFormData.set("dueAt", "2026-07-01T12:30");
+
+    await createTodoWorkspaceAction(invalidFormData);
+
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/todo/todos?organizationId=org-1&projectId=project-1&feedback=Too+small%3A+expected+string+to+have+%3E%3D1+characters&draft_details=Create+and+list+one+todo+through+the+generated+page&draft_status=todo&draft_dueAt=2026-07-01T12%3A30"
+    );
+
+    const invalidPage = await loadTodoWorkspacePage(
+      {
+        draft_details: "Create and list one todo through the generated page",
+        draft_dueAt: "2026-07-01T12:30",
+        draft_status: "todo",
+        feedback: "Too small: expected string to have >=1 characters",
+        organizationId: "org-1",
+        projectId: "project-1"
+      },
+      {
+        currentUser
+      }
+    );
+
+    expect(invalidPage.feedback).toBe(
+      "Too small: expected string to have >=1 characters"
+    );
+    expect(invalidPage.draftValues).toEqual(
+      expect.objectContaining({
+        details: "Create and list one todo through the generated page",
+        dueAt: "2026-07-01T12:30",
+        status: "todo"
+      })
+    );
+    expect(invalidPage.items).toEqual([]);
+
+    redirectMock.mockReset();
 
     const formData = new FormData();
     formData.set("organizationId", "org-1");
@@ -201,9 +247,34 @@ describe("generated todo product flow", () => {
         title: "Ship generated detail flow"
       })
     ]);
+
+    redirectMock.mockReset();
+
+    const deleteFormData = new FormData();
+    deleteFormData.set("todoId", "todo-1");
+    deleteFormData.set("organizationId", "org-1");
+    deleteFormData.set("projectId", "project-1");
+
+    await deleteTodoWorkspaceAction(deleteFormData);
+
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/todo/todos?organizationId=org-1&projectId=project-1"
+    );
+
+    const emptyAgain = await loadTodoWorkspacePage(
+      {
+        organizationId: "org-1",
+        projectId: "project-1"
+      },
+      {
+        currentUser
+      }
+    );
+
+    expect(emptyAgain.items).toEqual([]);
   });
 
-  it("renders the generated todo list, detail, and edit pages with the created todo visible", async () => {
+  it("renders the generated todo list, detail, and edit pages with feedback and destructive actions visible", async () => {
     records.splice(0, records.length, {
       createdAt: "2026-07-01T09:00:00.000Z",
       details: "Detail and edit now come from generated product routes",
@@ -218,6 +289,10 @@ describe("generated todo product flow", () => {
     render(
       await ResourcePage({
         searchParams: Promise.resolve({
+          draft_details: "Detail and edit now come from generated product routes",
+          draft_dueAt: "2026-07-01T12:30",
+          draft_status: "done",
+          feedback: "Title is required",
           organizationId: "org-1",
           projectId: "project-1"
         })
@@ -227,7 +302,11 @@ describe("generated todo product flow", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Todos" })
     ).toBeTruthy();
+    expect(screen.getByText("Title is required")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Create Todo" })).toBeTruthy();
+    expect(
+      screen.getByDisplayValue("Detail and edit now come from generated product routes")
+    ).toBeTruthy();
     expect(screen.getByText("Ship generated detail flow")).toBeTruthy();
     expect(screen.getByRole("link", { name: "View" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Edit" })).toBeTruthy();
@@ -248,6 +327,7 @@ describe("generated todo product flow", () => {
       screen.getAllByRole("heading", { level: 1, name: "Ship generated detail flow" })[0]
     ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to list" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Delete Todo" })).toBeTruthy();
 
     render(
       await ResourceEditPage({
@@ -255,6 +335,8 @@ describe("generated todo product flow", () => {
           todoId: "todo-1"
         }),
         searchParams: Promise.resolve({
+          draft_details: "Updated from validation feedback",
+          feedback: "Status is required",
           organizationId: "org-1",
           projectId: "project-1"
         })
@@ -262,7 +344,9 @@ describe("generated todo product flow", () => {
     );
 
     expect(screen.getByRole("heading", { level: 1, name: "Edit Todo" })).toBeTruthy();
+    expect(screen.getByText("Status is required")).toBeTruthy();
     expect(screen.getByDisplayValue("Ship generated detail flow")).toBeTruthy();
+    expect(screen.getByDisplayValue("Updated from validation feedback")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Save Todo" })).toBeTruthy();
   });
 });

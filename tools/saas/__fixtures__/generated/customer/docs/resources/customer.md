@@ -6,7 +6,7 @@ This preview was generated from a validated `customer` resource spec.
 
 - ownership: `organization`
 - CRUD: `list`, `create`, `read`, `update`
-- delete generation: unsupported in the first generator
+- delete generation: disabled for this resource spec
 - output mode: preview-only under `.generated/` or `tmp/`
 
 ## Fields

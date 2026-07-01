@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-
 import { createTodoService } from "../service.js";
-
 describe("createTodoService", () => {
   it("validates create input before writing todo records", async () => {
     const service = createTodoService({
@@ -17,6 +15,9 @@ describe("createTodoService", () => {
           updatedAt: "2026-06-29T00:00:00.000Z"
         };
       },
+      async delete() {
+        return true;
+      },
       async findById() {
         return undefined;
       },
@@ -27,7 +28,6 @@ describe("createTodoService", () => {
         return undefined;
       }
     });
-
     await expect(
       service.create({
         data: {

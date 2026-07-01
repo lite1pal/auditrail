@@ -1,10 +1,8 @@
 import type { CustomerRecord } from "@auditrail/domain/generated/customer";
 import { customerTable } from "@auditrail/db/schema";
 import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
-
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { CustomerRepo } from "./repo.js";
-
 export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {
   return {
     async create(input) {
@@ -17,7 +15,6 @@ export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {
         externalId: input.data.externalId,
         lastContactedAt: input.data.lastContactedAt ? new Date(input.data.lastContactedAt) : undefined,
       }).returning();
-
       return toCustomerRecord(record);
     },
     async findById(input) {
@@ -27,7 +24,6 @@ export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {
           eq(customerTable.organizationId, input.organizationId)
         )
       ).limit(1);
-
       return record ? toCustomerRecord(record) : undefined;
     },
     async list(input) {
@@ -61,7 +57,6 @@ export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {
             : undefined
         )
       ).orderBy(desc(customerTable.createdAt), desc(customerTable.id)).limit(limit);
-
       return records.map(toCustomerRecord);
     },
     async update(input) {
@@ -79,12 +74,10 @@ export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {
           eq(customerTable.organizationId, input.organizationId)
         )
       ).returning();
-
       return record ? toCustomerRecord(record) : undefined;
     }
   };
 }
-
 function toCustomerRecord(
   record: typeof customerTable.$inferSelect
 ): CustomerRecord {

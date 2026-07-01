@@ -196,11 +196,12 @@ The current product-generation slice is intentionally narrow:
   `/todo`, `/todo/todos`, `/todo/todos/[todoId]`, and
   `/todo/todos/[todoId]/edit`
 - the first proof path targets a simple workspace todo product with a real
-  list, detail, edit, and create flow, not a full PM product yet
+  list, detail, edit, create, and delete flow, not a full PM product yet
 - the committed proof now covers generated product install, test migration,
-  generated web page load, generated server-action create/update, generated
-  detail/edit routes, and real API create/list execution for the installed
-  todo slice
+  generated web page load, generated server-action create/update/delete,
+  generated validation feedback with preserved draft form values, generated
+  detail/edit routes, and real API create/list/delete execution for the
+  installed todo slice
 
 Prove the committed generated-resource slice against Postgres:
 

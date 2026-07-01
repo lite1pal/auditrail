@@ -84,6 +84,38 @@ This file tracks task-system and agent-workflow work items.
 
 ## Done
 
+- [x] T-115 Add generated delete flows and validation feedback for product-owned resources
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: generated products now reach create -> detail -> edit -> list, but they still fail the production-ready bar because destructive actions and user-visible validation feedback are missing
+    - 2026-07-01: this task should stay generator-owned, promote delete to a supported generated CRUD seam, and surface create/update/delete failures inline instead of failing with opaque server-action behavior
+    - 2026-07-01: generated resources now emit delete-capable API repos, services, routes, clients, and tests; generated product pages now preserve draft values across validation redirects and show inline feedback for create, update, and delete failures
+    - 2026-07-01: the committed todo proof now covers validation feedback -> create -> detail -> edit -> delete -> empty list, and the generator avoids wiping persisted edit fields when only partial draft overrides are present
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated resources can opt into delete and receive generated API repo/service/route/client support without manual runtime edits
+    - Generated product-owned routes expose delete actions and render create or update validation failures inline for users
+    - The committed todo proof covers create -> validation feedback -> detail -> edit -> delete -> empty list through generated routes and server actions
+
 - [x] T-114 Add generated detail and edit flows for product-owned resources
   status: done
   priority: high

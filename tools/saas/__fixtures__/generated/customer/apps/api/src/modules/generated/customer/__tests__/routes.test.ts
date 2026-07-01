@@ -1,21 +1,16 @@
 import Fastify from "fastify";
 import { describe, expect, it } from "vitest";
-
 import { registerCustomerRoutes } from "../routes.js";
 import type { createCustomerService } from "../service.js";
-
 describe("registerCustomerRoutes", () => {
   it("requires a session before listing customers", async () => {
     const app = buildTestApp({}, { session: false });
-
     const response = await app.inject({
       url: "/v1/organizations/11111111-1111-4111-8111-111111111111/customers"
     });
-
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({ error: "missing_session" });
   });
-
   it("lists customers for the current organization", async () => {
     const app = buildTestApp({
       async list(input) {
@@ -25,7 +20,6 @@ describe("registerCustomerRoutes", () => {
           organizationId: "11111111-1111-4111-8111-111111111111",
           query: undefined
         });
-
         return [
           {
             createdAt: "2026-06-29T00:00:00.000Z",
@@ -42,11 +36,9 @@ describe("registerCustomerRoutes", () => {
         ];
       }
     });
-
     const response = await app.inject({
       url: "/v1/organizations/11111111-1111-4111-8111-111111111111/customers"
     });
-
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       items: [
@@ -65,12 +57,10 @@ describe("registerCustomerRoutes", () => {
       ]
     });
   });
-
   it("maps forbidden organization access to 403", async () => {
     const app = buildTestApp({}, {
       accessError: new Error("forbidden")
     });
-
     const response = await app.inject({
       method: "POST",
       payload: {
@@ -83,12 +73,10 @@ describe("registerCustomerRoutes", () => {
       },
       url: "/v1/organizations/11111111-1111-4111-8111-111111111111/customers"
     });
-
     expect(response.statusCode).toBe(403);
     expect(response.json()).toEqual({ error: "forbidden" });
   });
 });
-
 function buildTestApp(
   overrides: Partial<ReturnType<typeof createCustomerService>>,
   options: {
@@ -98,7 +86,6 @@ function buildTestApp(
 ) {
   const app = Fastify();
   const useSession = options.session ?? true;
-
   app.decorateRequest("sessionUser");
   app.addHook("preHandler", async (request) => {
     request.sessionUser = useSession
@@ -108,7 +95,6 @@ function buildTestApp(
         }
       : undefined;
   });
-
   app.register(registerCustomerRoutes, {
     access: {
       async assertOrganizationAccess() {
@@ -119,10 +105,8 @@ function buildTestApp(
     },
     service: createCustomerServiceStub(overrides)
   });
-
   return app;
 }
-
 function createCustomerServiceStub(
   overrides: Partial<ReturnType<typeof createCustomerService>>
 ) {

@@ -41,9 +41,12 @@ export default async function ResourcePage({ searchParams }: ResourcePageProps) 
           <h1 className="text-3xl font-semibold text-[var(--foreground)]">Todos</h1>
           <p className="max-w-2xl text-sm text-[var(--muted)]">This generated product route loads real todos through the API seam and allows inline creation.</p>
         </header>
-        <TodoForm action={createTodoWorkspaceAction} submitLabel="Create Todo">
+        <TodoForm action={createTodoWorkspaceAction} defaultValues={data.draftValues} submitLabel="Create Todo">
           <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />
           <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />
+          {data.feedback ? (
+            <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>
+          ) : null}
         </TodoForm>
         <TodoScreen
           items={data.items}

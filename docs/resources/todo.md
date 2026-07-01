@@ -5,8 +5,8 @@ This preview was generated from a validated `todo` resource spec.
 ## Supported assumptions
 
 - ownership: `organization`
-- CRUD: `list`, `create`, `read`, `update`
-- delete generation: unsupported in the first generator
+- CRUD: `list`, `create`, `read`, `update`, `delete`
+- delete generation: hard delete is generated when `crud.delete` is enabled
 - output mode: preview-only under `.generated/` or `tmp/`
 
 ## Fields

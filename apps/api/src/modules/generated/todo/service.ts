@@ -1,7 +1,5 @@
 import { createTodoInputSchema, listTodosInputSchema, updateTodoInputSchema, type CreateTodoInput, type UpdateTodoInput } from "@auditrail/domain/generated/todo";
-
 import type { TodoRepo } from "./repo.js";
-
 export function createTodoService(repo: TodoRepo) {
   return {
     async create(input: { data: CreateTodoInput; organizationId: string }) {
@@ -9,6 +7,9 @@ export function createTodoService(repo: TodoRepo) {
         data: createTodoInputSchema.parse(input.data),
         organizationId: input.organizationId
       });
+    },
+    async delete(input: { id: string; organizationId: string }) {
+      return repo.delete(input);
     },
     async get(input: { id: string; organizationId: string }) {
       return repo.findById(input);

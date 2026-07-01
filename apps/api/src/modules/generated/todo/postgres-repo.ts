@@ -1,10 +1,8 @@
 import type { TodoRecord } from "@auditrail/domain/generated/todo";
 import { todoTable } from "@auditrail/db/schema";
 import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
-
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { TodoRepo } from "./repo.js";
-
 export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
   return {
     async create(input) {
@@ -15,7 +13,6 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
         status: input.data.status,
         dueAt: input.data.dueAt ? new Date(input.data.dueAt) : undefined,
       }).returning();
-
       return toTodoRecord(record);
     },
     async findById(input) {
@@ -25,8 +22,17 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
           eq(todoTable.organizationId, input.organizationId)
         )
       ).limit(1);
-
       return record ? toTodoRecord(record) : undefined;
+    },
+    async delete(input) {
+      const deleted = await db.delete(todoTable).where(
+        and(
+          eq(todoTable.id, input.id),
+          eq(todoTable.organizationId, input.organizationId)
+        )
+      ).returning({ id: todoTable.id });
+
+      return deleted.length > 0;
     },
     async list(input) {
       const limit = Math.min(input.filters.limit ?? 50, 100);
@@ -59,7 +65,6 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
             : undefined
         )
       ).orderBy(desc(todoTable.createdAt), desc(todoTable.id)).limit(limit);
-
       return records.map(toTodoRecord);
     },
     async update(input) {
@@ -75,12 +80,10 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
           eq(todoTable.organizationId, input.organizationId)
         )
       ).returning();
-
       return record ? toTodoRecord(record) : undefined;
     }
   };
 }
-
 function toTodoRecord(
   record: typeof todoTable.$inferSelect
 ): TodoRecord {

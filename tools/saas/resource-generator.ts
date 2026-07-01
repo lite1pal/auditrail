@@ -202,7 +202,6 @@ export function getResourceGeneratorSupportMetadata() {
     } as const,
     supportedOwnership: "organization" as const,
     unsupportedBehaviors: [
-      "delete generation",
       "nested relation reads",
       "relation graph traversal",
       "public API generation",
@@ -229,12 +228,6 @@ function validateSupportedResource(resource: FrameworkResourceSpec) {
   ) {
     throw new Error(
       "The first generator requires list, create, read, and update to stay enabled."
-    );
-  }
-
-  if (resource.crud.delete) {
-    throw new Error(
-      "Delete generation is not supported yet. Disable `crud.delete` before running the generator."
     );
   }
 
@@ -536,11 +529,16 @@ function renderApiRepo(context: ReturnType<typeof createTemplateContext>) {
     "",
     `export interface ${context.pascalName}Repo {`,
     `  create(input: { organizationId: string; data: Create${context.pascalName}Input }): Promise<${context.pascalName}Record>;`,
+    context.resource.crud.delete
+      ? `  delete(input: { id: string; organizationId: string }): Promise<boolean>;`
+      : "",
     `  findById(input: { id: string; organizationId: string }): Promise<${context.pascalName}Record | undefined>;`,
     `  list(input: { organizationId: string; filters: List${context.pluralPascalName}Input }): Promise<readonly ${context.pascalName}Record[]>;`,
     `  update(input: { id: string; organizationId: string; data: Update${context.pascalName}Input }): Promise<${context.pascalName}Record | undefined>;`,
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiService(context: ReturnType<typeof createTemplateContext>) {
@@ -557,6 +555,9 @@ function renderApiService(context: ReturnType<typeof createTemplateContext>) {
     "        organizationId: input.organizationId",
     "      });",
     "    },",
+    context.resource.crud.delete
+      ? "    async delete(input: { id: string; organizationId: string }) {\n      return repo.delete(input);\n    },"
+      : "",
     "    async get(input: { id: string; organizationId: string }) {",
     "      return repo.findById(input);",
     "    },",
@@ -579,7 +580,9 @@ function renderApiService(context: ReturnType<typeof createTemplateContext>) {
     "    }",
     "  };",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>) {
@@ -633,6 +636,20 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     "",
     `      return record ? to${context.pascalName}Record(record) : undefined;`,
     "    },",
+    context.resource.crud.delete
+      ? [
+          "    async delete(input) {",
+          `      const deleted = await db.delete(${context.resource.resource}Table).where(`,
+          "        and(",
+          `          eq(${context.resource.resource}Table.id, input.id),`,
+          `          eq(${context.resource.resource}Table.organizationId, input.organizationId)`,
+          "        )",
+          `      ).returning({ id: ${context.resource.resource}Table.id });`,
+          "",
+          "      return deleted.length > 0;",
+          "    },"
+        ].join("\n")
+      : "",
     "    async list(input) {",
     "      const limit = Math.min(input.filters.limit ?? 50, 100);",
     "      const pattern = input.filters.query ? `%${input.filters.query}%` : undefined;",
@@ -700,7 +717,9 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     "    updatedAt: record.updatedAt.toISOString()",
     "  };",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
@@ -868,6 +887,44 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     "      return mapGeneratedResourceAccessError(reply, error);",
     "    }",
     "  });",
+    context.resource.crud.delete
+      ? [
+          "",
+          `  app.delete("${listPath}/:id", async (request, reply) => {`,
+          "    const user = request.sessionUser;",
+          "    const params = resourceIdParamsSchema.safeParse(request.params);",
+          "",
+          "    if (!user) {",
+          '      return reply.code(401).send({ error: "missing_session" });',
+          "    }",
+          "",
+          "    if (!params.success) {",
+          '      return reply.code(400).send({ error: "invalid_request" });',
+          "    }",
+          "",
+          "    try {",
+          "      await options.access.assertOrganizationAccess({",
+          '        allowedRoles: ["owner", "admin", "member"],',
+          "        organizationId: params.data.organizationId,",
+          "        userId: user.id",
+          "      });",
+          "",
+          "      const deleted = await options.service.delete({",
+          "        id: params.data.id,",
+          "        organizationId: params.data.organizationId",
+          "      });",
+          "",
+          "      if (!deleted) {",
+          '        return reply.code(404).send({ error: "not_found" });',
+          "      }",
+          "",
+          "      return reply.code(204).send();",
+          "    } catch (error) {",
+          "      return mapGeneratedResourceAccessError(reply, error);",
+          "    }",
+          "  });"
+        ].join("\n")
+      : "",
     "}",
     "",
     "function mapGeneratedResourceAccessError(reply: FastifyReply, error: unknown) {",
@@ -877,7 +934,9 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     "",
     "  throw error;",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) {
@@ -961,6 +1020,30 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    expect(response.statusCode).toBe(403);",
     '    expect(response.json()).toEqual({ error: "forbidden" });',
     "  });",
+    context.resource.crud.delete
+      ? [
+          "",
+          `  it("deletes ${context.label.toLowerCase()} records for authorized organization members", async () => {`,
+          "    const app = buildTestApp({",
+          "      async delete(input) {",
+          "        expect(input).toEqual({",
+          '          id: "22222222-2222-4222-8222-222222222222",',
+          '          organizationId: "11111111-1111-4111-8111-111111111111"',
+          "        });",
+          "",
+          "        return true;",
+          "      }",
+          "    });",
+          "",
+          "    const response = await app.inject({",
+          '      method: "DELETE",',
+          `      url: "${listPath}/22222222-2222-4222-8222-222222222222"`,
+          "    });",
+          "",
+          "    expect(response.statusCode).toBe(204);",
+          "  });"
+        ].join("\n")
+      : "",
     "});",
     "",
     "function buildTestApp(",
@@ -1004,6 +1087,13 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    async create() {",
     '      throw new Error("not implemented");',
     "    },",
+    context.resource.crud.delete
+      ? [
+          "    async delete() {",
+          '      throw new Error("not implemented");',
+          "    },"
+        ].join("\n")
+      : "",
     "    async get() {",
     '      throw new Error("not implemented");',
     "    },",
@@ -1016,7 +1106,9 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    ...overrides",
     "  };",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiRoutesIntegrationTest(
@@ -1091,7 +1183,7 @@ function renderApiRoutesIntegrationTest(
     "    await pool.end();",
     "  });",
     "",
-    `  it("creates, lists, reads, and updates ${context.pluralLabel.toLowerCase()} through the installed API routes", async () => {`,
+    `  it("creates, lists, reads, updates, and deletes ${context.pluralLabel.toLowerCase()} through the installed API routes", async () => {`,
     "    const session = await createSessionMember();",
     "    const createResponse = await app.inject({",
     '      method: "POST",',
@@ -1168,6 +1260,33 @@ function renderApiRoutesIntegrationTest(
     "      id: createdId,",
     "      organizationId: session.organizationId",
     "    });",
+    context.resource.crud.delete
+      ? [
+          "",
+          "    const deleteResponse = await app.inject({",
+          '      method: "DELETE",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}/${"${createdId}"}\``,
+          "    });",
+          "",
+          "    expect(deleteResponse.statusCode).toBe(204);",
+          "",
+          "    const deletedListResponse = await app.inject({",
+          '      method: "GET",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}\``,
+          "    });",
+          "",
+          "    expect(deletedListResponse.statusCode).toBe(200);",
+          "    expect(deletedListResponse.json()).toEqual({",
+          "      items: []",
+          "    });"
+        ].join("\n")
+      : "",
     "  });",
     "",
     `  it("does not expose ${context.pluralLabel.toLowerCase()} across organizations", async () => {`,
@@ -1254,7 +1373,9 @@ function renderApiRoutesIntegrationTest(
     "    };",
     "  }",
     "});"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderApiServiceTest(context: ReturnType<typeof createTemplateContext>) {
@@ -1275,6 +1396,13 @@ function renderApiServiceTest(context: ReturnType<typeof createTemplateContext>)
     '          updatedAt: "2026-06-29T00:00:00.000Z"',
     "        };",
     "      },",
+    context.resource.crud.delete
+      ? [
+          "      async delete() {",
+          "        return true;",
+          "      },"
+        ].join("\n")
+      : "",
     "      async findById() {",
     "        return undefined;",
     "      },",
@@ -1298,7 +1426,9 @@ function renderApiServiceTest(context: ReturnType<typeof createTemplateContext>)
     "    });",
     "  });",
     "});"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderWebIndex(context: ReturnType<typeof createTemplateContext>) {
@@ -1360,10 +1490,23 @@ function renderWebApiClient(context: ReturnType<typeof createTemplateContext>) {
     `          path: \`${organizationPath}/${"${id}"}\` as never`,
     "        })",
     "      );",
-    "    }",
+    "    },",
+    context.resource.crud.delete
+      ? [
+          "    async delete(organizationId: string, id: string) {",
+          "      await apiClient.request({",
+          '        method: "DELETE",',
+          `        path: \`${organizationPath}/${"${id}"}\` as never`,
+          "      });",
+          "    }"
+        ].join("\n")
+      : ""
+    ,
     "  };",
     "}"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderWebDomainSchemas(context: ReturnType<typeof createTemplateContext>) {
@@ -1737,8 +1880,8 @@ function renderResourceDocs(context: ReturnType<typeof createTemplateContext>) {
     "## Supported assumptions",
     "",
     "- ownership: `organization`",
-    "- CRUD: `list`, `create`, `read`, `update`",
-    "- delete generation: unsupported in the first generator",
+    `- CRUD: \`${["list", "create", "read", "update", ...(context.resource.crud.delete ? ["delete"] : [])].join("`, `")}\``,
+    `- delete generation: ${context.resource.crud.delete ? "hard delete is generated when `crud.delete` is enabled" : "disabled for this resource spec"}`,
     "- output mode: preview-only under `.generated/` or `tmp/`",
     "",
     "## Fields",

@@ -56,9 +56,9 @@ CLI init plus install tests prove a simple todo product can be generated,
 installed into a seeded repo shape, and registered through the shared product
 runtime files without manual edits. Product-planning coverage now sits in the
 same lane so `pnpm saas plan product ...` is exercised before install mutates
-shared runtime files. The committed todo web proof now covers create ->
-detail -> edit -> list through generated product-owned pages and server
-actions instead of stopping at list-plus-create.
+shared runtime files. The committed todo web proof now covers validation
+feedback -> create -> detail -> edit -> delete -> empty list through generated
+product-owned pages and server actions instead of stopping at list-plus-create.
 
 ## Hosted Runtime Release Gate
 
@@ -427,6 +427,8 @@ It must stay deterministic and fail closed:
   product-owned web files it knows how to generate
 - `install product --force` must remain safe for already-generated product
   proofs, including embedded generated resources
+- generated edit flows must preserve persisted field values when only some
+  draft query overrides are present
 - it fails on conflicting generated product files unless `--force` is passed
 - existing organizations require an explicit post-install backfill step so the
   new product is enabled deliberately instead of silently mutating tenant state

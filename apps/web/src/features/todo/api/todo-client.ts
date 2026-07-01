@@ -1,11 +1,9 @@
 import type { ApiClient } from "@/src/lib/api/api-client";
 import { todoRecordSchema } from "@/src/features/todo/domain/schemas";
 import { z } from "zod";
-
 const todoListResponseSchema = z.object({
   items: z.array(todoRecordSchema)
 });
-
 export function createResourceClient(apiClient: ApiClient) {
   return {
     async create(organizationId: string, body: Record<string, unknown>) {
@@ -39,6 +37,12 @@ export function createResourceClient(apiClient: ApiClient) {
           path: `/api/v1/organizations/${organizationId}/todos/${id}` as never
         })
       );
+    },
+    async delete(organizationId: string, id: string) {
+      await apiClient.request({
+        method: "DELETE",
+        path: `/api/v1/organizations/${organizationId}/todos/${id}` as never
+      });
     }
   };
 }

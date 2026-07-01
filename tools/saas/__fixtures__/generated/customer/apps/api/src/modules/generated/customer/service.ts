@@ -1,7 +1,5 @@
 import { createCustomerInputSchema, listCustomersInputSchema, updateCustomerInputSchema, type CreateCustomerInput, type UpdateCustomerInput } from "@auditrail/domain/generated/customer";
-
 import type { CustomerRepo } from "./repo.js";
-
 export function createCustomerService(repo: CustomerRepo) {
   return {
     async create(input: { data: CreateCustomerInput; organizationId: string }) {

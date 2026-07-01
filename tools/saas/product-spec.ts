@@ -137,7 +137,7 @@ function normalizeTodoResource(productId: string): FrameworkResourceSpec {
     },
     crud: {
       create: true,
-      delete: false,
+      delete: true,
       list: true,
       read: true,
       update: true

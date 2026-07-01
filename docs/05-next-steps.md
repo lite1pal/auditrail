@@ -6,8 +6,8 @@ The immediate Elioric framework roadmap is now:
    resource and multi-product seams: workspace, project, task, comment
 1. relation-aware product generation for second-product resources so a PM slice
    can compose task -> project and comment -> task without manual page logic
-1. generated product UI depth beyond the current create/list/detail/edit slice:
-   delete or archive flows, richer validation feedback, and workspace summaries
+1. generated product UI depth beyond the current create/list/detail/edit/delete
+   slice: archive flows, richer field widgets, and workspace summaries
 1. generated-resource web UI depth for standalone resource routes, which are
    still intentionally weaker than the new product-owned route generation
 1. richer generated-resource authorization patterns beyond organization-role CRUD
@@ -22,7 +22,9 @@ meaningful checkpoint after the committed todo end-to-end proof is to deepen tha
 believable PM slice instead of a single-resource workspace proof.
 
 The hosted AuditTrail MVP remains the release gate, but the framework work now
-has a cleaner sequence for deeper multiple-product proof.
+has a cleaner sequence for deeper multiple-product proof, and the generated
+todo product is now strong enough to serve as the baseline CLI-owned CRUD
+reference before relation-aware PM generation.
 
 ## Hosted MVP Sequence
 

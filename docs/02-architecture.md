@@ -148,15 +148,16 @@ for simple resource-backed products:
   `/todo/todos/[todoId]/edit`, so product shell composition does not depend on
   the placeholder standalone resource pages
 - the committed `todo` proof now exercises the generated web page and server
-  action seams for create, detail, and edit in addition to the installed
-  generated API module and migration
+  action seams for create, detail, edit, delete, and validation-feedback
+  redirects in addition to the installed generated API module and migration
 
 Current product-generation limits are explicit:
 
 - no custom product API route generation yet
 - no arbitrary product-specific runtime logic or relation-aware dashboards yet
 - the first supported proof is a simple workspace product with generated
-  list-plus-create pages for organization-owned resources
+  CRUD pages for organization-owned resources, but archive flows and richer
+  product-specific policies remain manual
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.

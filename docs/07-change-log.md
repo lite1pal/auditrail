@@ -2,6 +2,14 @@
 
 ## 2026-07-01
 
+- Completed T-115 by promoting generated delete plus user-facing validation
+  feedback into the product-generation seam. Generated resources can now opt
+  into delete across repo, service, route, client, and integration-test output;
+  generated product pages surface create, update, and delete failures inline
+  through redirect-safe feedback plus preserved draft values; and the committed
+  todo proof now exercises validation feedback -> create -> detail -> edit ->
+  delete -> empty list.
+
 - Completed T-114 by adding generated detail and edit flows for product-owned
   resources. The product installer now emits product-owned
   `/todo/todos/[todoId]` and `/todo/todos/[todoId]/edit` pages, generated

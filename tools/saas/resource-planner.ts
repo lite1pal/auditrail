@@ -739,14 +739,6 @@ function collectWarnings(input: {
       .map((template) => template.path(input.resource))
   );
 
-  if (input.resource.crud.delete) {
-    warnings.push({
-      code: "delete-enabled",
-      message:
-        "Delete is enabled. A future generator should require explicit confirmation before wiring destructive behavior."
-    });
-  }
-
   if (
     input.resource.api.public &&
     input.resource.ownership === "organization" &&
