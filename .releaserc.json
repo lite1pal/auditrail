@@ -12,7 +12,7 @@
       "@semantic-release/commit-analyzer",
       {
         "preset": "conventionalcommits",
-        "releaseRules": [
+       "releaseRules": [
           {
             "scope": "landing",
             "release": false
@@ -21,20 +21,57 @@
             "breaking": true,
             "release": "minor"
           },
+
           {
             "type": "feat",
+            "scope": "framework",
             "release": "patch"
           },
           {
             "type": "fix",
+            "scope": "framework",
             "release": "patch"
           },
           {
             "type": "perf",
+            "scope": "framework",
             "release": "patch"
           },
           {
             "type": "refactor",
+            "scope": "framework",
+            "release": "patch"
+          },
+
+          {
+            "type": "feat",
+            "scope": "generator",
+            "release": "patch"
+          },
+          {
+            "type": "fix",
+            "scope": "generator",
+            "release": "patch"
+          },
+          {
+            "type": "perf",
+            "scope": "generator",
+            "release": "patch"
+          },
+          {
+            "type": "refactor",
+            "scope": "generator",
+            "release": "patch"
+          },
+
+          {
+            "type": "feat",
+            "scope": "release",
+            "release": "patch"
+          },
+          {
+            "type": "fix",
+            "scope": "release",
             "release": "patch"
           }
         ]

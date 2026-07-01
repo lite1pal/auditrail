@@ -91,6 +91,58 @@ Do not treat docs as optional follow-up work.
 
 If no doc update is required, the change summary must state why.
 
+## Commit Message Rule
+
+Follow the Conventional Commits specification.
+
+Format:
+
+```text
+type(scope): description
+```
+
+Every commit must have a meaningful scope. Do not use unscoped commits such as:
+
+```text
+fix: ...
+feat: ...
+refactor: ...
+```
+
+Preferred scopes include:
+
+- `framework`
+- `api`
+- `web`
+- `domain`
+- `db`
+- `generator`
+- `worker`
+- `release`
+- `landing`
+- `docs`
+- `tasks`
+
+Landing page changes must always use the `landing` scope so they are excluded from framework releases.
+
+Examples:
+
+```text
+feat(framework): add product registry
+fix(api): validate project ownership
+refactor(generator): simplify install pipeline
+chore(release): update GitHub workflow
+style(web): improve dashboard spacing
+
+feat(landing): add pricing section
+fix(landing): improve mobile navigation
+style(landing): refine hero spacing
+```
+
+The agent must never create commits or run `git commit`.
+
+Instead, after completing work, it must propose a Conventional Commit message that accurately summarizes the changes, allowing the developer to review and commit manually.
+
 ## Change Completion Checklist
 
 Before considering a task complete, verify:
