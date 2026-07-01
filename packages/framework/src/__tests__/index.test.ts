@@ -247,6 +247,90 @@ describe("framework contracts", () => {
     });
   });
 
+  it("normalizes belongs-to relations into uuid reference fields", () => {
+    expect(
+      normalizeFrameworkResourceSpec({
+        fields: [
+          {
+            name: "title",
+            required: true,
+            type: "string"
+          }
+        ],
+        label: "Task",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "project",
+            required: true,
+            target: "project",
+            targetScope: "platform"
+          },
+          {
+            kind: "belongs-to",
+            name: "assignee",
+            required: false,
+            target: "user",
+            targetScope: "platform"
+          }
+        ],
+        resource: "task"
+      })
+    ).toMatchObject({
+      fields: expect.arrayContaining([
+        expect.objectContaining({
+          name: "projectId",
+          required: true,
+          type: "uuid"
+        }),
+        expect.objectContaining({
+          name: "assigneeId",
+          required: false,
+          type: "uuid"
+        })
+      ]),
+      relations: [
+        expect.objectContaining({
+          field: "projectId",
+          target: "project",
+          targetScope: "platform"
+        }),
+        expect.objectContaining({
+          field: "assigneeId",
+          target: "user",
+          targetScope: "platform"
+        })
+      ]
+    });
+  });
+
+  it("rejects relations that shadow explicit fields", () => {
+    expect(() =>
+      frameworkResourceSpecSchema.parse({
+        fields: [
+          {
+            name: "projectId",
+            required: true,
+            type: "uuid"
+          }
+        ],
+        label: "Task",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "project",
+            required: true,
+            target: "project",
+            targetScope: "platform"
+          }
+        ],
+        resource: "task"
+      })
+    ).toThrow(/conflicts with an explicitly declared field/i);
+  });
+
   it("accepts a valid user-owned resource spec", () => {
     expect(
       frameworkResourceSpecSchema.parse({

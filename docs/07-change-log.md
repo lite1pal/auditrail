@@ -2,6 +2,15 @@
 
 ## 2026-07-01
 
+- Completed T-102 by adding bounded relation support to generated resources.
+  Resource specs and terminal init now accept explicit `belongs-to` relations,
+  those relations normalize into UUID foreign-key fields, generated DB schemas
+  and SQL migrations emit real references plus indexes, the planner now warns
+  when generated relation targets are not installed yet, and the golden/smoke
+  fixture set now includes a relation-backed `task` resource. The slice stays
+  intentionally narrow: platform targets are limited to `organization`,
+  `project`, and `user`, while nested reads and graph traversal remain manual.
+
 - Simplified the GitHub prerelease path so successful `Sync Alpha` runs now
   publish from the same workflow instead of relying on a second downstream
   workflow trigger. GitHub suppresses downstream `push` runs for

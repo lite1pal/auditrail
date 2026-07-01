@@ -1028,6 +1028,8 @@ Current contract:
 - `GET /customers` returns `{ "items": CustomerRecord[] }`
 - `POST`, `GET /:id`, and `PATCH /:id` return one `CustomerRecord`
 - `GET /:id` and `PATCH /:id` return `404 not_found` when the record is absent
+- generated belongs-to relations remain scalar UUID fields in request and
+  response bodies; the generated API does not expand related resources
 
 ## Web Auth Consumption
 

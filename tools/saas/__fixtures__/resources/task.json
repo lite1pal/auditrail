@@ -1,0 +1,54 @@
+{
+  "resource": "task",
+  "label": "Task",
+  "ownership": "organization",
+  "fields": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "name": "status",
+      "type": "enum",
+      "required": true,
+      "values": ["todo", "in_progress", "done"],
+      "default": "todo"
+    },
+    {
+      "name": "dueAt",
+      "type": "datetime",
+      "required": false
+    }
+  ],
+  "relations": [
+    {
+      "name": "project",
+      "kind": "belongs-to",
+      "target": "project",
+      "targetScope": "platform",
+      "required": true
+    },
+    {
+      "name": "assignee",
+      "kind": "belongs-to",
+      "target": "user",
+      "targetScope": "platform",
+      "required": false
+    }
+  ],
+  "crud": {
+    "list": true,
+    "create": true,
+    "read": true,
+    "update": true,
+    "delete": false
+  },
+  "api": {
+    "prefix": "/v1/organizations/:organizationId/tasks"
+  },
+  "ui": {
+    "nav": false
+  }
+}

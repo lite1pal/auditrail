@@ -39,6 +39,10 @@ describe("saas resource init", () => {
         "status:enum:required:values=draft|published:default=draft",
         "--field",
         "isActive:boolean:required:default=true",
+        "--relation",
+        "project:belongs-to:project:required:platform",
+        "--relation",
+        "assignee:belongs-to:user:optional:platform:field=assigneeId",
         "--output",
         "specs/achievement.json"
       ],
@@ -55,6 +59,7 @@ describe("saas resource init", () => {
       api: { prefix: string };
       fields: Array<{ default?: unknown; name: string; values?: string[] }>;
       ownership: string;
+      relations: Array<{ field: string; target: string; targetScope: string }>;
       resource: string;
       ui: { nav: boolean };
     };
@@ -72,6 +77,34 @@ describe("saas resource init", () => {
     expect(
       writtenSpec.fields.find((field) => field.name === "isActive")?.default
     ).toBe(true);
+    expect(writtenSpec.relations).toEqual([
+      {
+        field: "projectId",
+        kind: "belongs-to",
+        hidden: false,
+        name: "project",
+        readonly: false,
+        required: true,
+        searchable: false,
+        sortable: false,
+        target: "project",
+        targetScope: "platform",
+        unique: false
+      },
+      {
+        field: "assigneeId",
+        kind: "belongs-to",
+        hidden: false,
+        name: "assignee",
+        readonly: false,
+        required: false,
+        searchable: false,
+        sortable: false,
+        target: "user",
+        targetScope: "platform",
+        unique: false
+      }
+    ]);
 
     const plan = createResourcePlanFromFile({
       repoRoot,
@@ -124,11 +157,25 @@ describe("saas resource init", () => {
       ],
       repoRoot
     });
+    const invalidRelation = executeSaasCli({
+      args: [
+        "init",
+        "resource",
+        "achievement",
+        "--field",
+        "title:string:required",
+        "--relation",
+        "owner:has-many:user"
+      ],
+      repoRoot
+    });
 
     expect(invalidModifier.exitCode).toBe(1);
     expect(invalidModifier.stderr).toMatch(/unsupported field modifier/i);
     expect(invalidType.exitCode).toBe(1);
     expect(invalidType.stderr).toMatch(/unsupported field type/i);
+    expect(invalidRelation.exitCode).toBe(1);
+    expect(invalidRelation.stderr).toMatch(/unsupported relation kind/i);
   });
 });
 

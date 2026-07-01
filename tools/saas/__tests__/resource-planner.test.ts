@@ -153,6 +153,73 @@ describe("saas resource planner", () => {
     expect(plan.manualReview.some((item) => item.code === "product-navigation-review")).toBe(true);
   });
 
+  it("documents bounded relation behavior in assumptions", () => {
+    const plan = createResourcePlan({
+      repoRoot: "/repo",
+      sourcePath: "/repo/specs/task.json",
+      spec: resourceSpec({
+        fields: [
+          {
+            name: "title",
+            required: true,
+            type: "string"
+          }
+        ],
+        label: "Task",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "project",
+            required: true,
+            target: "project",
+            targetScope: "platform"
+          }
+        ],
+        resource: "task"
+      })
+    });
+
+    expect(plan.assumptions).toContain(
+      "Belongs-to relations currently generate UUID foreign-key fields and database references only; nested reads, join expansion, and graph traversal remain manual product work."
+    );
+  });
+
+  it("warns when generated relation targets have not been installed yet", () => {
+    const plan = createResourcePlan({
+      repoRoot: "/repo",
+      sourcePath: "/repo/specs/comment.json",
+      spec: resourceSpec({
+        fields: [
+          {
+            name: "body",
+            required: true,
+            type: "text"
+          }
+        ],
+        label: "Comment",
+        ownership: "organization",
+        relations: [
+          {
+            kind: "belongs-to",
+            name: "task",
+            required: true,
+            target: "task"
+          }
+        ],
+        resource: "comment"
+      })
+    });
+
+    expect(plan.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "generated-relation-target-missing"
+        })
+      ])
+    );
+  });
+
   it("marks existing planned files as updates", () => {
     const repoRoot = createRepo(createdRoots, {
       "packages/domain/src/generated/customer/index.ts": "export {};\n",

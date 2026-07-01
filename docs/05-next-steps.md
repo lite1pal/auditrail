@@ -1,8 +1,19 @@
 # Next Steps
 
-The active roadmap is the hosted AuditTrail MVP. The goal is to make the
-current sign-in -> setup -> ingest -> investigate flow provable, documented,
-and release-gated before broadening the product or the framework tooling story.
+The immediate Elioric framework roadmap is now:
+
+1. T-103: prove a second product module can register cleanly from the manifest
+   and runtime seams without hand-editing shared bootstrap code
+1. T-104: prove the smallest serious PM product slice on top of the generated
+   resource and multi-product seams: workspace, project, task, comment
+1. generated-resource web UI depth: relation-aware forms, list filters, and
+   product-owned navigation scaffolding
+1. richer generated-resource authorization patterns beyond organization-role CRUD
+1. broader relation support only after the current bounded belongs-to slice is
+   proven through a real second product
+
+The hosted AuditTrail MVP remains the release gate, but the framework work now
+has a cleaner sequence for multiple-product proof.
 
 ## Hosted MVP Sequence
 

@@ -23,34 +23,6 @@ This file tracks task-system and agent-workflow work items.
     - The repo ignores both directories going forward
     - The removal is reflected in the task tracker
 
-- [ ] T-102 Add relation support to generated resources
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-07-01
-  completed:
-  blocked_reason:
-  files:
-    - tools/saas/*
-    - packages/framework/src/*
-    - packages/domain/src/*
-    - packages/db/src/schema/*
-    - apps/api/src/modules/generated/*
-    - apps/api/src/**/__tests__/*
-    - README.md
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/04-quality-gates.md
-    - docs/05-next-steps.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - Resource specs can declare a bounded first relation set needed for product work such as belongs-to and optional reference fields
-    - Generated schema, repo, service, and route output stay deterministic and type-safe for the supported relation slice
-    - Tests and docs make the supported relation limits explicit instead of implying arbitrary ORM-style graph generation
-
 - [ ] T-103 Scaffold a second product module from the manifest/runtime seams
   status: ready
   priority: high
@@ -106,6 +78,38 @@ This file tracks task-system and agent-workflow work items.
     - The final docs describe what was framework-generated, what was still manual, and what gaps remain before broader production reuse
 
 ## Done
+
+- [x] T-102 Add relation support to generated resources
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: added bounded `belongs-to` relation support to framework resource specs, CLI init, planner assumptions, preview generation, and deterministic migration output
+    - 2026-07-01: relation fields now normalize into UUID foreign keys with bounded platform targets (`organization`, `project`, `user`), while generated-to-generated targets fail closed until the parent resource is already installed
+    - 2026-07-01: expanded the golden/smoke fixture set with a relation-backed `task` resource and kept the broader SaaS verification lane green
+  files:
+    - tools/saas/*
+    - packages/framework/src/*
+    - packages/domain/src/*
+    - packages/db/src/schema/*
+    - apps/api/src/modules/generated/*
+    - apps/api/src/**/__tests__/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Resource specs can declare a bounded first relation set needed for product work such as belongs-to and optional reference fields
+    - Generated schema, repo, service, and route output stay deterministic and type-safe for the supported relation slice
+    - Tests and docs make the supported relation limits explicit instead of implying arbitrary ORM-style graph generation
 
 - [x] T-109 Fix prerelease triggering and align tooling with the product-module seam
   status: done

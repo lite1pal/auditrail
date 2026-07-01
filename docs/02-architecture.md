@@ -90,7 +90,7 @@ refresh those committed fixtures intentionally.
 
 The next generated-output validation command also lives there:
 `pnpm saas check generated-resource`. It generates the committed fixture
-resource into an isolated ignored temp directory, reuses the planner plus
+resources into isolated ignored temp directories, reuses the planner plus
 golden-fixture comparison, and validates structural readiness signals such as
 expected file groups, deterministic repeated output, generic import safety,
 placeholder cleanup, and syntax-parsable TypeScript or TSX files without
@@ -127,6 +127,11 @@ That proof slice establishes the current supported contract:
 - generated list routes return `{ items: [...] }`
 - rerunning install for an already-generated resource is allowed with `--force`
   when the existing files are already generator-owned
+- relation support is limited to explicit `belongs-to` metadata that synthesizes
+  UUID foreign-key fields plus DB references
+- supported platform relation targets are `organization`, `project`, and `user`
+- generated relation targets must already exist in repo-owned domain and DB
+  seams before install; nested reads and join expansion are intentionally out of scope
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
