@@ -151,7 +151,7 @@ pnpm check:boundaries
 
 `apps/web` owns the hosted MVP user journey. It should call the API instead of importing API internals.
 
-`apps/landing` owns the public marketing site for Project Anvil. It should stay
+`apps/landing` owns the public marketing site for Elioric. It should stay
 isolated from authenticated product runtime composition, must not become a
 shared dumping ground for app-shell code, and should treat framework messaging
 as public copy rather than as a source of runtime contracts.

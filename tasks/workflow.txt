@@ -302,7 +302,7 @@ This file tracks task-system and agent-workflow work items.
     - App-level composition files consume the product-module declaration instead of hardcoding AuditTrail-specific adapters directly
     - Focused tests prove the existing AuditTrail runtime behavior stays unchanged after the extraction
 
-- [x] T-099 Replace the Project Anvil landing app with the Tailcast template
+- [x] T-099 Replace the Elioric landing app with the Tailcast template
   status: done
   priority: high
   owner: codex
@@ -313,7 +313,7 @@ This file tracks task-system and agent-workflow work items.
   blocked_reason:
   notes:
     - 2026-07-01: removed the previous landing app entirely and replaced it with the MIT-licensed Tailcast Astro template under `apps/landing`
-    - 2026-07-01: reduced the template to a single Project Anvil landing page, removed dead multi-page startup content, and rewrote the copy, metadata, README, and robots settings for the framework
+    - 2026-07-01: reduced the template to a single Elioric landing page, removed dead multi-page startup content, and rewrote the copy, metadata, README, and robots settings for the framework
     - 2026-07-01: pinned the landing app's Vite dependency to match Astro, added build-time `sharp`, and verified the landing with `pnpm --filter landing typecheck` and `pnpm --filter landing build`
   files:
     - apps/landing/*
@@ -327,7 +327,7 @@ This file tracks task-system and agent-workflow work items.
     - tasks/workflow.txt
   acceptance:
     - The previous landing template is removed completely and replaced with the Tailcast-based landing app
-    - The landing copy reflects Project Anvil rather than the upstream template defaults
+    - The landing copy reflects Elioric rather than the upstream template defaults
     - Repo scripts and docs still describe the landing app honestly, including any deployment or licensing caveats
 
 - [x] T-094 Define the product-module contract for true platform/product separation

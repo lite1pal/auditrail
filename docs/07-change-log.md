@@ -12,7 +12,7 @@
   a real Postgres integration test at
   `apps/api/src/modules/generated/customer/__tests__/routes.integration.test.ts`.
 
-- Added the first repo-level GitHub prerelease automation for Project Anvil.
+- Added the first repo-level GitHub prerelease automation for Elioric.
   The repo now uses `semantic-release` plus a GitHub Actions workflow on the
   `alpha` branch to run `pnpm verify`, calculate an `alpha` prerelease from
   Conventional Commit messages, and publish Git tags plus GitHub Releases
@@ -26,7 +26,7 @@
   being resolved automatically in CI.
 
 - Renamed the framework-facing repo and landing copy from Project Forge to
-  Project Anvil so the README, landing app, and framework docs describe one
+  Elioric so the README, landing app, and framework docs describe one
   consistent platform identity while AuditTrail remains the reference product.
 
 - Split the remaining shared billing, entitlement, webhook, and job seams by
@@ -54,7 +54,7 @@
   API and web workspace resolution when a selected organization does not have
   the product enabled.
 
-- Added `apps/landing` as an isolated Astro marketing app for Project Anvil,
+- Added `apps/landing` as an isolated Astro marketing app for Elioric,
   then replaced the first trial template with the user-selected
   MIT-licensed `Tailcast` Astro theme, reduced it to a single framework-focused
   page, and kept the landing deployment and docs clearly separate from the

@@ -62,11 +62,11 @@ export function createApiProductRuntime(
       return {
         description:
           registeredManifests.length > 1
-            ? "Versioned Project Anvil product API. The canonical contract is /api/v1."
+            ? "Versioned Elioric product API. The canonical contract is /api/v1."
             : "Versioned audit event ingestion and query API. The canonical contract is /api/v1.",
         title:
           registeredManifests.length > 1
-            ? "Project Anvil Product API"
+            ? "Elioric Product API"
             : `${defaultProductManifest.name} API`
       };
     },
