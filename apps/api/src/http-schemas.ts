@@ -43,11 +43,23 @@ export function registerApiSchemas(app: FastifyInstance) {
     $id: schemaIds.apiDescriptorResponse,
     type: "object",
     additionalProperties: false,
-    required: ["basePath", "latestVersion", "defaultVersion", "versions"],
+    required: ["basePath", "latestVersion", "defaultVersion", "products", "versions"],
     properties: {
       basePath: { type: "string" },
       latestVersion: { type: "string" },
       defaultVersion: { type: "string" },
+      products: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["id", "name"],
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" }
+          }
+        }
+      },
       versions: {
         type: "array",
         items: {

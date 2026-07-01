@@ -15,9 +15,17 @@ interface AppShellProductNavItem {
   label: string;
 }
 
+interface AppShellAvailableProduct {
+  href: string;
+  id: string;
+  isActive: boolean;
+  label: string;
+}
+
 interface AppShellProps {
   activeOrganizationId?: string;
   activeProjectId?: string;
+  availableProducts?: readonly AppShellAvailableProduct[];
   children: ReactNode;
   currentUser: CurrentUserResponse;
   productName: string;
@@ -27,6 +35,7 @@ interface AppShellProps {
 export function AppShell({
   activeOrganizationId,
   activeProjectId,
+  availableProducts = [],
   children,
   currentUser,
   productName,
@@ -79,6 +88,28 @@ export function AppShell({
           </div>
           <nav aria-label="Primary">
             <ul className="grid gap-1">
+              {availableProducts.length > 1 ? (
+                <li className="px-3 py-2">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    Products
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {availableProducts.map((product) => (
+                      <Link
+                        key={product.id}
+                        className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                          product.isActive
+                            ? "border-[var(--accent)] bg-[var(--panel-subtle)] text-[var(--foreground)]"
+                            : "border-[var(--border)] text-[var(--muted)] hover:bg-[var(--panel-subtle)]"
+                        }`}
+                        href={product.href as Route}
+                      >
+                        {product.label}
+                      </Link>
+                    ))}
+                  </div>
+                </li>
+              ) : null}
               {productNavItems.map((item) => (
                 <li key={item.id}>
                   <Link

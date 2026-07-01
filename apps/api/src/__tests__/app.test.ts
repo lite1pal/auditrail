@@ -363,6 +363,12 @@ describe("health route", () => {
       basePath: "/api",
       latestVersion: "v1",
       defaultVersion: "v1",
+      products: [
+        {
+          id: "audit-events",
+          name: "AuditTrail"
+        }
+      ],
       versions: [
         {
           version: "v1",

@@ -11,11 +11,17 @@ export function isProtectedApiRoute(routeUrl?: string) {
   return routeUrl.startsWith(`${API_VERSION_PREFIX}${EVENTS_ROUTE_PREFIX}`);
 }
 
-export function getApiDescriptor() {
+export function getApiDescriptor(
+  products: ReadonlyArray<{
+    id: string;
+    name: string;
+  }> = []
+) {
   return {
     basePath: API_BASE_PATH,
     latestVersion: API_VERSION,
     defaultVersion: API_VERSION,
+    products,
     versions: [
       {
         version: API_VERSION,

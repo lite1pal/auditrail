@@ -72,6 +72,7 @@ import { sessionAuthPlugin } from "./plugins/session-auth.js";
 import {
   currentProductId,
   getProductApiOpenApiInfo,
+  listRegisteredProducts,
   registerProductApiRoutes
 } from "./product-module.js";
 
@@ -214,7 +215,7 @@ export function buildApp(options: BuildAppOptions = {}) {
         },
       },
     },
-    async () => getApiDescriptor(),
+    async () => getApiDescriptor(listRegisteredProducts()),
   );
   app.get(
     `${API_VERSION_PREFIX}/health`,

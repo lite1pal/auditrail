@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import type { ProductModuleManifest } from "./product-module.js";
-
 const nonEmptyStringSchema = z.string().trim().min(1);
 
 export interface InstalledProductState {
@@ -15,7 +13,10 @@ export const installedProductStateSchema = z.object({
 }) satisfies z.ZodType<InstalledProductState>;
 
 export interface ProductManifestRegistry<
-  TManifest extends ProductModuleManifest = ProductModuleManifest
+  TManifest extends { id: string; name: string } = {
+    id: string;
+    name: string;
+  }
 > {
   get(productId: string): TManifest | undefined;
   hasEnabledProduct(
@@ -30,7 +31,7 @@ export interface ProductManifestRegistry<
 }
 
 export function createProductManifestRegistry<
-  TManifest extends ProductModuleManifest
+  TManifest extends { id: string; name: string }
 >(manifests: readonly TManifest[]): ProductManifestRegistry<TManifest> {
   const manifestsById = new Map(
     manifests.map((manifest) => [manifest.id, manifest] as const)

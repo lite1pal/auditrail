@@ -4,29 +4,6 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
-- [ ] T-097 Make shell and API composition product-aware for multiple installed products
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-06-30
-  completed:
-  blocked_reason:
-  files:
-    - apps/web/app/*
-    - apps/web/src/components/layout/*
-    - apps/api/src/app.ts
-    - apps/api/src/http-schemas.ts
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - The shell, landing flow, and API composition can render or register more than one installed product for the same organization
-    - Shared platform surfaces remain product-neutral and derive product-specific navigation or chrome from the registry
-    - Central composition files no longer assume AuditTrail is the only product in the runtime
-
 - [ ] T-098 Split product billing, entitlements, and webhook/event ownership for multi-product runtime
   status: ready
   priority: medium
@@ -98,6 +75,33 @@ This file tracks task-system and agent-workflow work items.
     - The removal is reflected in the task tracker
 
 ## Done
+
+- [x] T-097 Make shell and API composition product-aware for multiple installed products
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: rewired both app-level product composition seams to be registry-driven, added focused runtime factories for API and web product modules, and proved multiple registered products can be described or mounted without changing shared bootstrap code
+    - 2026-07-01: the API descriptor now exposes registered products, and the web shell renders installed-product launch links derived from active-organization product state instead of assuming AuditTrail is the only available product
+    - 2026-07-01: updated composition, shell, and descriptor tests plus architecture and API docs to reflect the new multi-product runtime posture while keeping current AuditTrail screens and routes unchanged
+  files:
+    - apps/web/app/*
+    - apps/web/src/components/layout/*
+    - apps/api/src/app.ts
+    - apps/api/src/http-schemas.ts
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The shell, landing flow, and API composition can render or register more than one installed product for the same organization
+    - Shared platform surfaces remain product-neutral and derive product-specific navigation or chrome from the registry
+    - Central composition files no longer assume AuditTrail is the only product in the runtime
 
 - [x] T-096 Add installed-product state and manifest registry composition
   status: done

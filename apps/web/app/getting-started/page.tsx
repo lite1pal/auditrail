@@ -28,7 +28,11 @@ export default async function GettingStartedPage({
   const onboardingCopy = getOnboardingScreenCopy();
   const shellProduct = getShellProductConfig({
     activeOrganizationId: onboarding.activeOrganizationId,
-    activeProjectId: onboarding.activeProjectId
+    activeProjectId: onboarding.activeProjectId,
+    installedProducts: currentUser.memberships.find(
+      (membership) => membership.organization.id === onboarding.activeOrganizationId
+    )?.installedProducts,
+    preferredProductId: currentProductId
   });
   const onboardingStepViews =
     onboarding.activeOnboarding && onboarding.activeOrganizationId
@@ -43,6 +47,7 @@ export default async function GettingStartedPage({
     <AppShell
       activeOrganizationId={onboarding.activeOrganizationId}
       activeProjectId={onboarding.activeProjectId}
+      availableProducts={shellProduct.availableProducts}
       currentUser={currentUser}
       productName={shellProduct.productName}
       productNavItems={shellProduct.navItems}

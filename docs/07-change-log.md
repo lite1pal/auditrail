@@ -2,6 +2,13 @@
 
 ## 2026-07-01
 
+- Made shell and API composition registry-driven for multiple installed
+  products. The API product runtime now registers routes by iterating
+  registered product modules instead of assuming one hardcoded product, the
+  public `/api` descriptor reports registered products, and the web shell now
+  derives available product links from installed-product state for the active
+  organization.
+
 - Added persisted organization installed-product state plus a pure product
   manifest registry. The platform now records enabled products per
   organization, injects that state into `/api/v1/me`, auto-installs the

@@ -36,7 +36,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   });
   const shellProduct = getShellProductConfig({
     activeOrganizationId: workspace.activeOrganizationId,
-    activeProjectId: workspace.activeProjectId
+    activeProjectId: workspace.activeProjectId,
+    installedProducts: currentUser.memberships.find(
+      (membership) => membership.organization.id === workspace.activeOrganizationId
+    )?.installedProducts,
+    preferredProductId: currentProductId
   });
   const settingsProductCopy = getWorkspaceSettingsProductCopy();
 
@@ -44,6 +48,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     <AppShell
       activeOrganizationId={workspace.activeOrganizationId}
       activeProjectId={workspace.activeProjectId}
+      availableProducts={shellProduct.availableProducts}
       currentUser={currentUser}
       productName={shellProduct.productName}
       productNavItems={shellProduct.navItems}

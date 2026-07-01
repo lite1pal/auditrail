@@ -21,13 +21,18 @@ export default async function ApiKeysPage({ searchParams }: ApiKeysPageProps) {
   });
   const shellProduct = getShellProductConfig({
     activeOrganizationId: workspace.activeOrganizationId,
-    activeProjectId: workspace.activeProjectId
+    activeProjectId: workspace.activeProjectId,
+    installedProducts: currentUser.memberships.find(
+      (membership) => membership.organization.id === workspace.activeOrganizationId
+    )?.installedProducts,
+    preferredProductId: currentProductId
   });
 
   return (
     <AppShell
       activeOrganizationId={workspace.activeOrganizationId}
       activeProjectId={workspace.activeProjectId}
+      availableProducts={shellProduct.availableProducts}
       currentUser={currentUser}
       productName={shellProduct.productName}
       productNavItems={shellProduct.navItems}

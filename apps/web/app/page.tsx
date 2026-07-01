@@ -47,13 +47,16 @@ export default async function Home({ searchParams }: HomeProps) {
       };
   const shellProduct = getShellProductConfig({
     activeOrganizationId: workspace.activeOrganizationId,
-    activeProjectId: workspace.activeProjectId
+    activeProjectId: workspace.activeProjectId,
+    installedProducts: workspace.activeOrganizationInstalledProducts,
+    preferredProductId: currentProductId
   });
 
   return (
     <AppShell
       activeOrganizationId={workspace.activeOrganizationId}
       activeProjectId={workspace.activeProjectId}
+      availableProducts={shellProduct.availableProducts}
       currentUser={currentUser}
       productName={shellProduct.productName}
       productNavItems={shellProduct.navItems}

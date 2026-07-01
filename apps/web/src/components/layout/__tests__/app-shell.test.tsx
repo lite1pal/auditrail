@@ -59,6 +59,14 @@ describe("AppShell", () => {
             id: "user-1",
           },
         }}
+        availableProducts={[
+          {
+            href: "/?organizationId=org-1&projectId=project-1",
+            id: "audit-events",
+            isActive: true,
+            label: "AuditTrail"
+          }
+        ]}
         productName="AuditTrail"
         productNavItems={[
           {
@@ -108,6 +116,14 @@ describe("AppShell", () => {
             id: "user-1",
           },
         }}
+        availableProducts={[
+          {
+            href: "/",
+            id: "audit-events",
+            isActive: true,
+            label: "AuditTrail"
+          }
+        ]}
         productName="AuditTrail"
         productNavItems={[
           {
@@ -134,6 +150,53 @@ describe("AppShell", () => {
     expect(
       screen.getByRole("link", { name: "Members" }).getAttribute("href"),
     ).toBe("/members");
+  });
+
+  it("renders product links when multiple installed products are available", () => {
+    render(
+      <AppShell
+        activeOrganizationId="org-1"
+        availableProducts={[
+          {
+            href: "/?organizationId=org-1",
+            id: "audit-events",
+            isActive: true,
+            label: "AuditTrail"
+          },
+          {
+            href: "/analytics?organizationId=org-1",
+            id: "analytics",
+            isActive: false,
+            label: "Analytics Hub"
+          }
+        ]}
+        currentUser={{
+          memberships: [],
+          user: {
+            email: "user@example.com",
+            id: "user-1"
+          }
+        }}
+        productName="AuditTrail"
+        productNavItems={[
+          {
+            href: "/?organizationId=org-1",
+            id: "events",
+            label: "Events"
+          }
+        ]}
+      >
+        <div>Child content</div>
+      </AppShell>
+    );
+
+    expect(screen.getByText("Products")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "AuditTrail" }).getAttribute("href")).toBe(
+      "/?organizationId=org-1"
+    );
+    expect(
+      screen.getByRole("link", { name: "Analytics Hub" }).getAttribute("href")
+    ).toBe("/analytics?organizationId=org-1");
   });
 });
 

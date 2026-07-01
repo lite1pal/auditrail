@@ -33,7 +33,9 @@ The repo now has a manifest registry plus installed-product state for future
 multi-product composition. Product modules are still registered in the current
 application runtime, but organization context now carries which products are
 enabled so the API and web layers can fail closed when a selected organization
-does not have a given product installed.
+does not have a given product installed. The public `GET /api` descriptor also
+reports the centrally registered product list, while the web shell derives its
+available product links from the same installed-product state.
 
 ## Request Correlation
 
@@ -520,7 +522,8 @@ Response:
 
 ## `GET /api`
 
-Returns supported API version metadata.
+Returns supported API version metadata plus the centrally registered product
+catalog exposed by the current runtime.
 
 Response:
 
@@ -529,6 +532,12 @@ Response:
   "basePath": "/api",
   "latestVersion": "v1",
   "defaultVersion": "v1",
+  "products": [
+    {
+      "id": "audit-events",
+      "name": "AuditTrail"
+    }
+  ],
   "versions": [
     {
       "version": "v1",

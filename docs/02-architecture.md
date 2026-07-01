@@ -271,6 +271,9 @@ metadata lives in `packages/domain/src/audit-events/product.ts`, and the same
 `apps/web/app/product-module.ts` boundary adapts those items into
 workspace-aware hrefs before `apps/web/src/components/layout/app-shell.tsx`
 renders them. Shared shell code must not import audit-product modules directly.
+That adapter is now registry-driven: it resolves the active product plus the
+installed product list for the current organization, so the shell can render
+product launch links without embedding AuditTrail-only assumptions.
 
 The remaining app-level product chrome, such as metadata title/description and
 top-level loading/error copy, is also sourced from the audit-owned product
@@ -281,8 +284,10 @@ The API bootstrap now follows the same pattern. Product-owned route
 registration declarations still live in the manifest under
 `packages/domain/src/audit-events/product.ts`, but `apps/api/src/product-module.ts`
 is now the only API composition seam that interprets those declarations and
-mounts the declared AuditTrail routes into the shared Fastify runtime. The
-generic API bootstrap no longer hardcodes AuditTrail route plugins directly.
+mounts registered product routes into the shared Fastify runtime. The generic
+API bootstrap no longer hardcodes AuditTrail route plugins directly, and the
+public `/api` descriptor now reports the registered product list as part of
+that central composition boundary.
 
 ## Multi-Product Target
 
@@ -312,10 +317,8 @@ from installed-product state without loading modules itself.
 
 What is still missing from the current repo:
 
-- registry-driven composition for more than one declared product module at a
-  time
-- product-aware shell and landing resolution when more than one product is
-  installed
+- product-owned page routing and launch flow beyond the current reference
+  AuditTrail screens
 - product ownership rules for billing, entitlements, jobs, events, and
   webhook namespaces
 

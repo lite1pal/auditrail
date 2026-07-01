@@ -22,10 +22,18 @@ describe("api version helpers", () => {
   });
 
   it("returns the current API descriptor", () => {
-    expect(getApiDescriptor()).toEqual({
+    expect(
+      getApiDescriptor([{ id: "audit-events", name: "AuditTrail" }])
+    ).toEqual({
       basePath: API_BASE_PATH,
       latestVersion: API_VERSION,
       defaultVersion: API_VERSION,
+      products: [
+        {
+          id: "audit-events",
+          name: "AuditTrail"
+        }
+      ],
       versions: [
         {
           version: API_VERSION,

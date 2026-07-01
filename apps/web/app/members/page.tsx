@@ -20,13 +20,18 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
   )?.organization.name;
   const shellProduct = getShellProductConfig({
     activeOrganizationId: membersPage.activeOrganizationId,
-    activeProjectId: membersPage.activeProjectId
+    activeProjectId: membersPage.activeProjectId,
+    installedProducts: currentUser.memberships.find(
+      (membership) => membership.organization.id === membersPage.activeOrganizationId
+    )?.installedProducts,
+    preferredProductId: currentProductId
   });
 
   return (
     <AppShell
       activeOrganizationId={membersPage.activeOrganizationId}
       activeProjectId={membersPage.activeProjectId}
+      availableProducts={shellProduct.availableProducts}
       currentUser={currentUser}
       productName={shellProduct.productName}
       productNavItems={shellProduct.navItems}
