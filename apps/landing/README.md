@@ -1,6 +1,6 @@
-# Project Anvil Landing
+# Elioric Landing
 
-This app is the public landing site for Project Anvil.
+This app is the public landing site for Elioric.
 
 It is intentionally separate from the authenticated AuditTrail runtime and
 exists only for framework-facing marketing and discovery copy.
@@ -9,7 +9,7 @@ exists only for framework-facing marketing and discovery copy.
 
 The current implementation is based on the MIT-licensed
 [`matt765/Tailcast`](https://github.com/matt765/Tailcast) Astro theme and has
-been reduced to a single Project Anvil landing page with framework-specific
+been reduced to a single Elioric landing page with framework-specific
 copy.
 
 ## Local commands

@@ -1,6 +1,6 @@
-# Project Anvil
+# Elioric
 
-Project Anvil is an AI-native framework for creating production-ready
+Elioric is an AI-native framework for creating production-ready
 platforms. The goal is to let a team go from an idea to a production-quality
 platform in hours instead of months while keeping architecture strict,
 generation deterministic, and product code cleanly separated from platform
@@ -8,7 +8,7 @@ code.
 
 This repository currently contains two things at once:
 
-- the Project Anvil framework-in-progress
+- the Elioric framework-in-progress
 - AuditTrail, the reference product used to prove the framework against a real
   platform
 
@@ -19,7 +19,7 @@ agents from day one.
 
 ## Vision
 
-Project Anvil is intended to become more than a SaaS starter.
+Elioric is intended to become more than a SaaS starter.
 
 - open source first
 - AI-first developer experience
@@ -48,9 +48,9 @@ resource and let the framework generate the surrounding platform slice:
 
 ## Current State
 
-Today, Project Anvil already includes working terminal-first framework seams:
+Today, Elioric already includes working terminal-first framework seams:
 
-- an isolated `apps/landing` Astro marketing site for Project Anvil
+- an isolated `apps/landing` Astro marketing site for Elioric
 - scaffold planning, generation, and smoke validation for new platform
   candidates
 - resource spec initialization from the terminal
@@ -142,7 +142,7 @@ pnpm dev:landing
 
 ## Framework Commands
 
-Project Anvil is currently driven from the terminal.
+Elioric is currently driven from the terminal.
 
 Scaffold a new platform candidate:
 
@@ -195,7 +195,7 @@ pnpm verify
 
 ## GitHub Releases
 
-Project Anvil now publishes repo-level GitHub prereleases automatically from
+Elioric now publishes repo-level GitHub prereleases automatically from
 the `alpha` branch through `semantic-release`.
 
 Current release posture:
@@ -256,7 +256,7 @@ the shell.
 Landing provenance:
 
 - `apps/landing` now adapts the MIT-licensed upstream `Tailcast` Astro theme
-- the landing has been reduced to a single Project Anvil marketing page
+- the landing has been reduced to a single Elioric marketing page
 - it remains separate from the authenticated product runtime and should be
   deployed independently
 
