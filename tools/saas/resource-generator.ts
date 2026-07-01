@@ -1439,7 +1439,7 @@ function renderWebScreenTest(context: ReturnType<typeof createTemplateContext>) 
     `  it("renders the empty state when no ${context.pluralLabel.toLowerCase()} exist", () => {`,
     `    render(<${context.pascalName}Screen items={[]} />);`,
     "",
-    `    expect(screen.getByText("No ${context.pluralLabel.toLowerCase()} yet")).toBeInTheDocument();`,
+    `    expect(screen.getByText("No ${context.pluralLabel.toLowerCase()} yet")).toBeTruthy();`,
     "  });",
     "});"
   ].join("\n");
