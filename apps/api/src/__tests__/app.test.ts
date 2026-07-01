@@ -368,6 +368,10 @@ describe("health route", () => {
         {
           id: "audit-events",
           name: "AuditTrail"
+        },
+        {
+          id: "projects",
+          name: "Projects"
         }
       ],
       versions: [
@@ -411,12 +415,15 @@ describe("health route", () => {
     expect(response.statusCode).toBe(200);
     expect(body.openapi).toBe("3.0.3");
     expect(body.info).toMatchObject({
-      title: "AuditTrail API",
+      title: "Elioric Product API",
       version: "v1"
     });
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events`);
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/stats`);
     expect(body.paths).toHaveProperty(`${API_VERSION_PREFIX}/events/timeseries`);
+    expect(body.paths).toHaveProperty(
+      `${API_VERSION_PREFIX}/organizations/{organizationId}/projects/workspace`
+    );
     expect(body.paths).not.toHaveProperty(`${API_VERSION_PREFIX}/auth/magic-links`);
     expect(body.paths).not.toHaveProperty(
       `${API_VERSION_PREFIX}/organizations/{organizationId}/billing`

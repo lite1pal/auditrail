@@ -3,12 +3,7 @@ import { installedProductStateSchema } from "@auditrail/domain/product";
 
 const onboardingStepSchema = z.object({
   completedAt: z.string().datetime().optional(),
-  id: z.enum([
-    "project_created",
-    "api_key_created",
-    "first_event_ingested",
-    "member_invited"
-  ]),
+  id: z.string().min(1),
   required: z.boolean(),
   status: z.enum(["complete", "pending"])
 });

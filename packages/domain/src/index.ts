@@ -5,6 +5,7 @@ export * from "./jobs/index.js";
 export * from "./onboarding/index.js";
 export * from "./pricing/index.js";
 export * from "./product/index.js";
+export * from "./projects/index.js";
 export * from "./time/index.js";
 export * from "./usage/index.js";
 export * from "./webhooks/index.js";

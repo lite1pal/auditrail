@@ -301,7 +301,9 @@ export function buildApp(options: BuildAppOptions = {}) {
         tokenSecret: authTokenSecret,
       });
       const platformService = createPlatformService(platformRepo, {
-        defaultInstalledProductIds: [currentProductId]
+        defaultInstalledProductIds: listRegisteredProducts().map(
+          (product) => product.id
+        )
       });
       const billingProviderRegistry = createBillingProviderRegistry([
         config.BILLING_STRIPE_SECRET_KEY
@@ -382,6 +384,7 @@ export function buildApp(options: BuildAppOptions = {}) {
       });
       infrastructureApp.register(registerProductApiRoutes, {
         prefix: API_VERSION_PREFIX,
+        platformService,
         productAccess: workspaceAccessService,
         productId: currentProductId,
         projectAccess: workspaceAccessService

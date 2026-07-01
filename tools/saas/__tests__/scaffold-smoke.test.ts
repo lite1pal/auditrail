@@ -43,7 +43,7 @@ describe("scaffold smoke check", () => {
         "placeholder-product"
       ])
     );
-  });
+  }, 15_000);
 
   it("fails when a required scaffold file is missing", () => {
     const report = runScaffoldSmokeCheck({

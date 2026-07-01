@@ -321,9 +321,10 @@ that central composition boundary.
 
 ## Multi-Product Target
 
-The current repo still runs one concrete product, AuditTrail, on top of a
-growing platform core. True platform/product separation is not complete until
-product composition becomes data-driven instead of app-patch-driven.
+The current repo now runs one real product, AuditTrail, plus one intentionally
+minimal second product module, `projects`, on top of a growing platform core.
+That gives Elioric a concrete proof that product composition can be registry-
+driven instead of hardcoded directly into the app bootstrap.
 
 The target shape is:
 
@@ -347,12 +348,15 @@ from installed-product state without loading modules itself.
 
 What is still missing from the current repo:
 
-- product-owned page routing and launch flow beyond the current reference
-  AuditTrail screens
+- deeper product-owned page routing, forms, and workflows beyond the minimal
+  `projects` workspace proof
 - deeper billing-provider inbound sync and subscription projection for future
   non-Stripe adapters
 - product-specific billing catalogs and entitlement mappings beyond the
   current default AuditTrail-owned runtime seam
+- worker-owned product registrations beyond the current API and web proof
+- a materially deeper second product slice that proves related resources and
+  product-specific authorization patterns
 
 The implementation order should stay narrow:
 
@@ -360,12 +364,14 @@ The implementation order should stay narrow:
 1. move AuditTrail behind that contract without changing runtime behavior
 1. persist installed-product state
 1. make shell and API composition registry-driven for multiple installed products
-1. deepen product-owned billing catalogs and route surfaces where the current
-   shared runtime still defaults to AuditTrail
+1. prove a second minimal product module through the same seam
+1. deepen product-owned billing catalogs, worker surfaces, and product
+   vertical slices where the current shared runtime still defaults to
+   AuditTrail
 
-Until those slices land, the repo should still be described honestly as a
-framework-in-progress plus a reference product, not as a finished multi-product
-runtime host.
+Until the later slices land, the repo should still be described honestly as a
+framework-in-progress with one production-shaped reference product and one
+minimal second-product proof, not as a finished multi-product runtime host.
 
 The audit-events feature now follows the same pattern for product-facing copy.
 Audit-specific screen, dashboard, chart, empty-state, table, and detail-panel

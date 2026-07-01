@@ -19,6 +19,10 @@ describe("app product module", () => {
     });
     expect(getProductLoadingLabel()).toBe("Loading AuditTrail...");
     expect(getProductErrorHeading()).toBe("Unable to load AuditTrail");
+    expect(getProductMetadata("projects")).toEqual({
+      description: "Projects workspace for teams building inside Elioric",
+      title: "Projects"
+    });
   });
 
   it("builds shell navigation and onboarding views from one product boundary", () => {
@@ -91,6 +95,68 @@ describe("app product module", () => {
         sectionTitle: "Plan & usage"
       }
     });
+    expect(getWorkspaceSettingsProductCopy("projects")).toMatchObject({
+      planUsage: {
+        navLabel: "Projects usage",
+        sectionTitle: "Projects plan & usage"
+      }
+    });
+  });
+
+  it("can resolve the built-in projects product when it is installed", () => {
+    expect(
+      getShellProductConfig({
+        activeOrganizationId: "org-1",
+        installedProducts: [
+          {
+            enabled: true,
+            productId: "audit-events"
+          },
+          {
+            enabled: true,
+            productId: "projects"
+          }
+        ],
+        preferredProductId: "projects"
+      })
+    ).toEqual({
+      activeProductId: "projects",
+      availableProducts: [
+        {
+          href: "/?organizationId=org-1",
+          id: "audit-events",
+          isActive: false,
+          label: "AuditTrail"
+        },
+        {
+          href: "/projects?organizationId=org-1",
+          id: "projects",
+          isActive: true,
+          label: "Projects"
+        }
+      ],
+      navItems: [
+        {
+          href: "/projects?organizationId=org-1",
+          id: "projects-home",
+          label: "Projects"
+        }
+      ],
+      productName: "Projects"
+    });
+    expect(
+      buildOnboardingStepViews({
+        activeOnboarding: {
+          completedRequiredSteps: 0,
+          isComplete: true,
+          isDismissed: false,
+          steps: [],
+          totalRequiredSteps: 0
+        },
+        activeOrganizationId: "org-1",
+        productId: "projects"
+      })
+    ).toEqual([]);
   });
 
   it("can resolve multiple installed products through the shell runtime", () => {
@@ -162,8 +228,7 @@ describe("app product module", () => {
           };
         },
         manifest: {
-          id: "alpha-product",
-          name: "Alpha Product"
+          ...createTestManifest("alpha-product", "Alpha Product")
         }
       },
       {
@@ -233,8 +298,7 @@ describe("app product module", () => {
           };
         },
         manifest: {
-          id: "beta-product",
-          name: "Beta Product"
+          ...createTestManifest("beta-product", "Beta Product")
         }
       }
     ]);
@@ -281,3 +345,31 @@ describe("app product module", () => {
     });
   });
 });
+
+function createTestManifest(id: string, name: string) {
+  return {
+    capabilities: [],
+    emptyStateCopy: {
+      emptyStateDescription: `${name} empty`,
+      emptyStateTitle: `${name} title`
+    },
+    id,
+    name,
+    navItems: [],
+    onboardingContent: {
+      completeSummaryDescription: "done",
+      dismissFromSidebarLabel: "dismiss",
+      eyebrow: "Setup",
+      incompleteSummaryDescription: "todo",
+      showInSidebarLabel: "show",
+      stepContent: [],
+      title: `${name} setup`
+    },
+    onboardingSteps: [],
+    resources: [],
+    runtime: {
+      registrations: []
+    },
+    usageMeters: []
+  } as const;
+}

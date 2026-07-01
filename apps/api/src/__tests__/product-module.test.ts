@@ -11,8 +11,8 @@ describe("API product module", () => {
   it("derives OpenAPI info from the product module", () => {
     expect(getProductApiOpenApiInfo()).toEqual({
       description:
-        "Versioned audit event ingestion and query API. The canonical contract is /api/v1.",
-      title: "AuditTrail API"
+        "Versioned Elioric product API. The canonical contract is /api/v1.",
+      title: "Elioric Product API"
     });
   });
 
@@ -23,14 +23,30 @@ describe("API product module", () => {
       prefix: "/api/v1"
     });
 
-    const paths = app
-      .printRoutes()
-      .split("\n")
-      .filter((line) => line.includes("api/v1/events"));
-
-    expect(paths.length).toBeGreaterThan(0);
+    expect(app.hasRoute({ method: "POST", url: "/api/v1/events" })).toBe(true);
+    expect(
+      app.hasRoute({
+        method: "GET",
+        url: "/api/v1/organizations/:organizationId/projects/workspace"
+      })
+    ).toBe(true);
 
     await app.close();
+  });
+
+  it("lists both built-in registered products", () => {
+    const runtime = createApiProductRuntime();
+
+    expect(runtime.listRegisteredProducts()).toEqual([
+      {
+        id: "audit-events",
+        name: "AuditTrail"
+      },
+      {
+        id: "projects",
+        name: "Projects"
+      }
+    ]);
   });
 
   it("can describe and register multiple product modules through one runtime", async () => {
@@ -48,10 +64,7 @@ describe("API product module", () => {
               }
             ];
           },
-          manifest: {
-            id: "alpha-product",
-            name: "Alpha Product"
-          }
+          manifest: createTestManifest("alpha-product", "Alpha Product")
         },
         {
           getRuntimeRegistrations() {
@@ -63,10 +76,7 @@ describe("API product module", () => {
               }
             ];
           },
-          manifest: {
-            id: "beta-product",
-            name: "Beta Product"
-          }
+          manifest: createTestManifest("beta-product", "Beta Product")
         }
       ],
       {
@@ -103,3 +113,31 @@ describe("API product module", () => {
     await app.close();
   });
 });
+
+function createTestManifest(id: string, name: string) {
+  return {
+    capabilities: [],
+    emptyStateCopy: {
+      emptyStateDescription: `${name} empty`,
+      emptyStateTitle: `${name} title`
+    },
+    id,
+    name,
+    navItems: [],
+    onboardingContent: {
+      completeSummaryDescription: "done",
+      dismissFromSidebarLabel: "dismiss",
+      eyebrow: "Setup",
+      incompleteSummaryDescription: "todo",
+      showInSidebarLabel: "show",
+      stepContent: [],
+      title: `${name} setup`
+    },
+    onboardingSteps: [],
+    resources: [],
+    runtime: {
+      registrations: []
+    },
+    usageMeters: []
+  } as const;
+}

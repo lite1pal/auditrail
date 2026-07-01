@@ -2,6 +2,15 @@
 
 ## 2026-07-01
 
+- Completed T-103 by proving a second product module can register through the
+  shared manifest and runtime seams. The repo now has shared
+  `RegisteredProductModule` contracts, API and web runtimes that compose the
+  same built-in product-module set, a minimal `projects` product definition
+  and runtime adapter, a project workspace proof route plus web entrypoint,
+  automatic installation of all registered products for new organizations,
+  extraction-manifest coverage for the proof slice, and focused SaaS smoke
+  checks that stay green with the added module.
+
 - Completed T-102 by adding bounded relation support to generated resources.
   Resource specs and terminal init now accept explicit `belongs-to` relations,
   those relations normalize into UUID foreign-key fields, generated DB schemas
