@@ -2,12 +2,13 @@
 
 ## 2026-07-01
 
-- Corrected the GitHub prerelease trigger so successful `Sync Alpha` runs now
-  publish releases reliably. The original `push: alpha` release workflow never
-  fired after automated branch promotion because GitHub suppresses downstream
-  workflow triggers for pushes created by `GITHUB_TOKEN`; the release lane now
-  also listens for successful `workflow_run` completion from `Sync Alpha`,
-  checks out `alpha` explicitly, and keeps direct `alpha` pushes working.
+- Simplified the GitHub prerelease path so successful `Sync Alpha` runs now
+  publish from the same workflow instead of relying on a second downstream
+  workflow trigger. GitHub suppresses downstream `push` runs for
+  `GITHUB_TOKEN`-created branch updates, so the automated `main -> alpha`
+  release path now merges, pushes, verifies, and runs `semantic-release` in
+  one workflow while the standalone `Release` workflow remains for direct or
+  manual `alpha` publishes.
 
 - Cleaned up the generated-resource verification lane so it follows the newer
   web product-module seam instead of deleted `audit-product-*` adapter files.

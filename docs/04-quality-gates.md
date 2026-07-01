@@ -96,7 +96,8 @@ Current policy:
 - direct pushes to `alpha` publish the current GitHub prerelease stream automatically
 - pushes to `main` first trigger the `sync-alpha` workflow, which merges
   `main` into `alpha`
-- successful `sync-alpha` completion also triggers the release workflow
+- successful `sync-alpha` completion now also runs verify plus
+  `semantic-release` directly in that same workflow
 - the release lane runs `pnpm verify` before tagging
 - successful publishes create Git tags and GitHub prereleases only
 - the current channel is `alpha`
@@ -123,12 +124,11 @@ The sync policy is intentionally strict. If the automated `main -> alpha`
 merge conflicts, the workflow should fail and a human should resolve the
 branch divergence explicitly instead of letting CI guess.
 
-The release trigger is intentionally dual-mode because GitHub suppresses
-downstream `push` workflow runs when the upstream branch update was created by
-another workflow using the default `GITHUB_TOKEN`. The repo therefore listens
-for successful `Sync Alpha` workflow completion in addition to direct `alpha`
-pushes, and the release job checks out `alpha` explicitly before running
-`semantic-release`.
+The automated `main -> alpha` path now publishes from inside `Sync Alpha`
+itself because GitHub suppresses downstream `push` workflow runs when the
+upstream branch update was created by another workflow using the default
+`GITHUB_TOKEN`. The standalone `Release` workflow remains for direct or manual
+`alpha` publishes.
 
 The focused SaaS tooling test lane should be isolated from generated preview
 output:
