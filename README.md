@@ -171,6 +171,23 @@ pnpm saas apply resource specs/achievement.json --target .generated/apply-previe
 pnpm saas install resource specs/achievement.json
 ```
 
+Create and install a simple CLI-owned product proof:
+
+```bash
+pnpm saas init product todo --template todo --output specs/todo.product.json
+pnpm saas install product specs/todo.product.json
+```
+
+The current product-generation slice is intentionally narrow:
+
+- product generation is resource-backed, not arbitrary custom runtime code
+- the CLI registers the new product in both API and web product runtimes
+- embedded resources are installed through the existing generated-resource seam
+- product-owned web routes are generated under the product path, for example
+  `/todo` and `/todo/todos`
+- the first proof path targets a simple workspace todo product with a real
+  list-plus-create page, not a full PM product yet
+
 Prove the committed generated-resource slice against Postgres:
 
 ```bash

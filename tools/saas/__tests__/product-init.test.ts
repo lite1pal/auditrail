@@ -1,0 +1,94 @@
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+
+import { afterEach, describe, expect, it } from "vitest";
+
+import { executeSaasCli } from "../cli.js";
+
+describe("saas product init", () => {
+  const createdRoots: string[] = [];
+
+  afterEach(() => {
+    for (const root of createdRoots) {
+      rmSync(root, {
+        force: true,
+        recursive: true
+      });
+    }
+  });
+
+  it("creates a todo product spec from terminal flags", () => {
+    const repoRoot = createRepo(createdRoots);
+
+    const result = executeSaasCli({
+      args: [
+        "init",
+        "product",
+        "todo",
+        "--template",
+        "todo",
+        "--title",
+        "Todo",
+        "--output",
+        "specs/todo.product.json"
+      ],
+      repoRoot
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain("Initialized product spec: todo");
+    expect(result.stdout).toContain("pnpm saas install product specs/todo.product.json");
+
+    const writtenSpec = JSON.parse(
+      readFileSync(resolve(repoRoot, "specs/todo.product.json"), "utf8")
+    ) as {
+      id: string;
+      name: string;
+      resources: Array<{
+        listPath: string;
+        navLabel: string;
+        resource: {
+          api: { prefix: string };
+          resource: string;
+          ui: {
+            createPage: boolean;
+            detailPage: boolean;
+            editPage: boolean;
+            listPage: boolean;
+            nav: boolean;
+          };
+        };
+      }>;
+    };
+
+    expect(writtenSpec.id).toBe("todo");
+    expect(writtenSpec.name).toBe("Todo");
+    expect(writtenSpec.resources).toHaveLength(1);
+    expect(writtenSpec.resources[0]).toMatchObject({
+      listPath: "/todo/todos",
+      navLabel: "Todos",
+      resource: {
+        api: {
+          prefix: "/v1/organizations/:organizationId/todos"
+        },
+        resource: "todo",
+        ui: {
+          createPage: false,
+          detailPage: false,
+          editPage: false,
+          listPage: false,
+          nav: false
+        }
+      }
+    });
+  });
+});
+
+function createRepo(createdRoots: string[]) {
+  const root = mkdtempSync(join(tmpdir(), "auditrail-product-init-"));
+
+  createdRoots.push(root);
+
+  return root;
+}

@@ -51,6 +51,10 @@ Generated-resource tooling follows the same principle for its supported slice:
 when the generator starts emitting runtime-ready repo code, the fast tooling
 checks should prove golden-fixture parity, smoke validation, and type-safe
 template output together instead of relying only on string-level unit tests.
+The same fast SaaS lane now covers the first product-generation seam as well:
+CLI init plus install tests prove a simple todo product can be generated,
+installed into a seeded repo shape, and registered through the shared product
+runtime files without manual edits.
 
 ## Hosted Runtime Release Gate
 
@@ -358,6 +362,7 @@ The current read-only SaaS tooling checks are:
 pnpm typecheck:saas
 pnpm test:saas
 pnpm saas init resource achievement --field title:string:required --field slug:string:required:unique
+pnpm saas init product todo --template todo --output specs/todo.product.json
 pnpm saas plan resource tools/saas/examples/customer.resource.json
 ```
 
@@ -375,6 +380,29 @@ deterministic and fail-closed:
 `pnpm saas plan resource ...` validates a JSON resource spec and prints a
 deterministic dry-run file plan only. It must not write CRUD files or mutate
 runtime code.
+
+`pnpm saas init product ...` creates a validated JSON product spec for the
+current supported product slice. Today that slice is intentionally narrow:
+
+- the product is resource-backed
+- embedded resources reuse the existing generated-resource install path
+- generated web routes are product-owned, not the placeholder standalone
+  resource pages
+- the first supported proof template is `todo`
+
+The corresponding install path is:
+
+```bash
+pnpm saas install product specs/todo.product.json
+```
+
+It must stay deterministic and fail closed:
+
+- it installs embedded resources first through the existing repo-root resource
+  seam
+- it patches only the shared product runtime files, domain exports, and new
+  product-owned web files it knows how to generate
+- it fails on conflicting generated product files unless `--force` is passed
 
 The first write-capable generator check is now:
 

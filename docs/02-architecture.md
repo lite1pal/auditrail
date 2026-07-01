@@ -133,6 +133,25 @@ That proof slice establishes the current supported contract:
 - generated relation targets must already exist in repo-owned domain and DB
   seams before install; nested reads and join expansion are intentionally out of scope
 
+On top of that resource seam, the CLI now supports one product-generation slice
+for simple resource-backed products:
+
+- `pnpm saas init product <name> --template todo` creates a product spec with
+  embedded normalized resource specs
+- `pnpm saas install product <spec>` installs those resources through the
+  existing repo-root resource seam, then patches the shared API and web product
+  registries plus domain exports
+- generated product-owned web routes live under the product path, for example
+  `/todo` and `/todo/todos`, so product shell composition does not depend on
+  the placeholder standalone resource pages
+
+Current product-generation limits are explicit:
+
+- no custom product API route generation yet
+- no arbitrary product-specific runtime logic or relation-aware dashboards yet
+- the first supported proof is a simple workspace product with generated
+  list-plus-create pages for organization-owned resources
+
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.
 

@@ -4,17 +4,20 @@ The immediate Elioric framework roadmap is now:
 
 1. T-104: prove the smallest serious PM product slice on top of the generated
    resource and multi-product seams: workspace, project, task, comment
-1. generated product UI depth for second-product resources: relation-aware
-   forms, detail screens, list filters, and product-owned navigation
-1. generated-resource web UI depth: relation-aware forms, list filters, and
-   product-owned navigation scaffolding
+1. relation-aware product generation for second-product resources so a PM slice
+   can compose task -> project and comment -> task without manual page logic
+1. generated product UI depth beyond the current list-plus-create slice:
+   detail screens, edit flows, and richer workspace summaries
+1. generated-resource web UI depth for standalone resource routes, which are
+   still intentionally weaker than the new product-owned route generation
 1. richer generated-resource authorization patterns beyond organization-role CRUD
 1. broader relation support only after the current bounded belongs-to slice is
    proven through a real second product
 
-T-103 is now complete: the repo can register a second concrete product module
-through the shared manifest/runtime seam, and the next meaningful checkpoint is
-to make that proof product materially useful.
+T-110 is now complete: the CLI can create and install a simple todo product
+through supported product and generated-resource seams, so the next meaningful
+checkpoint is to deepen that path into a believable PM slice instead of a
+single-resource workspace proof.
 
 The hosted AuditTrail MVP remains the release gate, but the framework work now
 has a cleaner sequence for deeper multiple-product proof.

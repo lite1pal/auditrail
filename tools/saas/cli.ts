@@ -28,9 +28,17 @@ import {
   initializeResourceSpec
 } from "./resource-init.js";
 import {
+  formatInitializedProductSpecSummary,
+  initializeProductSpec
+} from "./product-init.js";
+import {
   applyResourceFromFile,
   formatAppliedResourceSummary
 } from "./resource-apply.js";
+import {
+  formatInstalledProductSummary,
+  installProductFromFile
+} from "./product-install.js";
 import {
   formatGeneratorGoldenReport,
   runGeneratorGoldenCheck
@@ -82,6 +90,13 @@ export function executeSaasCli(input: {
     });
   }
 
+  if (command === "init" && input.args[1] === "product") {
+    return executeInitProductCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
   if (command === "plan" && input.args[1] === "scaffold") {
     return executePlanScaffoldCommand({
       args: input.args.slice(2),
@@ -112,6 +127,13 @@ export function executeSaasCli(input: {
 
   if (command === "install" && input.args[1] === "resource") {
     return executeInstallResourceCommand({
+      args: input.args.slice(2),
+      repoRoot: input.repoRoot
+    });
+  }
+
+  if (command === "install" && input.args[1] === "product") {
+    return executeInstallProductCommand({
       args: input.args.slice(2),
       repoRoot: input.repoRoot
     });
@@ -167,12 +189,14 @@ export function executeSaasCli(input: {
       "Usage:",
       "  pnpm saas doctor",
       "  pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--relation <name:belongs-to:target[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
+      "  pnpm saas init product <product-name> [--template todo] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
       "  pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
       "  pnpm saas generate scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--force]",
       "  pnpm saas add resource <path-to-resource-spec.json> [--output <preview-dir>] [--force]",
       "  pnpm saas apply resource <path-to-resource-spec.json> --target <target-dir> [--force]",
       "  pnpm saas install resource <path-to-resource-spec.json> [--force]",
+      "  pnpm saas install product <path-to-product-spec.json> [--force]",
       "  pnpm saas agent context resource <path-to-resource-spec.json> [--json] [--output <context-file>]",
       "  pnpm saas agent recipe resource-install <path-to-resource-spec.json> [--json] [--output <recipe-file>]",
       "  pnpm saas check generators [--update]",
@@ -308,6 +332,63 @@ function executeInitResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Resource spec initialization failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeInitProductCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args, {
+      booleanOptions: ["--force"],
+      valueOptions: ["--description", "--output", "--template", "--title"]
+    });
+    const [productName] = parsedArgs.positionalArgs;
+
+    if (!productName) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing product name. Usage: pnpm saas init product <product-name> [--template todo] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
+        stdout: ""
+      };
+    }
+
+    const template = parsedArgs.optionsWithValues.get("--template") ?? "todo";
+
+    if (template !== "todo") {
+      return {
+        exitCode: 1,
+        stderr: `Unsupported product template '${template}'. Supported values: todo.`,
+        stdout: ""
+      };
+    }
+
+    const result = initializeProductSpec({
+      description: parsedArgs.optionsWithValues.get("--description"),
+      force: parsedArgs.options.has("--force"),
+      outputPath: parsedArgs.optionsWithValues.get("--output"),
+      productName,
+      productTitle: parsedArgs.optionsWithValues.get("--title"),
+      repoRoot: input.repoRoot,
+      template: "todo"
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: formatInitializedProductSpecSummary(result)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Product spec initialization failed.",
       stdout: ""
     };
   }
@@ -551,6 +632,48 @@ function executeInstallResourceCommand(input: {
         error instanceof Error
           ? error.message
           : "Resource install failed.",
+      stdout: ""
+    };
+  }
+}
+
+function executeInstallProductCommand(input: {
+  args: readonly string[];
+  repoRoot: string;
+}): SaasCliExecutionResult {
+  try {
+    const parsedArgs = parseCommandArguments(input.args, {
+      booleanOptions: ["--force"]
+    });
+    const [specPath] = parsedArgs.positionalArgs;
+
+    if (!specPath) {
+      return {
+        exitCode: 1,
+        stderr:
+          "Missing product spec path. Usage: pnpm saas install product <path-to-product-spec.json> [--force]",
+        stdout: ""
+      };
+    }
+
+    const result = installProductFromFile({
+      force: parsedArgs.options.has("--force"),
+      repoRoot: input.repoRoot,
+      specPath
+    });
+
+    return {
+      exitCode: 0,
+      stderr: "",
+      stdout: formatInstalledProductSummary(result)
+    };
+  } catch (error) {
+    return {
+      exitCode: 1,
+      stderr:
+        error instanceof Error
+          ? error.message
+          : "Product installation failed.",
       stdout: ""
     };
   }

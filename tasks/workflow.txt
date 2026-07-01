@@ -51,6 +51,37 @@ This file tracks task-system and agent-workflow work items.
     - The slice uses the generated-resource and product-module seams instead of hand-built one-off runtime wiring wherever the framework claims support
     - The final docs describe what was framework-generated, what was still manual, and what gaps remain before broader production reuse
 
+- [x] T-110 Add CLI-owned simple product generation proof with a todo workspace
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-01
+  completed: 2026-07-01
+  blocked_reason:
+  notes:
+    - 2026-07-01: scope is intentionally narrower than full PM generation; the first proof is a simple todo product created entirely from CLI-managed product and resource specs without manual runtime edits
+    - 2026-07-01: success requires product runtime registration, product-owned shell pages, and at least one resource-backed workspace page that loads and creates real records through the generated API seam
+    - 2026-07-01: added `pnpm saas init product ... --template todo` plus `pnpm saas install product ...`, seeded install tests, and product-owned web route generation that avoids the standalone resource-page placeholder seam
+  files:
+    - tools/saas/*
+    - packages/framework/src/*
+    - packages/domain/src/product/*
+    - apps/api/src/product-module.ts
+    - apps/web/app/product-module.ts
+    - apps/web/src/features/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The CLI can initialize and install a simple product spec without manual runtime edits
+    - The generated proof product can register in both API and web product runtimes through supported seams
+    - The first proof product can render a real workspace page for a generated todo resource instead of placeholder-only UI
+
 ## Done
 
 - [x] T-103 Scaffold a second product module from the manifest/runtime seams

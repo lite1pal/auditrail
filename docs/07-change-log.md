@@ -2,6 +2,16 @@
 
 ## 2026-07-01
 
+- Completed T-110 by adding the first CLI-owned product generation seam. The
+  repo now supports `pnpm saas init product ... --template todo` plus
+  `pnpm saas install product ...`, which generate a simple resource-backed
+  product spec, install its embedded generated resources through the existing
+  repo-root resource path, patch the shared API and web product registries, and
+  create product-owned web routes such as `/todo` and `/todo/todos` without
+  manual runtime edits. The current slice is intentionally narrow: no custom
+  product API routes yet, and the first generated UI proof is a real
+  list-plus-create workspace page rather than a full PM dashboard.
+
 - Completed T-103 by proving a second product module can register through the
   shared manifest and runtime seams. The repo now has shared
   `RegisteredProductModule` contracts, API and web runtimes that compose the
