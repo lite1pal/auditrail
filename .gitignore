@@ -14,5 +14,9 @@ apps/web/storybook-static
 apps/web/test-results
 apps/web/playwright-report
 apps/web/blob-report
-.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/*.yml
+apps/landing/.github/
 .vscode/

@@ -85,6 +85,43 @@ pnpm --filter landing typecheck
 pnpm --filter landing build
 ```
 
+## GitHub Prerelease Gate
+
+The repo now has one automated GitHub prerelease lane under
+`.github/workflows/release.yml`.
+
+Current policy:
+
+- `main` is the source branch for ongoing development
+- pushes to `alpha` publish the current GitHub prerelease stream automatically
+- pushes to `main` first trigger the `sync-alpha` workflow, which merges
+  `main` into `alpha`
+- the release lane runs `pnpm verify` before tagging
+- successful publishes create Git tags and GitHub prereleases only
+- the current channel is `alpha`
+- the workflow does not publish npm packages or push changelog commits yet
+
+Before relying on the CI workflow for a structural release change, validate
+the semantic-release decision locally:
+
+```bash
+pnpm install --no-frozen-lockfile
+pnpm release:dry-run
+```
+
+This dry run still needs network access to the configured Git remote. For the
+closest match to CI, export a GitHub token in the shell before running it.
+
+Release creation is commit-driven. At the current 0.x framework stage:
+
+- `feat`, `fix`, `perf`, and `refactor` trigger patch prerelease bumps
+- breaking changes trigger minor prerelease bumps
+- commits such as `docs`, `test`, or `chore` do not publish by themselves
+
+The sync policy is intentionally strict. If the automated `main -> alpha`
+merge conflicts, the workflow should fail and a human should resolve the
+branch divergence explicitly instead of letting CI guess.
+
 ## API Coverage
 
 Project policy requires at least 95% coverage for:
@@ -407,7 +444,7 @@ fixture resource in isolated temp output by checking:
 - deterministic repeated generation
 - syntax-readiness for generated `.ts` and `.tsx` files via lightweight parse or transpile diagnostics
 
-What it does not prove yet:
+What this smoke check does not prove by itself:
 
 - it does not prove that repo-root installation is safe for every future
   runtime composition shape
@@ -426,6 +463,37 @@ The first repo-root install path is now:
 ```bash
 pnpm saas install resource tools/saas/__fixtures__/resources/customer.json
 ```
+
+The current release-quality generated-resource proof is now the committed
+`customer` slice. From the repo root, the full proof path is:
+
+```bash
+pnpm saas init resource achievement --field title:string:required --field slug:string:required:unique
+pnpm saas plan resource specs/achievement.json
+pnpm saas add resource specs/achievement.json --output .generated/resource-preview/achievement
+pnpm saas check generators
+pnpm saas check generated-resource
+pnpm saas install resource tools/saas/__fixtures__/resources/customer.json --force
+pnpm db:create:test
+pnpm db:migrate:test
+pnpm --filter @auditrail/api typecheck
+pnpm --filter @auditrail/api exec vitest run src/modules/generated/customer/__tests__/routes.test.ts src/modules/generated/customer/__tests__/service.test.ts
+pnpm --filter @auditrail/api exec vitest run --config vitest.integration.config.ts src/modules/generated/customer/__tests__/routes.integration.test.ts
+```
+
+What this proof now covers:
+
+- deterministic resource init, plan, preview generation, golden-fixture drift detection, and isolated smoke validation
+- repo-root install through supported seams only: generated files, domain barrel, DB schema barrel, migration journal, and `apps/api/src/app.ts`
+- generated route auth and organization-access policy in unit tests
+- generated API module type safety through `pnpm --filter @auditrail/api typecheck`
+- real Postgres migration plus route execution through the installed
+  `customer` integration test
+
+Operator note:
+
+- the committed proof resource is already installed in this repo, so rerunning
+  the install step uses `--force` intentionally
 
 Current apply policy:
 
