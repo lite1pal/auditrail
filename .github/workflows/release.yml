@@ -3,41 +3,39 @@ name: Release
 on:
   push:
     branches:
-      - alpha
+      - main
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.13.1
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Verify
-        run: pnpm verify
+      - run: pnpm verify
 
-      - name: Publish alpha prerelease
+      - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm release
