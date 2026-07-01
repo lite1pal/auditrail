@@ -53,17 +53,65 @@ import dashboard from '../assets/images/dashboard.jpg';
     </div>
     <div class="relative z-20 flex w-screen justify-center">
       <div
-        class="hero-fade-in image-glow-border absolute z-10 mx-auto w-4/5 rounded-xl lg:top-6 xl:top-0 2xl:w-[75rem]"
+        class="hero-fade-in image-glow-border absolute z-10 mx-auto w-11/12 rounded-2xl lg:top-6 xl:top-0 xl:w-5/6 2xl:w-[75rem]"
         style="--delay: 0.15s; opacity: 0.005"
       >
-        <Image
-          src={dashboard}
-          alt="Elioric platform preview"
-          class="main-border-gray w-full rounded-xl"
-          fetchpriority="high"
-          loading="eager"
-        />
-        <div class="pointer-events-none absolute inset-0 rounded-xl bg-black/10"></div>
+        <div class="main-border-gray rounded-2xl bg-white shadow-2xl">
+          <div class="grid overflow-hidden rounded-2xl lg:grid-cols-[0.95fr_1.05fr]">
+            <div
+              class="border-mainBorderSubtler border-b bg-gray-950 p-5 text-left lg:border-r lg:border-b-0"
+            >
+              <div class="mb-5 flex items-center gap-2">
+                <span class="h-3 w-3 rounded-full bg-red-400"></span>
+                <span class="h-3 w-3 rounded-full bg-yellow-400"></span>
+                <span class="h-3 w-3 rounded-full bg-green-400"></span>
+                <span class="ml-3 text-xs text-gray-400">terminal</span>
+              </div>
+
+              <pre
+                class="overflow-x-auto text-sm leading-7 text-gray-100"><code>$ pnpm saas init resource project
+$ pnpm saas plan resources/project.json
+$ pnpm saas preview resources/project.json
+$ pnpm saas install resources/project.json
+
+✓ schema generated
+✓ domain contracts written
+✓ API routes installed
+✓ docs updated
+✓ verification passed</code></pre>
+            </div>
+
+            <div class="bg-bgDark1 p-5 text-left">
+              <div class="mb-4 flex items-center justify-between">
+                <p class="text-primaryText text-sm font-semibold">Generated vertical slice</p>
+                <span class="badge-primary">deterministic output</span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="card p-4">
+                  <p class="text-primaryText text-sm font-semibold">Domain</p>
+                  <p class="text-secondaryText mt-1 text-sm">
+                    Typed resource contract, validation schema, and pure product logic.
+                  </p>
+                </div>
+
+                <div class="card p-4">
+                  <p class="text-primaryText text-sm font-semibold">Runtime</p>
+                  <p class="text-secondaryText mt-1 text-sm">
+                    Repository seam, route wiring, migration path, and service tests.
+                  </p>
+                </div>
+
+                <div class="card p-4">
+                  <p class="text-primaryText text-sm font-semibold">Proof</p>
+                  <p class="text-secondaryText mt-1 text-sm">
+                    Docs, smoke checks, typecheck, and architecture boundary verification.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="relative flex w-screen justify-center">
