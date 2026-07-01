@@ -214,7 +214,8 @@ Branch promotion:
 
 - pushes to `main` automatically trigger a GitHub Action that merges `main`
   into `alpha`
-- successful `Sync Alpha` runs then trigger the prerelease workflow
+- successful `Sync Alpha` runs now also verify and publish the prerelease in
+  the same workflow
 - direct pushes to `alpha` also trigger the prerelease workflow
 - if `main -> alpha` conflicts, the sync workflow fails and the conflict must
   be resolved explicitly on `alpha`
@@ -222,10 +223,11 @@ Branch promotion:
 GitHub Actions detail:
 
 - pushes created by a workflow with the default `GITHUB_TOKEN` do not trigger
-  downstream `push` workflows
-- the release workflow therefore listens for both direct `push` events on
-  `alpha` and successful completion of the `Sync Alpha` workflow, then checks
-  out `alpha` explicitly before running `semantic-release`
+  downstream `push` workflows reliably enough for this branch-promotion flow
+- the automated path therefore publishes from inside `Sync Alpha` itself after
+  the merge and push succeed
+- `.github/workflows/release.yml` remains available for direct or manual
+  `alpha` releases outside the `main -> alpha` promotion path
 
 One-time branch bootstrap:
 

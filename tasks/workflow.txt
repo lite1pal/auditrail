@@ -121,6 +121,7 @@ This file tracks task-system and agent-workflow work items.
     - 2026-07-01: updated release docs so the branch-promotion and prerelease behavior matches how the workflows actually run in GitHub Actions
     - 2026-07-01: aligned generated-resource planning, smoke validation, and extraction metadata with `apps/web/app/product-module.ts` and excluded `.generated/**` output from `pnpm test:saas`
     - 2026-07-01: classified the new installed-product runtime files and committed generated `customer` proof slice in the extraction manifest so scaffold planning and smoke checks stay green after T-093
+    - 2026-07-01: simplified the automated release path further by publishing directly from `Sync Alpha` after the merge and push, while keeping `Release` only for direct or manual `alpha` runs
   files:
     - .github/workflows/release.yml
     - package.json
