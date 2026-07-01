@@ -1,4 +1,3 @@
-import { auditTrailProduct } from "@auditrail/domain/audit-events";
 import {
   canConsumeMeter as evaluateMeterConsumption,
   canUseFeature as evaluateFeatureUsage,
@@ -22,7 +21,7 @@ const quantitySchema = z.number().int().positive();
 
 export const defaultPlatformEntitlementPlanId: PricingPlanId = "starter";
 export const defaultPlatformMeterKey = "events";
-export const defaultPlatformProductId = auditTrailProduct.id;
+export const defaultPlatformProductId = "audit-events";
 
 export interface OrganizationMeterUsage<TMeterKey extends string = string> {
   meterKey: TMeterKey;

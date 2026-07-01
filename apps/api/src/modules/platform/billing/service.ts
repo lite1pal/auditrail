@@ -3,7 +3,6 @@ import {
   billingPortalIntentSchema,
   type BillingProvider
 } from "@auditrail/domain/billing";
-import { auditTrailProduct } from "@auditrail/domain/audit-events";
 
 import {
   BillingCustomerNotFoundError
@@ -20,6 +19,7 @@ import { assertRole, type Membership } from "../service.js";
 import type { PlatformBillingRepo } from "./repo.js";
 
 const defaultBillingProvider: BillingProvider = "stripe";
+const defaultBillingProductId = "audit-events";
 
 export interface BillingStatusSummary {
   customer: {
@@ -90,7 +90,7 @@ export function createPlatformBillingService(
     runtime?: PlatformBillingRuntime;
   } = {}
 ): PlatformBillingService {
-  const defaultProductId = options.defaultProductId ?? auditTrailProduct.id;
+  const defaultProductId = options.defaultProductId ?? defaultBillingProductId;
   const runtime =
     options.runtime ??
     createPlatformBillingRuntime({
