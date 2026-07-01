@@ -1,5 +1,5 @@
 ---
-import TailcastLogo from '../assets/logos/TailcastLogo.astro';
+import logo from '../assets/logos/elioric-logo-compressed.webp';
 import GithubIcon from '../assets/icons/GithubIcon.astro';
 
 const navbarLinks = [
@@ -29,10 +29,10 @@ const isActive = (href: string) => {
     <div>
       <a href="/#home" aria-label="Home">
         <div class="flex grow basis-0 items-center justify-start">
-          <div class="mr-2 text-6xl text-white">
-            <TailcastLogo />
+          <div>
+            <img src={logo.src} alt="Elioric" class="mr-3 h-9 w-9" />
           </div>
-          <div class="font-['Inter'] text-xl font-bold text-white">Elioric</div>
+          <div class="font-['Inter'] text-xl font-bold text-white">elioric</div>
         </div>
       </a>
     </div>
@@ -58,7 +58,7 @@ const isActive = (href: string) => {
       <div class="hidden grow basis-0 justify-end lg:flex">
         <a
           class="main-border-gray bg-bgDark2 hover:bg-bgDark3 flex rounded-xl pt-2 pr-8 pb-2 pl-6 text-sm text-white"
-          href="https://github.com/denistarasenko/elioric"
+          href="https://github.com/lite1pal/elioric"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Elioric repository (opens in new tab)"
@@ -97,7 +97,7 @@ const isActive = (href: string) => {
     }
     <a
       class="outlined-button flex pt-2 pr-8 pb-2 pl-6"
-      href="https://github.com/denistarasenko/elioric"
+      href="https://github.com/lite1pal/elioric"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Elioric repository (opens in new tab)"
