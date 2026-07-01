@@ -7,6 +7,6 @@ describe("CustomerScreen", () => {
   it("renders the empty state when no customers exist", () => {
     render(<CustomerScreen items={[]} />);
 
-    expect(screen.getByText("No customers yet")).toBeInTheDocument();
+    expect(screen.getByText("No customers yet")).toBeTruthy();
   });
 });
