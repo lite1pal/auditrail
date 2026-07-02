@@ -4,32 +4,6 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
-- [ ] T-117 Add a CLI-owned CRM product template
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-07-02
-  completed:
-  blocked_reason:
-  notes:
-    - 2026-07-02: `init product` currently only supports the todo template, which keeps PM or CRM generation as manual spec assembly work
-    - 2026-07-02: this task should add a first-class CRM template with coherent embedded resources and product navigation so the CLI can generate a believable second business product family
-  files:
-    - tools/saas/*
-    - specs/*
-    - README.md
-    - docs/02-architecture.md
-    - docs/04-quality-gates.md
-    - docs/05-next-steps.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - `pnpm saas init product crm --template crm` produces a deterministic multi-resource product spec
-    - The generated CRM spec includes a bounded but believable default model such as company, contact, deal, and note
-    - Planning and install tests cover the CRM template without manual runtime edits
-
 - [ ] T-118 Add archive and soft-delete generation for product-owned resources
   status: ready
   priority: high
@@ -369,6 +343,34 @@ This file tracks task-system and agent-workflow work items.
     - The first proof product can render a real workspace page for a generated todo resource instead of placeholder-only UI
 
 ## Done
+
+- [x] T-117 Add a CLI-owned CRM product template
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed: 2026-07-02
+  blocked_reason:
+  notes:
+    - 2026-07-02: `init product` currently only supports the todo template, which keeps PM or CRM generation as manual spec assembly work
+    - 2026-07-02: this task should add a first-class CRM template with coherent embedded resources and product navigation so the CLI can generate a believable second business product family
+    - 2026-07-02: `init product --template crm` now emits a deterministic multi-resource CRM spec with `company`, `contact`, `deal`, and `note`, and the default product title is `CRM` instead of a generic title-cased fallback
+    - 2026-07-02: focused init, plan, and install tests now exercise the CRM template directly instead of relying on hand-written product JSON
+  files:
+    - tools/saas/*
+    - specs/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - `pnpm saas init product crm --template crm` produces a deterministic multi-resource product spec
+    - The generated CRM spec includes a bounded but believable default model such as company, contact, deal, and note
+    - Planning and install tests cover the CRM template without manual runtime edits
 
 - [x] T-116 Add relation-aware product generation for generated resources
   status: done

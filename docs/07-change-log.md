@@ -2,6 +2,12 @@
 
 ## 2026-07-02
 
+- Completed T-117 by adding the first CLI-owned CRM product template. `init
+  product` now supports `--template crm`, which emits a deterministic
+  multi-resource spec for `company`, `contact`, `deal`, and `note`; planner
+  and install tests now exercise that template end to end without manual
+  runtime edits.
+
 - Completed T-116 by adding the first bounded relation-aware product-generation
   seam. Generated web tables can now accept relation presentations, generated
   product server loaders can resolve labels and links for product-local

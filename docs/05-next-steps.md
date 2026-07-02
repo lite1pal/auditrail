@@ -4,8 +4,9 @@ The immediate Elioric framework roadmap is now:
 
 1. T-104: prove the smallest serious PM product slice on top of the generated
    resource and multi-product seams: workspace, project, task, comment
-1. finish and broaden relation-aware product generation for second-product resources so a PM slice
-   can compose task -> project and comment -> task without manual page logic
+1. broaden relation-aware product generation beyond the current bounded project
+   and product-local target slice so a PM slice can compose task -> project and
+   comment -> task without manual page logic
 1. generated product UI depth beyond the current create/list/detail/edit/delete
    slice: archive flows, richer field widgets, and workspace summaries
 1. generated-resource web UI depth for standalone resource routes, which are
@@ -21,6 +22,9 @@ checkpoint was to add a dry-run planning seam first. With product planning now
 available and existing-organization product backfill now supported, the next
 meaningful checkpoint after the committed todo end-to-end proof is to deepen that path into a
 believable PM slice instead of a single-resource workspace proof.
+The CRM template now provides the first bounded multi-resource business-product
+family, so the next leverage moves are lifecycle, policy, and workflow depth
+rather than more template plumbing.
 
 The hosted AuditTrail MVP remains the release gate, but the framework work now
 has a cleaner sequence for deeper multiple-product proof, and the generated

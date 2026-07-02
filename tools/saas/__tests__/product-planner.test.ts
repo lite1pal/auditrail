@@ -139,6 +139,54 @@ describe("saas product planner", () => {
       "Missing product spec path. Usage: pnpm saas plan product <path-to-product-spec.json> [--json]"
     );
   });
+
+  it("plans a crm product template with multiple generated resources", () => {
+    const repoRoot = createSeededRepo(createdRoots);
+    const initResult = executeSaasCli({
+      args: [
+        "init",
+        "product",
+        "crm",
+        "--template",
+        "crm",
+        "--output",
+        "specs/crm.product.json"
+      ],
+      repoRoot
+    });
+
+    expect(initResult.exitCode).toBe(0);
+
+    const plan = createProductPlanFromFile({
+      repoRoot,
+      specPath: "specs/crm.product.json"
+    });
+
+    expect(plan.product).toMatchObject({
+      homeRoute: "/crm",
+      id: "crm",
+      name: "CRM"
+    });
+    expect(plan.product.resources.map((resource) => resource.id)).toEqual([
+      "company",
+      "contact",
+      "deal",
+      "note"
+    ]);
+    expect(plan.product.resources.map((resource) => resource.listPath)).toEqual([
+      "/crm/companies",
+      "/crm/contacts",
+      "/crm/deals",
+      "/crm/notes"
+    ]);
+    expect(plan.summary.resourceCount).toBe(4);
+    expect(formatProductPlanReport(plan)).toContain(
+      "company: /crm/companies via pnpm saas install resource tmp/saas-product-install/crm/company.json"
+    );
+    expect(formatProductPlanReport(plan)).toContain(
+      "deal: /crm/deals via pnpm saas install resource tmp/saas-product-install/crm/deal.json"
+    );
+  });
 });
 
 function createSeededRepo(createdRoots: string[]) {

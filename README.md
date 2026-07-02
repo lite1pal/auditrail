@@ -175,8 +175,11 @@ Create and install a simple CLI-owned product proof:
 
 ```bash
 pnpm saas init product todo --template todo --output specs/todo.product.json
+pnpm saas init product crm --template crm --output specs/crm.product.json
 pnpm saas plan product specs/todo.product.json
+pnpm saas plan product specs/crm.product.json
 pnpm saas install product specs/todo.product.json
+pnpm saas install product specs/crm.product.json
 pnpm products:backfill todo
 pnpm db:migrate:test
 pnpm --filter web exec vitest run src/features/todo-product/__tests__/todo-product-flow.test.tsx
@@ -186,6 +189,7 @@ pnpm --filter @auditrail/api exec vitest run --config vitest.integration.config.
 The current product-generation slice is intentionally narrow:
 
 - product generation is resource-backed, not arbitrary custom runtime code
+- `init product` now supports bounded `todo` and `crm` templates
 - the CLI registers the new product in both API and web product runtimes
 - embedded resources are installed through the existing generated-resource seam
 - product planning is available as a dry run before install and makes shared
@@ -197,6 +201,8 @@ The current product-generation slice is intentionally narrow:
   `/todo/todos/[todoId]/edit`
 - the first proof path targets a simple workspace todo product with a real
   list, detail, edit, create, and delete flow, not a full PM product yet
+- the CRM template provides a bounded second business-product family with
+  generated `company`, `contact`, `deal`, and `note` resources
 - the committed proof now covers generated product install, test migration,
   generated web page load, generated server-action create/update/delete,
   generated validation feedback with preserved draft form values, generated

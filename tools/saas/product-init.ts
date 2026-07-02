@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 
 import {
+  createCrmProductSpec,
   createTodoProductSpec,
   type GeneratedProductSpec
 } from "./product-spec.js";
@@ -18,14 +19,24 @@ export function initializeProductSpec(input: {
   productName: string;
   productTitle?: string;
   repoRoot: string;
-  template: "todo";
+  template: "crm" | "todo";
 }) : InitializedProductSpecResult {
   const productId = normalizeProductId(input.productName);
-  const product = createTodoProductSpec({
-    description: input.description,
-    productId,
-    productName: input.productTitle?.trim() || toTitleCase(productId)
-  });
+  const productName =
+    input.productTitle?.trim() ||
+    (input.template === "crm" && productId === "crm" ? "CRM" : toTitleCase(productId));
+  const product =
+    input.template === "crm"
+      ? createCrmProductSpec({
+          description: input.description,
+          productId,
+          productName
+        })
+      : createTodoProductSpec({
+          description: input.description,
+          productId,
+          productName
+        });
   const outputPath = resolveSafeSpecOutputPath({
     outputPath: input.outputPath ?? `specs/${productId}.product.json`,
     repoRoot: input.repoRoot

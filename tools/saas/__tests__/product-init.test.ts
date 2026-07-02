@@ -83,6 +83,77 @@ describe("saas product init", () => {
       }
     });
   });
+
+  it("creates a crm product spec from terminal flags", () => {
+    const repoRoot = createRepo(createdRoots);
+
+    const result = executeSaasCli({
+      args: [
+        "init",
+        "product",
+        "crm",
+        "--template",
+        "crm",
+        "--title",
+        "CRM",
+        "--output",
+        "specs/crm.product.json"
+      ],
+      repoRoot
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain("Initialized product spec: crm");
+    expect(result.stdout).toContain("pnpm saas install product specs/crm.product.json");
+
+    const writtenSpec = JSON.parse(
+      readFileSync(resolve(repoRoot, "specs/crm.product.json"), "utf8")
+    ) as {
+      id: string;
+      name: string;
+      resources: Array<{
+        listPath: string;
+        navLabel: string;
+        resource: {
+          relations: Array<{ target: string; targetScope: string }>;
+          resource: string;
+        };
+      }>;
+    };
+
+    expect(writtenSpec.id).toBe("crm");
+    expect(writtenSpec.name).toBe("CRM");
+    expect(writtenSpec.resources.map((resource) => resource.resource.resource)).toEqual([
+      "company",
+      "contact",
+      "deal",
+      "note"
+    ]);
+    expect(writtenSpec.resources.map((resource) => resource.listPath)).toEqual([
+      "/crm/companies",
+      "/crm/contacts",
+      "/crm/deals",
+      "/crm/notes"
+    ]);
+    expect(writtenSpec.resources[1]?.resource.relations).toEqual([
+      expect.objectContaining({
+        target: "company",
+        targetScope: "generated"
+      })
+    ]);
+    expect(writtenSpec.resources[2]?.resource.relations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: "company",
+          targetScope: "generated"
+        }),
+        expect.objectContaining({
+          target: "user",
+          targetScope: "platform"
+        })
+      ])
+    );
+  });
 });
 
 function createRepo(createdRoots: string[]) {

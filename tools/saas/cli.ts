@@ -200,7 +200,7 @@ export function executeSaasCli(input: {
       "Usage:",
       "  pnpm saas doctor",
       "  pnpm saas init resource <resource-name> --field <name:type[:modifier...]> [--field <name:type[:modifier...]> ...] [--relation <name:belongs-to:target[:modifier...]> ...] [--label <label>] [--ownership <mode>] [--crud <ops>] [--api-prefix <prefix>] [--output <path>] [--nav] [--public] [--no-timestamps] [--force]",
-      "  pnpm saas init product <product-name> [--template todo] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
+      "  pnpm saas init product <product-name> [--template todo|crm] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
       "  pnpm saas plan resource <path-to-resource-spec.json> [--json]",
       "  pnpm saas plan product <path-to-product-spec.json> [--json]",
       "  pnpm saas plan scaffold <app-name> [--package-name <package-name>] [--product-name <product-name>] [--output <target-dir>] [--database <provider>] [--auth <mode>] [--json]",
@@ -405,17 +405,17 @@ function executeInitProductCommand(input: {
       return {
         exitCode: 1,
         stderr:
-          "Missing product name. Usage: pnpm saas init product <product-name> [--template todo] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
+          "Missing product name. Usage: pnpm saas init product <product-name> [--template todo|crm] [--title <product-title>] [--description <description>] [--output <path>] [--force]",
         stdout: ""
       };
     }
 
     const template = parsedArgs.optionsWithValues.get("--template") ?? "todo";
 
-    if (template !== "todo") {
+    if (template !== "todo" && template !== "crm") {
       return {
         exitCode: 1,
-        stderr: `Unsupported product template '${template}'. Supported values: todo.`,
+        stderr: `Unsupported product template '${template}'. Supported values: todo, crm.`,
         stdout: ""
       };
     }
@@ -427,7 +427,7 @@ function executeInitProductCommand(input: {
       productName,
       productTitle: parsedArgs.optionsWithValues.get("--title"),
       repoRoot: input.repoRoot,
-      template: "todo"
+      template
     });
 
     return {

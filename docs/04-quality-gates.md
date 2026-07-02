@@ -63,6 +63,9 @@ Relation-aware generation now also requires golden-fixture and install coverage
 for bounded relation presentation so generated products can render resolved
 labels or links for supported relation targets without changing generated API
 record contracts.
+The same lane now covers the first multi-resource product template as well:
+`init product --template crm`, planning, and install tests must keep the CRM
+spec deterministic and installable without manual runtime edits.
 
 ## Hosted Runtime Release Gate
 
@@ -371,8 +374,10 @@ pnpm typecheck:saas
 pnpm test:saas
 pnpm saas init resource achievement --field title:string:required --field slug:string:required:unique
 pnpm saas init product todo --template todo --output specs/todo.product.json
+pnpm saas init product crm --template crm --output specs/crm.product.json
 pnpm saas plan resource tools/saas/examples/customer.resource.json
 pnpm saas plan product specs/todo.product.json
+pnpm saas plan product specs/crm.product.json
 ```
 
 `pnpm saas init resource ...` writes a validated JSON resource spec inside the
@@ -398,6 +403,7 @@ current supported product slice. Today that slice is intentionally narrow:
 - generated web routes are product-owned, not the placeholder standalone
   resource pages
 - the first supported proof template is `todo`
+- the first supported multi-resource business template is `crm`
 
 The corresponding dry-run path is:
 
@@ -417,6 +423,7 @@ The corresponding install path is:
 
 ```bash
 pnpm saas install product specs/todo.product.json
+pnpm saas install product specs/crm.product.json
 pnpm products:backfill todo
 pnpm db:migrate:test
 pnpm --filter web exec vitest run src/features/todo-product/__tests__/todo-product-flow.test.tsx

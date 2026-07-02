@@ -143,6 +143,8 @@ for simple resource-backed products:
 
 - `pnpm saas init product <name> --template todo` creates a product spec with
   embedded normalized resource specs
+- `pnpm saas init product <name> --template crm` creates a bounded multi-resource
+  CRM spec with generated `company`, `contact`, `deal`, and `note` resources
 - `pnpm saas install product <spec>` installs those resources through the
   existing repo-root resource seam, then patches the shared API and web product
   registries plus domain exports
@@ -160,9 +162,9 @@ Current product-generation limits are explicit:
 
 - no custom product API route generation yet
 - no arbitrary product-specific runtime logic or full relation-aware dashboards yet
-- the first supported proof is a simple workspace product with generated
-  CRUD pages for organization-owned resources, but archive flows and richer
-  product-specific policies remain manual
+- the current supported templates are still bounded to generated CRUD-oriented
+  business products, and archive flows plus richer product-specific policies
+  remain manual
 
 The rule is strict: `platform-*` code must not depend on `audit-product` code.
 Audit-specific modules may depend on platform modules, but never the reverse.

@@ -136,129 +136,28 @@ describe("saas product install", () => {
   it("installs relation-aware product pages for generated resource targets", () => {
     const repoRoot = createSeededRepo(createdRoots);
 
-    writeRepoFile(
-      repoRoot,
-      "specs/crm.product.json",
-      JSON.stringify(
-        {
-          id: "crm",
-          name: "CRM",
-          resources: [
-            {
-              listPath: "/crm/companies",
-              navLabel: "Companies",
-              resource: {
-                api: {
-                  filters: [],
-                  pagination: true,
-                  prefix: "/v1/organizations/:organizationId/companies",
-                  public: false
-                },
-                crud: {
-                  create: true,
-                  delete: false,
-                  list: true,
-                  read: true,
-                  update: true
-                },
-                fields: [
-                  {
-                    name: "name",
-                    required: true,
-                    searchable: true,
-                    sortable: true,
-                    type: "string"
-                  }
-                ],
-                label: "Company",
-                ownership: "organization",
-                permissions: {},
-                pluralLabel: "Companies",
-                relations: [],
-                resource: "company",
-                timestamps: {
-                  createdAtField: "createdAt",
-                  enabled: true,
-                  updatedAtField: "updatedAt"
-                },
-                ui: {
-                  createPage: false,
-                  detailPage: false,
-                  editPage: false,
-                  listPage: false,
-                  nav: false,
-                  navLabel: "Companies"
-                }
-              }
-            },
-            {
-              listPath: "/crm/deals",
-              navLabel: "Deals",
-              resource: {
-                api: {
-                  filters: [],
-                  pagination: true,
-                  prefix: "/v1/organizations/:organizationId/deals",
-                  public: false
-                },
-                crud: {
-                  create: true,
-                  delete: false,
-                  list: true,
-                  read: true,
-                  update: true
-                },
-                fields: [
-                  {
-                    name: "title",
-                    required: true,
-                    searchable: true,
-                    sortable: true,
-                    type: "string"
-                  }
-                ],
-                label: "Deal",
-                ownership: "organization",
-                permissions: {},
-                pluralLabel: "Deals",
-                relations: [
-                  {
-                    kind: "belongs-to",
-                    name: "company",
-                    required: true,
-                    target: "company",
-                    targetScope: "generated"
-                  }
-                ],
-                resource: "deal",
-                timestamps: {
-                  createdAtField: "createdAt",
-                  enabled: true,
-                  updatedAtField: "updatedAt"
-                },
-                ui: {
-                  createPage: false,
-                  detailPage: false,
-                  editPage: false,
-                  listPage: false,
-                  nav: false,
-                  navLabel: "Deals"
-                }
-              }
-            }
-          ]
-        },
-        null,
-        2
-      ) + "\n"
-    );
+    const initResult = executeSaasCli({
+      args: [
+        "init",
+        "product",
+        "crm",
+        "--template",
+        "crm",
+        "--output",
+        "specs/crm.product.json"
+      ],
+      repoRoot
+    });
 
     const installResult = executeSaasCli({
       args: ["install", "product", "specs/crm.product.json"],
       repoRoot
     });
 
+    expect(initResult.exitCode).toBe(0);
     expect(installResult.exitCode).toBe(0);
+    expect(installResult.stdout).toContain("Installed product: crm");
+    expect(installResult.stdout).toContain("resources: company, contact, deal, note");
     expect(
       readGenerated(repoRoot, "apps/web/src/features/crm-product/server/deal-workspace.ts")
     ).toContain(
@@ -273,6 +172,9 @@ describe("saas product install", () => {
     expect(
       readGenerated(repoRoot, "apps/web/app/crm/deals/[dealId]/page.tsx")
     ).toContain("renderRelationAwareDetailValue");
+    expect(
+      readGenerated(repoRoot, "apps/web/app/crm/notes/page.tsx")
+    ).toContain("createNoteWorkspaceAction");
   });
 });
 

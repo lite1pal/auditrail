@@ -96,6 +96,33 @@ export function createTodoProductSpec(input: {
   });
 }
 
+export function createCrmProductSpec(input: {
+  description?: string;
+  productId: string;
+  productName: string;
+}) {
+  const resources = createCrmResources(input.productId);
+
+  return readGeneratedProductSpec({
+    description:
+      input.description ??
+      `${input.productName} is a generated CRM workspace product for tracking companies, contacts, deals, and notes through Elioric's reusable product seams.`,
+    home: {
+      ctaLabel: "Open Deals",
+      description:
+        "Manage companies, contacts, deals, and notes through one generated multi-resource CRM workspace without hand-editing shared runtime seams.",
+      title: `${input.productName} workspace`
+    },
+    id: input.productId,
+    name: input.productName,
+    resources: resources.map((resource) => ({
+      listPath: `/${input.productId}/${pluralizePathSegment(toKebabCase(resource.resource))}`,
+      navLabel: resource.pluralLabel,
+      resource
+    }))
+  });
+}
+
 function readGeneratedProductResource(value: unknown, index: number): GeneratedProductResource {
   if (!isObject(value)) {
     throw new Error(`Generated product resource at index ${index} must be an object.`);
@@ -186,6 +213,182 @@ function normalizeTodoResource(productId: string): FrameworkResourceSpec {
       listPage: false,
       nav: false,
       navLabel: pluralizeLabel(toTitleCase(resourceId))
+    }
+  });
+}
+
+function createCrmResources(productId: string): FrameworkResourceSpec[] {
+  return [
+    normalizeProductResource({
+      fields: [
+        {
+          name: "name",
+          required: true,
+          searchable: true,
+          sortable: true,
+          type: "string"
+        },
+        {
+          name: "domain",
+          required: false,
+          searchable: true,
+          sortable: true,
+          type: "string"
+        },
+        {
+          default: "lead",
+          name: "status",
+          required: true,
+          type: "enum",
+          values: ["lead", "customer", "inactive"]
+        }
+      ],
+      label: "Company",
+      resourceId: "company"
+    }),
+    normalizeProductResource({
+      fields: [
+        {
+          name: "name",
+          required: true,
+          searchable: true,
+          sortable: true,
+          type: "string"
+        },
+        {
+          name: "email",
+          required: false,
+          searchable: true,
+          sortable: true,
+          type: "email"
+        },
+        {
+          name: "title",
+          required: false,
+          searchable: true,
+          sortable: true,
+          type: "string"
+        }
+      ],
+      label: "Contact",
+      relations: [
+        {
+          kind: "belongs-to",
+          name: "company",
+          required: true,
+          target: "company",
+          targetScope: "generated"
+        }
+      ],
+      resourceId: "contact"
+    }),
+    normalizeProductResource({
+      fields: [
+        {
+          name: "name",
+          required: true,
+          searchable: true,
+          sortable: true,
+          type: "string"
+        },
+        {
+          default: "lead",
+          name: "stage",
+          required: true,
+          type: "enum",
+          values: ["lead", "qualified", "proposal", "won", "lost"]
+        },
+        {
+          name: "amount",
+          required: false,
+          sortable: true,
+          type: "string"
+        }
+      ],
+      label: "Deal",
+      relations: [
+        {
+          kind: "belongs-to",
+          name: "company",
+          required: true,
+          target: "company",
+          targetScope: "generated"
+        },
+        {
+          kind: "belongs-to",
+          name: "owner",
+          required: false,
+          target: "user",
+          targetScope: "platform"
+        }
+      ],
+      resourceId: "deal"
+    }),
+    normalizeProductResource({
+      fields: [
+        {
+          name: "body",
+          required: true,
+          searchable: true,
+          type: "text"
+        }
+      ],
+      label: "Note",
+      relations: [
+        {
+          kind: "belongs-to",
+          name: "deal",
+          required: true,
+          target: "deal",
+          targetScope: "generated"
+        }
+      ],
+      resourceId: "note"
+    })
+  ];
+}
+
+function normalizeProductResource(input: {
+  fields: NonNullable<FrameworkResourceSpec["fields"]>;
+  label: string;
+  relations?: NonNullable<FrameworkResourceSpec["relations"]>;
+  resourceId: string;
+}) {
+  const pluralPath = pluralizePathSegment(toKebabCase(input.resourceId));
+
+  return frameworkResourceSpecSchema.parse({
+    api: {
+      filters: [],
+      pagination: true,
+      prefix: `/v1/organizations/:organizationId/${pluralPath}`,
+      public: false
+    },
+    crud: {
+      create: true,
+      delete: false,
+      list: true,
+      read: true,
+      update: true
+    },
+    fields: input.fields,
+    label: input.label,
+    ownership: "organization",
+    permissions: {},
+    pluralLabel: pluralizeLabel(input.label),
+    relations: input.relations ?? [],
+    resource: input.resourceId,
+    timestamps: {
+      createdAtField: "createdAt",
+      enabled: true,
+      updatedAtField: "updatedAt"
+    },
+    ui: {
+      createPage: false,
+      detailPage: false,
+      editPage: false,
+      listPage: false,
+      nav: false,
+      navLabel: pluralizeLabel(input.label)
     }
   });
 }
