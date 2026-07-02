@@ -162,9 +162,13 @@ function normalizeTodoResource(productId: string): FrameworkResourceSpec {
       prefix: `/v1/organizations/:organizationId/${pluralPath}`,
       public: false
     },
+    archive: {
+      enabled: true,
+      field: "archivedAt"
+    },
     crud: {
       create: true,
-      delete: true,
+      delete: false,
       list: true,
       read: true,
       update: true
@@ -362,6 +366,10 @@ function normalizeProductResource(input: {
       pagination: true,
       prefix: `/v1/organizations/:organizationId/${pluralPath}`,
       public: false
+    },
+    archive: {
+      enabled: true,
+      field: "archivedAt"
     },
     crud: {
       create: true,

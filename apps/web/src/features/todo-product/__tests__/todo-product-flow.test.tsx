@@ -7,10 +7,11 @@ import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
 import type { TodoRecord } from "@/src/features/todo/domain/schemas";
 import ResourcePage from "@/app/todo/todos/page";
 import {
+  archiveTodoWorkspaceAction,
   createTodoWorkspaceAction,
-  deleteTodoWorkspaceAction,
   loadTodoWorkspaceDetailPage,
   loadTodoWorkspacePage,
+  unarchiveTodoWorkspaceAction,
   updateTodoWorkspaceAction
 } from "@/src/features/todo-product/server/todo-workspace";
 
@@ -69,13 +70,55 @@ vi.mock("@/src/features/todo/api/todo-client", () => ({
     async get() {
       return records[0];
     },
-    async list() {
+    async list(
+      _organizationId: string,
+      options?: { archived?: "exclude" | "include" | "only" }
+    ) {
+      const archived = options?.archived ?? "exclude";
+      const items =
+        archived === "only"
+          ? records.filter((record) => record.archivedAt)
+          : archived === "include"
+            ? [...records]
+            : records.filter((record) => !record.archivedAt);
+
       return {
-        items: [...records]
+        items
       };
     },
-    async delete() {
-      records.splice(0, records.length);
+    async archive() {
+      const existing = records[0];
+
+      if (!existing) {
+        throw new Error("missing_todo");
+      }
+
+      const nextRecord: TodoRecord = {
+        ...existing,
+        archivedAt: "2026-07-01T11:00:00.000Z",
+        updatedAt: "2026-07-01T11:00:00.000Z"
+      };
+
+      records.splice(0, records.length, nextRecord);
+
+      return nextRecord;
+    },
+    async unarchive() {
+      const existing = records[0];
+
+      if (!existing) {
+        throw new Error("missing_todo");
+      }
+
+      const nextRecord: TodoRecord = {
+        ...existing,
+        archivedAt: undefined,
+        updatedAt: "2026-07-01T12:00:00.000Z"
+      };
+
+      records.splice(0, records.length, nextRecord);
+
+      return nextRecord;
     },
     async update(
       _organizationId: string,
@@ -113,7 +156,7 @@ describe("generated todo product flow", () => {
     requireCurrentUserMock.mockResolvedValue(createCurrentUser());
   });
 
-  it("loads the workspace, surfaces validation feedback, creates a todo, opens detail, edits it, deletes it, and returns to an empty list", async () => {
+  it("loads the workspace, surfaces validation feedback, creates a todo, opens detail, edits it, archives it, and restores it through the generated flow", async () => {
     const currentUser = createCurrentUser();
     const emptyPage = await loadTodoWorkspacePage(
       {
@@ -140,7 +183,7 @@ describe("generated todo product flow", () => {
     await createTodoWorkspaceAction(invalidFormData);
 
     expect(redirectMock).toHaveBeenCalledWith(
-      "/todo/todos?organizationId=org-1&projectId=project-1&feedback=Too+small%3A+expected+string+to+have+%3E%3D1+characters&draft_details=Create+and+list+one+todo+through+the+generated+page&draft_status=todo&draft_dueAt=2026-07-01T12%3A30"
+      "/todo/todos?organizationId=org-1&projectId=project-1&archived=exclude&feedback=Too+small%3A+expected+string+to+have+%3E%3D1+characters&draft_details=Create+and+list+one+todo+through+the+generated+page&draft_status=todo&draft_dueAt=2026-07-01T12%3A30"
     );
 
     const invalidPage = await loadTodoWorkspacePage(
@@ -182,10 +225,10 @@ describe("generated todo product flow", () => {
     await createTodoWorkspaceAction(formData);
 
     expect(revalidatePathMock).toHaveBeenCalledWith(
-      "/todo/todos?organizationId=org-1&projectId=project-1"
+      "/todo/todos?organizationId=org-1&projectId=project-1&archived=exclude"
     );
     expect(redirectMock).toHaveBeenCalledWith(
-      "/todo/todos?organizationId=org-1&projectId=project-1"
+      "/todo/todos?organizationId=org-1&projectId=project-1&archived=exclude"
     );
 
     const detailPage = await loadTodoWorkspaceDetailPage(
@@ -219,13 +262,13 @@ describe("generated todo product flow", () => {
     await updateTodoWorkspaceAction(updateFormData);
 
     expect(revalidatePathMock).toHaveBeenCalledWith(
-      "/todo/todos/todo-1?organizationId=org-1&projectId=project-1"
+      "/todo/todos/todo-1?organizationId=org-1&projectId=project-1&archived=exclude"
     );
     expect(revalidatePathMock).toHaveBeenCalledWith(
-      "/todo/todos?organizationId=org-1&projectId=project-1"
+      "/todo/todos?organizationId=org-1&projectId=project-1&archived=exclude"
     );
     expect(redirectMock).toHaveBeenCalledWith(
-      "/todo/todos/todo-1?organizationId=org-1&projectId=project-1"
+      "/todo/todos/todo-1?organizationId=org-1&projectId=project-1&archived=exclude"
     );
 
     const populatedPage = await loadTodoWorkspacePage(
@@ -250,15 +293,16 @@ describe("generated todo product flow", () => {
 
     redirectMock.mockReset();
 
-    const deleteFormData = new FormData();
-    deleteFormData.set("todoId", "todo-1");
-    deleteFormData.set("organizationId", "org-1");
-    deleteFormData.set("projectId", "project-1");
+    const archiveFormData = new FormData();
+    archiveFormData.set("todoId", "todo-1");
+    archiveFormData.set("organizationId", "org-1");
+    archiveFormData.set("projectId", "project-1");
+    archiveFormData.set("archived", "exclude");
 
-    await deleteTodoWorkspaceAction(deleteFormData);
+    await archiveTodoWorkspaceAction(archiveFormData);
 
     expect(redirectMock).toHaveBeenCalledWith(
-      "/todo/todos?organizationId=org-1&projectId=project-1"
+      "/todo/todos?organizationId=org-1&projectId=project-1&archived=exclude"
     );
 
     const emptyAgain = await loadTodoWorkspacePage(
@@ -272,6 +316,53 @@ describe("generated todo product flow", () => {
     );
 
     expect(emptyAgain.items).toEqual([]);
+
+    const archivedOnlyPage = await loadTodoWorkspacePage(
+      {
+        archived: "only",
+        organizationId: "org-1",
+        projectId: "project-1"
+      },
+      {
+        currentUser
+      }
+    );
+
+    expect(archivedOnlyPage.items).toEqual([
+      expect.objectContaining({
+        archivedAt: "2026-07-01T11:00:00.000Z",
+        title: "Ship generated detail flow"
+      })
+    ]);
+
+    const unarchiveFormData = new FormData();
+    unarchiveFormData.set("todoId", "todo-1");
+    unarchiveFormData.set("organizationId", "org-1");
+    unarchiveFormData.set("projectId", "project-1");
+    unarchiveFormData.set("archived", "only");
+
+    await unarchiveTodoWorkspaceAction(unarchiveFormData);
+
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/todo/todos/todo-1?organizationId=org-1&projectId=project-1&archived=exclude"
+    );
+
+    const restoredPage = await loadTodoWorkspacePage(
+      {
+        organizationId: "org-1",
+        projectId: "project-1"
+      },
+      {
+        currentUser
+      }
+    );
+
+    expect(restoredPage.items).toEqual([
+      expect.objectContaining({
+        archivedAt: undefined,
+        title: "Ship generated detail flow"
+      })
+    ]);
   });
 
   it("renders the generated todo list, detail, and edit pages with feedback and destructive actions visible", async () => {
@@ -327,7 +418,7 @@ describe("generated todo product flow", () => {
       screen.getAllByRole("heading", { level: 1, name: "Ship generated detail flow" })[0]
     ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to list" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Delete Todo" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Archive Todo" })).toBeTruthy();
 
     render(
       await ResourceEditPage({

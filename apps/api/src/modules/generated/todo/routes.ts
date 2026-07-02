@@ -4,6 +4,10 @@ import type { createTodoService } from "./service.js";
 const organizationParamsSchema = z.object({
   organizationId: z.string().uuid()
 });
+const listQuerySchema = z.object({
+  archived: z.enum(["exclude", "include", "only"]).optional()
+});
+
 const resourceIdParamsSchema = z.object({
   id: z.string().uuid(),
   organizationId: z.string().uuid()
@@ -26,10 +30,11 @@ export async function registerTodoRoutes(
   app.get("/v1/organizations/:organizationId/todos", async (request, reply) => {
     const user = request.sessionUser;
     const params = organizationParamsSchema.safeParse(request.params);
+    const query = listQuerySchema.safeParse(request.query);
     if (!user) {
       return reply.code(401).send({ error: "missing_session" });
     }
-    if (!params.success) {
+    if (!params.success || !query.success) {
       return reply.code(400).send({ error: "invalid_request" });
     }
     try {
@@ -40,6 +45,7 @@ export async function registerTodoRoutes(
       });
       return {
         items: await options.service.list({
+          archived: query.data.archived,
           cursor: undefined,
           limit: undefined,
           organizationId: params.data.organizationId,
@@ -131,7 +137,7 @@ export async function registerTodoRoutes(
     }
   });
 
-  app.delete("/v1/organizations/:organizationId/todos/:id", async (request, reply) => {
+  app.post("/v1/organizations/:organizationId/todos/:id/archive", async (request, reply) => {
     const user = request.sessionUser;
     const params = resourceIdParamsSchema.safeParse(request.params);
 
@@ -150,16 +156,50 @@ export async function registerTodoRoutes(
         userId: user.id
       });
 
-      const deleted = await options.service.delete({
+      const resource = await options.service.archive({
         id: params.data.id,
         organizationId: params.data.organizationId
       });
 
-      if (!deleted) {
+      if (!resource) {
         return reply.code(404).send({ error: "not_found" });
       }
 
-      return reply.code(204).send();
+      return resource;
+    } catch (error) {
+      return mapGeneratedResourceAccessError(reply, error);
+    }
+  });
+
+  app.post("/v1/organizations/:organizationId/todos/:id/unarchive", async (request, reply) => {
+    const user = request.sessionUser;
+    const params = resourceIdParamsSchema.safeParse(request.params);
+
+    if (!user) {
+      return reply.code(401).send({ error: "missing_session" });
+    }
+
+    if (!params.success) {
+      return reply.code(400).send({ error: "invalid_request" });
+    }
+
+    try {
+      await options.access.assertOrganizationAccess({
+        allowedRoles: ["owner", "admin", "member"],
+        organizationId: params.data.organizationId,
+        userId: user.id
+      });
+
+      const resource = await options.service.unarchive({
+        id: params.data.id,
+        organizationId: params.data.organizationId
+      });
+
+      if (!resource) {
+        return reply.code(404).send({ error: "not_found" });
+      }
+
+      return resource;
     } catch (error) {
       return mapGeneratedResourceAccessError(reply, error);
     }

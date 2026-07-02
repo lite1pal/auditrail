@@ -6,7 +6,7 @@ describe("registerTodoRoutes", () => {
   it("requires a session before listing todos", async () => {
     const app = buildTestApp({}, { session: false });
     const response = await app.inject({
-      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos"
+      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos?archived=only"
     });
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({ error: "missing_session" });
@@ -15,6 +15,7 @@ describe("registerTodoRoutes", () => {
     const app = buildTestApp({
       async list(input) {
         expect(input).toEqual({
+          archived: "only",
           cursor: undefined,
           limit: undefined,
           organizationId: "11111111-1111-4111-8111-111111111111",
@@ -35,7 +36,7 @@ describe("registerTodoRoutes", () => {
       }
     });
     const response = await app.inject({
-      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos"
+      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos?archived=only"
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
@@ -71,24 +72,66 @@ describe("registerTodoRoutes", () => {
     expect(response.json()).toEqual({ error: "forbidden" });
   });
 
-  it("deletes todo records for authorized organization members", async () => {
+  it("archives todo records for authorized organization members", async () => {
     const app = buildTestApp({
-      async delete(input) {
+      async archive(input) {
         expect(input).toEqual({
           id: "22222222-2222-4222-8222-222222222222",
           organizationId: "11111111-1111-4111-8111-111111111111"
         });
 
-        return true;
+        return {
+          createdAt: "2026-06-29T00:00:00.000Z",
+      title: "title value",
+      details: "details value",
+      status: "todo",
+      dueAt: "2026-06-29T00:00:00.000Z",
+          archivedAt: "2026-07-01T00:00:00.000Z",
+          id: "22222222-2222-4222-8222-222222222222",
+          organizationId: "11111111-1111-4111-8111-111111111111",
+          updatedAt: "2026-07-01T00:00:00.000Z"
+        };
       }
     });
 
     const response = await app.inject({
-      method: "DELETE",
-      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos/22222222-2222-4222-8222-222222222222"
+      method: "POST",
+      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos/22222222-2222-4222-8222-222222222222/archive"
     });
 
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({ archivedAt: "2026-07-01T00:00:00.000Z" });
+  });
+
+  it("unarchives todo records for authorized organization members", async () => {
+    const app = buildTestApp({
+      async unarchive(input) {
+        expect(input).toEqual({
+          id: "22222222-2222-4222-8222-222222222222",
+          organizationId: "11111111-1111-4111-8111-111111111111"
+        });
+
+        return {
+          createdAt: "2026-06-29T00:00:00.000Z",
+      title: "title value",
+      details: "details value",
+      status: "todo",
+      dueAt: "2026-06-29T00:00:00.000Z",
+          archivedAt: undefined,
+          id: "22222222-2222-4222-8222-222222222222",
+          organizationId: "11111111-1111-4111-8111-111111111111",
+          updatedAt: "2026-07-01T00:00:00.000Z"
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/organizations/11111111-1111-4111-8111-111111111111/todos/22222222-2222-4222-8222-222222222222/unarchive"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).not.toHaveProperty("archivedAt");
   });
 });
 function buildTestApp(
@@ -125,10 +168,10 @@ function createTodoServiceStub(
   overrides: Partial<ReturnType<typeof createTodoService>>
 ) {
   return {
-    async create() {
+    async archive() {
       throw new Error("not implemented");
     },
-    async delete() {
+    async create() {
       throw new Error("not implemented");
     },
     async get() {
@@ -136,6 +179,9 @@ function createTodoServiceStub(
     },
     async list() {
       return [];
+    },
+    async unarchive() {
+      throw new Error("not implemented");
     },
     async update() {
       throw new Error("not implemented");

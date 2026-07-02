@@ -14,6 +14,7 @@ export const todoRecordSchema = z.object({
   details: z.string().trim().min(1).optional(),
   status: z.enum(["todo", "done"]),
   dueAt: z.string().datetime().optional(),
+  archivedAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
@@ -33,6 +34,7 @@ export const updateTodoInputSchema = z.object({
 });
 
 export const listTodosInputSchema = z.object({
+  archived: z.enum(["exclude", "include", "only"]).optional(),
   cursor: z.string().uuid().optional(),
   limit: z.number().int().positive().max(100).optional(),
   query: z.string().trim().min(1).optional()

@@ -1,6 +1,6 @@
 import type { CustomerRecord } from "@auditrail/domain/generated/customer";
 import { customerTable } from "@auditrail/db/schema";
-import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { CustomerRepo } from "./repo.js";
 export function createPostgresCustomerRepo(db: AppDatabase): CustomerRepo {

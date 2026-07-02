@@ -2,6 +2,14 @@
 
 ## 2026-07-02
 
+- Completed T-118 by adding generator-owned archive lifecycle support for
+  product resources. Resource specs can now opt into archive semantics,
+  generated DB schemas add a nullable archive timestamp, generated domain/API
+  contracts expose archive and unarchive actions plus archived list filters,
+  generated product pages now render archive or restore flows, and the
+  committed todo proof now exercises archive -> archived-only list -> restore
+  against both web tests and the real Postgres-backed API integration slice.
+
 - Completed T-117 by adding the first CLI-owned CRM product template. `init
   product` now supports `--template crm`, which emits a deterministic
   multi-resource spec for `company`, `contact`, `deal`, and `note`; planner

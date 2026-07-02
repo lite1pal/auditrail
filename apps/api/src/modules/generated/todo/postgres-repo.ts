@@ -1,10 +1,24 @@
 import type { TodoRecord } from "@auditrail/domain/generated/todo";
 import { todoTable } from "@auditrail/db/schema";
-import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { TodoRepo } from "./repo.js";
 export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
   return {
+    async archive(input) {
+      const [record] = await db.update(todoTable).set({
+        archivedAt: new Date(),
+        updatedAt: new Date()
+      }).where(
+        and(
+          eq(todoTable.id, input.id),
+          eq(todoTable.organizationId, input.organizationId),
+          isNull(todoTable.archivedAt)
+        )
+      ).returning();
+
+      return record ? toTodoRecord(record) : undefined;
+    },
     async create(input) {
       const [record] = await db.insert(todoTable).values({
         organizationId: input.organizationId,
@@ -24,19 +38,10 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
       ).limit(1);
       return record ? toTodoRecord(record) : undefined;
     },
-    async delete(input) {
-      const deleted = await db.delete(todoTable).where(
-        and(
-          eq(todoTable.id, input.id),
-          eq(todoTable.organizationId, input.organizationId)
-        )
-      ).returning({ id: todoTable.id });
-
-      return deleted.length > 0;
-    },
     async list(input) {
       const limit = Math.min(input.filters.limit ?? 50, 100);
       const pattern = input.filters.query ? `%${input.filters.query}%` : undefined;
+      const archived = input.filters.archived ?? "exclude";
       const [cursorRecord] = input.filters.cursor ? await db.select({
         createdAt: todoTable.createdAt,
         id: todoTable.id
@@ -49,6 +54,11 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
       const records = await db.select().from(todoTable).where(
         and(
           eq(todoTable.organizationId, input.organizationId),
+          archived === "only"
+            ? isNotNull(todoTable.archivedAt)
+            : archived === "include"
+              ? undefined
+              : isNull(todoTable.archivedAt),
           pattern
             ? or(
       ilike(sql`cast(${todoTable.title} as text)`, pattern)
@@ -66,6 +76,20 @@ export function createPostgresTodoRepo(db: AppDatabase): TodoRepo {
         )
       ).orderBy(desc(todoTable.createdAt), desc(todoTable.id)).limit(limit);
       return records.map(toTodoRecord);
+    },
+    async unarchive(input) {
+      const [record] = await db.update(todoTable).set({
+        archivedAt: null,
+        updatedAt: new Date()
+      }).where(
+        and(
+          eq(todoTable.id, input.id),
+          eq(todoTable.organizationId, input.organizationId),
+          isNotNull(todoTable.archivedAt)
+        )
+      ).returning();
+
+      return record ? toTodoRecord(record) : undefined;
     },
     async update(input) {
       const [record] = await db.update(todoTable).set({
@@ -94,6 +118,7 @@ function toTodoRecord(
     details: record.details ?? undefined,
     status: record.status as TodoRecord["status"],
     dueAt: record.dueAt?.toISOString(),
+    archivedAt: record.archivedAt?.toISOString(),
     createdAt: record.createdAt.toISOString(),
     updatedAt: record.updatedAt.toISOString()
   };

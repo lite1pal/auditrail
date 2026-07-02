@@ -7,6 +7,7 @@ export const todoRecordSchema = z.object({
   details: z.string().trim().min(1).optional(),
   status: z.enum(["todo", "done"]),
   dueAt: z.string().datetime().optional(),
+  archivedAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });

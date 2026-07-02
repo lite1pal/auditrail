@@ -9,6 +9,7 @@ export const customerRecordSchema = z.object({
   status: z.enum(["active", "inactive"]),
   externalId: z.string().uuid().optional(),
   lastContactedAt: z.string().datetime().optional(),
+
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });

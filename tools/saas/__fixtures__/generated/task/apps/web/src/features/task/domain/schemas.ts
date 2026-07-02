@@ -8,6 +8,7 @@ export const taskRecordSchema = z.object({
   dueAt: z.string().datetime().optional(),
   projectId: z.string().uuid(),
   assigneeId: z.string().uuid().optional(),
+
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });

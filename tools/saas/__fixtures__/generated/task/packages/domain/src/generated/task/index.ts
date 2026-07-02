@@ -16,6 +16,7 @@ export const taskRecordSchema = z.object({
   dueAt: z.string().datetime().optional(),
   projectId: z.string().uuid(),
   assigneeId: z.string().uuid().optional(),
+
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
@@ -37,6 +38,7 @@ export const updateTaskInputSchema = z.object({
 });
 
 export const listTasksInputSchema = z.object({
+
   cursor: z.string().uuid().optional(),
   limit: z.number().int().positive().max(100).optional(),
   query: z.string().trim().min(1).optional()

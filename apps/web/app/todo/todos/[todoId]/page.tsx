@@ -2,7 +2,7 @@ import { AppShell } from "@/src/components/layout/app-shell";
 import { requireCurrentUser } from "@/src/features/auth/server/auth-server";
 
 import { getShellProductConfig } from "@/app/product-module";
-import { deleteTodoWorkspaceAction, loadTodoWorkspaceDetailPage } from "@/src/features/todo-product/server/todo-workspace";
+import { archiveTodoWorkspaceAction, loadTodoWorkspaceDetailPage, unarchiveTodoWorkspaceAction } from "@/src/features/todo-product/server/todo-workspace";
 
 interface ResourceDetailPageProps {
   params: Promise<{ todoId: string }>;
@@ -33,7 +33,8 @@ export default async function ResourceDetailPage({
   });
   const workspaceSuffix = buildWorkspaceSuffix(
     data.workspace.activeOrganizationId ?? "",
-    data.workspace.activeProjectId ?? undefined
+    data.workspace.activeProjectId ?? undefined,
+    data.archivedFilter
   );
   const listHref = "/todo/todos" + workspaceSuffix;
   const editHref = data.item ? "/todo/todos" + `/${data.item.id}/edit${workspaceSuffix}` : listHref;
@@ -79,11 +80,13 @@ export default async function ResourceDetailPage({
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Due At</p>
               <p>{data.item ? renderRelationAwareDetailValue(data.item.id, "dueAt", data.item.dueAt, data.relationPresentations) : "Not set"}</p>
             </div>
-            <form action={deleteTodoWorkspaceAction} className="pt-2">
+
+            <form action={data.item.archivedAt ? unarchiveTodoWorkspaceAction : archiveTodoWorkspaceAction} className="pt-2">
               <input name="todoId" type="hidden" value={data.item.id} />
               <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />
               <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />
-              <button className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium" type="submit">Delete Todo</button>
+              <input name="archived" type="hidden" value={data.archivedFilter} />
+              <button className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium" type="submit">{data.item.archivedAt ? "Restore Todo" : "Archive Todo"}</button>
             </form>
           </section>
         ) : (
@@ -127,12 +130,17 @@ function renderRelationAwareDetailValue(
 
 function buildWorkspaceSuffix(
   organizationId: string,
-  projectId?: string
+  projectId?: string,
+  archived?: "exclude" | "include" | "only"
 ) {
   const query = new URLSearchParams({ organizationId });
 
   if (projectId) {
     query.set("projectId", projectId);
+  }
+
+  if (archived) {
+    query.set("archived", archived);
   }
 
   return `?${query.toString()}`;

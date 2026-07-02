@@ -57,8 +57,9 @@ installed into a seeded repo shape, and registered through the shared product
 runtime files without manual edits. Product-planning coverage now sits in the
 same lane so `pnpm saas plan product ...` is exercised before install mutates
 shared runtime files. The committed todo web proof now covers validation
-feedback -> create -> detail -> edit -> delete -> empty list through generated
-product-owned pages and server actions instead of stopping at list-plus-create.
+feedback -> create -> detail -> edit -> archive -> archived-only list ->
+restore through generated product-owned pages and server actions instead of
+stopping at list-plus-create.
 Relation-aware generation now also requires golden-fixture and install coverage
 for bounded relation presentation so generated products can render resolved
 labels or links for supported relation targets without changing generated API
@@ -66,6 +67,10 @@ record contracts.
 The same lane now covers the first multi-resource product template as well:
 `init product --template crm`, planning, and install tests must keep the CRM
 spec deterministic and installable without manual runtime edits.
+Archive-enabled generated resources now also need migration coverage in the
+real test database, because schema-only generator changes are not complete
+until the committed proof still passes against Postgres after
+`pnpm db:migrate:test`.
 
 ## Hosted Runtime Release Gate
 

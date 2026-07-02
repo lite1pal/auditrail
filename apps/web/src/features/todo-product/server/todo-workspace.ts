@@ -26,11 +26,13 @@ export async function loadTodoWorkspacePage(
   );
   const items = workspace.activeOrganizationId
     ? (await createResourceClient(createServerApiClient()).list(
-        workspace.activeOrganizationId
+        workspace.activeOrganizationId,
+        { archived: readArchivedFilter(searchParams) }
       )).items
     : [];
   const relationPresentations = {};
   return {
+    archivedFilter: readArchivedFilter(searchParams),
     draftValues: readDraftValues(searchParams),
     feedback: readFeedback(searchParams),
     items,
@@ -68,6 +70,7 @@ export async function loadTodoWorkspaceDetailPage(
     draftValues: readDraftValues(input.searchParams),
     feedback: readFeedback(input.searchParams),
     item,
+    archivedFilter: readArchivedFilter(input.searchParams),
     relationPresentations,
     workspace
   };
@@ -76,6 +79,7 @@ export async function createTodoWorkspaceAction(formData: FormData) {
   "use server";
   const organizationId = String(formData.get("organizationId") ?? "");
   const projectId = coerceString(formData.get("projectId"));
+  const archived = readArchivedFilterFromFormData(formData);
   try {
     const payload = createTodoInputSchema.parse({
       title: String(formData.get("title") ?? ""),
@@ -87,12 +91,12 @@ export async function createTodoWorkspaceAction(formData: FormData) {
       organizationId,
       payload
     );
-    const nextPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId);
+    const nextPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId, archived);
     revalidatePath(nextPath);
     redirect(nextPath as never);
   } catch (error) {
     redirect(
-      buildFailurePath("/todo/todos", organizationId, projectId, {
+      buildFailurePath("/todo/todos", organizationId, projectId, archived, {
         draftValues: buildDraftValues(formData),
         feedback: getFeedbackMessage(error, "Unable to create this record right now.")
       }) as never
@@ -104,6 +108,7 @@ export async function updateTodoWorkspaceAction(formData: FormData) {
   const todoId = String(formData.get("todoId") ?? "");
   const organizationId = String(formData.get("organizationId") ?? "");
   const projectId = coerceString(formData.get("projectId"));
+  const archived = readArchivedFilterFromFormData(formData);
   try {
     const payload = updateTodoInputSchema.parse({
       title: String(formData.get("title") ?? ""),
@@ -116,14 +121,14 @@ export async function updateTodoWorkspaceAction(formData: FormData) {
       todoId,
       payload
     );
-    const nextPath = buildResourcePath("/todo/todos", todoId, organizationId, projectId);
-    const listPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId);
+    const nextPath = buildResourcePath("/todo/todos", todoId, organizationId, projectId, archived);
+    const listPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId, archived);
     revalidatePath(nextPath);
     revalidatePath(listPath);
     redirect(nextPath as never);
   } catch (error) {
     redirect(
-      buildFailurePath(buildResourceEditPath("/todo/todos", todoId), organizationId, projectId, {
+      buildFailurePath(buildResourceEditPath("/todo/todos", todoId), organizationId, projectId, archived, {
         draftValues: buildDraftValues(formData),
         feedback: getFeedbackMessage(error, "Unable to save changes right now.")
       }) as never
@@ -131,26 +136,61 @@ export async function updateTodoWorkspaceAction(formData: FormData) {
   }
 }
 
-export async function deleteTodoWorkspaceAction(formData: FormData) {
+export async function archiveTodoWorkspaceAction(formData: FormData) {
   "use server";
 
   const todoId = String(formData.get("todoId") ?? "");
   const organizationId = String(formData.get("organizationId") ?? "");
   const projectId = coerceString(formData.get("projectId"));
+  const archived = readArchivedFilterFromFormData(formData);
 
   try {
-    await createResourceClient(createServerApiClient()).delete(
+    await createResourceClient(createServerApiClient()).archive(
       organizationId,
       todoId
     );
 
-    const listPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId);
+    const listPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId, archived);
+    const detailPath = buildResourcePath(
+      "/todo/todos",
+      todoId,
+      organizationId,
+      projectId,
+      archived === "only" ? "only" : "exclude"
+    );
     revalidatePath(listPath);
+    revalidatePath(detailPath);
     redirect(listPath as never);
   } catch (error) {
     redirect(
-      buildFailurePath(buildResourcePath("/todo/todos", todoId, organizationId, projectId), organizationId, projectId, {
-        feedback: getFeedbackMessage(error, "Unable to delete this record right now.")
+      buildFailurePath(buildResourcePath("/todo/todos", todoId, organizationId, projectId, archived), organizationId, projectId, archived, {
+        feedback: getFeedbackMessage(error, "Unable to archive this record right now.")
+      }) as never
+    );
+  }
+}
+
+export async function unarchiveTodoWorkspaceAction(formData: FormData) {
+  "use server";
+
+  const todoId = String(formData.get("todoId") ?? "");
+  const organizationId = String(formData.get("organizationId") ?? "");
+  const projectId = coerceString(formData.get("projectId"));
+  const archived = readArchivedFilterFromFormData(formData);
+
+  try {
+    await createResourceClient(createServerApiClient()).unarchive(
+      organizationId,
+      todoId
+    );
+
+    const listPath = "/todo/todos" + buildWorkspaceSuffix(organizationId, projectId, archived === "only" ? "exclude" : archived);
+    revalidatePath(listPath);
+    redirect(buildResourcePath("/todo/todos", todoId, organizationId, projectId, "exclude") as never);
+  } catch (error) {
+    redirect(
+      buildFailurePath(buildResourcePath("/todo/todos", todoId, organizationId, projectId, archived), organizationId, projectId, archived, {
+        feedback: getFeedbackMessage(error, "Unable to restore this record right now.")
       }) as never
     );
   }
@@ -192,11 +232,16 @@ function compactRelationPresentations(
 }
 function buildWorkspaceSuffix(
   organizationId: string,
-  projectId?: string
+  projectId?: string,
+  archived?: "exclude" | "include" | "only"
 ) {
   const query = new URLSearchParams({ organizationId });
   if (projectId) {
     query.set("projectId", projectId);
+  }
+
+  if (archived) {
+    query.set("archived", archived);
   }
   return `?${query.toString()}`;
 }
@@ -204,9 +249,10 @@ function buildResourcePath(
   basePath: string,
   id: string,
   organizationId: string,
-  projectId?: string
+  projectId?: string,
+  archived?: "exclude" | "include" | "only"
 ) {
-  return `${basePath}/${id}${buildWorkspaceSuffix(organizationId, projectId)}`;
+  return `${basePath}/${id}${buildWorkspaceSuffix(organizationId, projectId, archived)}`;
 }
 function buildResourceEditPath(basePath: string, id: string) {
   return `${basePath}/${id}/edit`;
@@ -215,6 +261,7 @@ function buildFailurePath(
   basePath: string,
   organizationId: string,
   projectId: string | undefined,
+  archived: "exclude" | "include" | "only" | undefined,
   input: {
     draftValues?: Record<string, string | undefined>;
     feedback: string;
@@ -223,6 +270,10 @@ function buildFailurePath(
   const query = new URLSearchParams({ organizationId });
   if (projectId) {
     query.set("projectId", projectId);
+  }
+
+  if (archived) {
+    query.set("archived", archived);
   }
   query.set("feedback", input.feedback);
   for (const [key, value] of Object.entries(input.draftValues ?? {})) {
@@ -238,6 +289,22 @@ function getSearchValue(value: string | string[] | undefined) {
 function readFeedback(searchParams: Record<string, string | string[] | undefined>) {
   const feedback = getSearchValue(searchParams.feedback);
   return feedback ? feedback : undefined;
+}
+
+function readArchivedFilter(
+  searchParams: Record<string, string | string[] | undefined>
+): "exclude" | "include" | "only" {
+  const archived = getSearchValue(searchParams.archived);
+
+  return archived === "include" || archived === "only" ? archived : "exclude";
+}
+
+function readArchivedFilterFromFormData(
+  formData: FormData
+): "exclude" | "include" | "only" {
+  const value = coerceString(formData.get("archived"));
+
+  return value === "include" || value === "only" ? value : "exclude";
 }
 function readDraftValues(searchParams: Record<string, string | string[] | undefined>) {
   return compactDraftValues({

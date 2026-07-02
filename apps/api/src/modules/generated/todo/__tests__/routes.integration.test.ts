@@ -85,10 +85,10 @@ describe("todo generated resource integration", () => {
       items: [
         {
           createdAt: expect.any(String),
-      title: "title value",
-      details: "details value",
-      status: "todo",
-      dueAt: "2026-06-29T00:00:00.000Z",
+          title: "title value",
+          details: "details value",
+          status: "todo",
+          dueAt: "2026-06-29T00:00:00.000Z",
           id: createdId,
           organizationId: session.organizationId,
           updatedAt: expect.any(String)
@@ -131,17 +131,18 @@ describe("todo generated resource integration", () => {
       organizationId: session.organizationId
     });
 
-    const deleteResponse = await app.inject({
-      method: "DELETE",
+    const archiveResponse = await app.inject({
+      method: "POST",
       headers: {
         cookie: session.cookie
       },
-      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos/${createdId}`
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos/${createdId}/archive`
     });
 
-    expect(deleteResponse.statusCode).toBe(204);
+    expect(archiveResponse.statusCode).toBe(200);
+    expect(archiveResponse.json()).toMatchObject({ archivedAt: expect.any(String) });
 
-    const deletedListResponse = await app.inject({
+    const archivedListResponse = await app.inject({
       method: "GET",
       headers: {
         cookie: session.cookie
@@ -149,9 +150,69 @@ describe("todo generated resource integration", () => {
       url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos`
     });
 
-    expect(deletedListResponse.statusCode).toBe(200);
-    expect(deletedListResponse.json()).toEqual({
+    expect(archivedListResponse.statusCode).toBe(200);
+    expect(archivedListResponse.json()).toEqual({
       items: []
+    });
+
+    const archivedOnlyResponse = await app.inject({
+      method: "GET",
+      headers: {
+        cookie: session.cookie
+      },
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos?archived=only`
+    });
+
+    expect(archivedOnlyResponse.statusCode).toBe(200);
+    expect(archivedOnlyResponse.json()).toEqual({
+      items: [
+        {
+          createdAt: expect.any(String),
+      title: "updated title value",
+      details: "details value",
+      status: "todo",
+      dueAt: "2026-06-29T00:00:00.000Z",
+          archivedAt: expect.any(String),
+          id: createdId,
+          organizationId: session.organizationId,
+          updatedAt: expect.any(String)
+        }
+      ]
+    });
+
+    const unarchiveResponse = await app.inject({
+      method: "POST",
+      headers: {
+        cookie: session.cookie
+      },
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos/${createdId}/unarchive`
+    });
+
+    expect(unarchiveResponse.statusCode).toBe(200);
+    expect(unarchiveResponse.json()).not.toHaveProperty("archivedAt");
+
+    const unarchivedListResponse = await app.inject({
+      method: "GET",
+      headers: {
+        cookie: session.cookie
+      },
+      url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/todos`
+    });
+
+    expect(unarchivedListResponse.statusCode).toBe(200);
+    expect(unarchivedListResponse.json()).toEqual({
+      items: [
+        {
+          createdAt: expect.any(String),
+          title: "updated title value",
+          details: "details value",
+          status: "todo",
+          dueAt: "2026-06-29T00:00:00.000Z",
+          id: createdId,
+          organizationId: session.organizationId,
+          updatedAt: expect.any(String)
+        }
+      ]
     });
   });
   it("does not expose todos across organizations", async () => {

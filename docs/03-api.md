@@ -188,6 +188,18 @@ not have the target product installed and enabled, the route should return
 `403 product_not_installed` rather than falling back to another organization or
 serving product data from a globally registered module.
 
+The committed generated todo proof now also establishes the first generated
+archive contract for product-owned resources:
+
+- generated list routes exclude archived records by default
+- generated list routes accept `?archived=include` or `?archived=only`
+- generated archive-enabled resources expose
+  `POST /api/v1/organizations/:organizationId/<resource>/:id/archive`
+- generated archive-enabled resources expose
+  `POST /api/v1/organizations/:organizationId/<resource>/:id/unarchive`
+- active records omit the archive timestamp field from JSON responses until a
+  record is actually archived
+
 The first explicit non-AuditTrail proof route is:
 
 - `GET /api/v1/organizations/:organizationId/projects/workspace`

@@ -2,27 +2,31 @@ import { createTodoInputSchema, listTodosInputSchema, updateTodoInputSchema, typ
 import type { TodoRepo } from "./repo.js";
 export function createTodoService(repo: TodoRepo) {
   return {
+    async archive(input: { id: string; organizationId: string }) {
+      return repo.archive(input);
+    },
     async create(input: { data: CreateTodoInput; organizationId: string }) {
       return repo.create({
         data: createTodoInputSchema.parse(input.data),
         organizationId: input.organizationId
       });
     },
-    async delete(input: { id: string; organizationId: string }) {
-      return repo.delete(input);
-    },
     async get(input: { id: string; organizationId: string }) {
       return repo.findById(input);
     },
-    async list(input: { organizationId: string; query?: string; limit?: number; cursor?: string }) {
+    async list(input: { archived?: "exclude" | "include" | "only"; organizationId: string; query?: string; limit?: number; cursor?: string }) {
       return repo.list({
         filters: listTodosInputSchema.parse({
+          archived: input.archived,
           cursor: input.cursor,
           limit: input.limit,
           query: input.query
         }),
         organizationId: input.organizationId
       });
+    },
+    async unarchive(input: { id: string; organizationId: string }) {
+      return repo.unarchive(input);
     },
     async update(input: { data: UpdateTodoInput; id: string; organizationId: string }) {
       return repo.update({

@@ -62,6 +62,7 @@ export default async function ResourceEditPage({
           <input name="todoId" type="hidden" value={data.item?.id ?? resolvedParams.todoId} />
           <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />
           <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />
+          <input name="archived" type="hidden" value={data.archivedFilter} />
         </TodoForm>
       </div>
     </AppShell>

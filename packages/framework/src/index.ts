@@ -167,6 +167,11 @@ export interface FrameworkCrudDefinition {
   uiBasePath?: string;
 }
 
+export interface FrameworkResourceArchiveDefinition {
+  enabled: boolean;
+  field: string;
+}
+
 export interface FrameworkRouteDefinition {
   authStrategy?: FrameworkRouteAuthStrategy;
   id: string;
@@ -191,6 +196,7 @@ export interface FrameworkModuleDefinition {
 }
 
 export interface FrameworkResourceDefinition {
+  archive?: FrameworkResourceArchiveDefinition;
   crud?: FrameworkCrudDefinition;
   description?: string;
   fields: readonly FrameworkFieldDefinition[];
@@ -341,6 +347,16 @@ export const frameworkCrudDefinitionSchema = z.object({
   uiBasePath: nonEmptyStringSchema.optional()
 }) satisfies z.ZodType<FrameworkCrudDefinition>;
 
+export const frameworkResourceArchiveDefinitionSchema = z
+  .object({
+    enabled: z.boolean(),
+    field: z
+      .string()
+      .trim()
+      .regex(tsIdentifierPattern, "field names must be valid TypeScript identifiers")
+  })
+  .strict() satisfies z.ZodType<FrameworkResourceArchiveDefinition>;
+
 export const frameworkRouteDefinitionSchema = z.object({
   authStrategy: frameworkRouteAuthStrategySchema.optional(),
   id: nonEmptyStringSchema,
@@ -365,6 +381,7 @@ export const frameworkModuleDefinitionSchema = z.object({
 }) satisfies z.ZodType<FrameworkModuleDefinition>;
 
 export const frameworkResourceDefinitionSchema = z.object({
+  archive: frameworkResourceArchiveDefinitionSchema.optional(),
   crud: frameworkCrudDefinitionSchema.optional(),
   description: nonEmptyStringSchema.optional(),
   fields: z.array(frameworkFieldDefinitionSchema).min(1),
@@ -517,6 +534,22 @@ export const frameworkResourceCrudSpecSchema = z
   })
   .strict();
 
+export const frameworkResourceArchiveSpecSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    field: frameworkFieldNameSchema.optional()
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.enabled === false && value.field) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "archive field cannot be set when archive support is disabled",
+        path: ["field"]
+      });
+    }
+  });
+
 export const frameworkResourceApiSpecSchema = z
   .object({
     filters: z.array(frameworkFieldNameSchema).optional(),
@@ -603,6 +636,7 @@ export const frameworkResourceTimestampsSpecSchema = z
 export const frameworkResourceSpecInputSchema = z
   .object({
     api: frameworkResourceApiSpecSchema.optional(),
+    archive: z.union([z.boolean(), frameworkResourceArchiveSpecSchema]).optional(),
     crud: frameworkResourceCrudSpecSchema.optional(),
     description: nonEmptyStringSchema.optional(),
     fields: z.array(frameworkResourceFieldSpecSchema).min(1),
@@ -717,6 +751,9 @@ export type FrameworkResourceRelationSpec = z.infer<
 export type FrameworkResourceCrudSpec = z.infer<
   typeof frameworkResourceCrudSpecSchema
 >;
+export type FrameworkResourceArchiveSpec = z.infer<
+  typeof frameworkResourceArchiveSpecSchema
+>;
 export type FrameworkResourceApiSpec = z.infer<typeof frameworkResourceApiSpecSchema>;
 export type FrameworkResourceUiSpec = z.infer<typeof frameworkResourceUiSpecSchema>;
 export type FrameworkResourcePermissionsSpec = z.infer<
@@ -790,6 +827,30 @@ const normalizedFrameworkResourceCrudSpecSchema = z
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: "at least one CRUD operation must be enabled"
+      });
+    }
+  });
+
+const normalizedFrameworkResourceArchiveSpecSchema = z
+  .object({
+    enabled: z.boolean(),
+    field: frameworkFieldNameSchema.optional()
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.enabled && !value.field) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "archive field is required when archive support is enabled",
+        path: ["field"]
+      });
+    }
+
+    if (!value.enabled && value.field) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "archive field cannot be set when archive support is disabled",
+        path: ["field"]
       });
     }
   });
@@ -874,6 +935,7 @@ const normalizedFrameworkResourceTimestampsSpecSchema = z
 export const normalizedFrameworkResourceSpecSchema = z
   .object({
     api: normalizedFrameworkResourceApiSpecSchema,
+    archive: normalizedFrameworkResourceArchiveSpecSchema,
     crud: normalizedFrameworkResourceCrudSpecSchema,
     description: nonEmptyStringSchema.optional(),
     fields: z.array(normalizedFrameworkResourceFieldSpecSchema).min(1),
@@ -982,6 +1044,7 @@ export function normalizeFrameworkResourceSpec(
     update: input.crud?.update ?? true,
     delete: input.crud?.delete ?? false
   };
+  const archive = normalizeArchive(input.archive);
   const pluralLabel = input.pluralLabel ?? pluralizeLabel(input.label);
   const pathSegment = pluralizePathSegment(toKebabCase(input.resource));
   const fields = input.fields.map((field) => ({
@@ -1035,6 +1098,7 @@ export function normalizeFrameworkResourceSpec(
       public: input.api?.public ?? false,
       version: input.api?.version
     },
+    archive,
     crud,
     description: input.description,
     fields: [...fields, ...relationFields],
@@ -1202,6 +1266,34 @@ function normalizeTimestamps(
     createdAtField: timestamps.createdAtField ?? "createdAt",
     enabled: timestamps.enabled ?? true,
     updatedAtField: timestamps.updatedAtField ?? "updatedAt"
+  };
+}
+
+function normalizeArchive(
+  archive: FrameworkResourceSpecInput["archive"]
+) {
+  if (archive === false || archive === undefined) {
+    return {
+      enabled: false
+    };
+  }
+
+  if (archive === true) {
+    return {
+      enabled: true,
+      field: "archivedAt"
+    };
+  }
+
+  if (archive.enabled === false) {
+    return {
+      enabled: false
+    };
+  }
+
+  return {
+    enabled: archive.enabled ?? true,
+    field: archive.field ?? "archivedAt"
   };
 }
 

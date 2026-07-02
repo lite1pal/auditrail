@@ -624,6 +624,10 @@ function executeApplyResourceCommand(input: {
     }
 
     const result = applyResourceFromFile({
+      allowedWarningCodes:
+        parsedArgs.options.has("--force")
+          ? ["existing-module-conflict"]
+          : undefined,
       force: parsedArgs.options.has("--force"),
       repoRoot: input.repoRoot,
       specPath,

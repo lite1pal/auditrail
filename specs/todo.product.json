@@ -18,9 +18,13 @@
           "prefix": "/v1/organizations/:organizationId/todos",
           "public": false
         },
+        "archive": {
+          "enabled": true,
+          "field": "archivedAt"
+        },
         "crud": {
           "create": true,
-          "delete": true,
+          "delete": false,
           "list": true,
           "read": true,
           "update": true

@@ -11,6 +11,7 @@ export const todoTable = pgTable(
     details: text("details"),
     status: text("status").notNull(),
     dueAt: timestamp("due_at", { withTimezone: true }),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
   },

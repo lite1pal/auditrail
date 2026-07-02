@@ -154,6 +154,15 @@ export function formatGeneratedResourceSummary(
   result: ResourceGeneratorResult
 ): string {
   const groupCounts = countFilesByGroup(result.writtenFiles);
+  const supportedCrud = ["list", "create", "read", "update"];
+
+  if (result.resource.crud.delete) {
+    supportedCrud.push("delete");
+  }
+
+  if (result.resource.archive.enabled) {
+    supportedCrud.push("archive", "unarchive");
+  }
 
   return [
     `Generated resource preview: ${result.resource.resource}`,
@@ -167,8 +176,9 @@ export function formatGeneratedResourceSummary(
     `- docs files: ${groupCounts.docs}`,
     `- skipped central follow-up paths: ${result.skippedPlanPaths.length}`,
     `- ownership: ${result.resource.ownership}`,
-    `- supported CRUD: list, create, read, update`,
-    `- delete support: not generated`,
+    `- supported CRUD: ${supportedCrud.join(", ")}`,
+    `- delete support: ${result.resource.crud.delete ? "generated when enabled" : "not generated"}`,
+    `- archive support: ${result.resource.archive.enabled ? `generated via \`${result.resource.archive.field}\`` : "disabled"}`,
     `- post-generation checks: ${result.checks.length}`
   ].join("\n");
 }
@@ -435,6 +445,9 @@ function renderDomainIndex(context: ReturnType<typeof createTemplateContext>) {
     '  id: z.string().uuid(),',
     '  organizationId: z.string().uuid(),',
     `${fieldLines},`,
+    isArchiveEnabled(context)
+      ? `  ${getArchiveFieldName(context)}: z.string().datetime().optional(),`
+      : "",
     '  createdAt: z.string().datetime(),',
     '  updatedAt: z.string().datetime()',
     "});",
@@ -448,6 +461,9 @@ function renderDomainIndex(context: ReturnType<typeof createTemplateContext>) {
     "});",
     "",
     `export const list${context.pluralPascalName}InputSchema = z.object({`,
+    isArchiveEnabled(context)
+      ? '  archived: z.enum(["exclude", "include", "only"]).optional(),'
+      : "",
     '  cursor: z.string().uuid().optional(),',
     '  limit: z.number().int().positive().max(100).optional(),',
     "  query: z.string().trim().min(1).optional()",
@@ -493,6 +509,16 @@ function renderDbSchema(context: ReturnType<typeof createTemplateContext>) {
     '    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()'
   );
 
+  if (isArchiveEnabled(context)) {
+    fieldLines.splice(
+      fieldLines.length - 2,
+      0,
+      `    ${getArchiveFieldName(context)}: timestamp("${toSnakeCase(
+        getArchiveFieldName(context)
+      )}", { withTimezone: true }),`
+    );
+  }
+
   const indexLines = [
     `    index("${context.resourcePath}s_organization_id_idx").on(table.organizationId)`,
     ...context.resource.relations.map(
@@ -528,12 +554,18 @@ function renderApiRepo(context: ReturnType<typeof createTemplateContext>) {
     `import type { Create${context.pascalName}Input, ${context.pascalName}Record, List${context.pluralPascalName}Input, Update${context.pascalName}Input } from "@auditrail/domain/generated/${context.resourcePath}";`,
     "",
     `export interface ${context.pascalName}Repo {`,
+    isArchiveEnabled(context)
+      ? `  archive(input: { id: string; organizationId: string }): Promise<${context.pascalName}Record | undefined>;`
+      : "",
     `  create(input: { organizationId: string; data: Create${context.pascalName}Input }): Promise<${context.pascalName}Record>;`,
     context.resource.crud.delete
       ? `  delete(input: { id: string; organizationId: string }): Promise<boolean>;`
       : "",
     `  findById(input: { id: string; organizationId: string }): Promise<${context.pascalName}Record | undefined>;`,
     `  list(input: { organizationId: string; filters: List${context.pluralPascalName}Input }): Promise<readonly ${context.pascalName}Record[]>;`,
+    isArchiveEnabled(context)
+      ? `  unarchive(input: { id: string; organizationId: string }): Promise<${context.pascalName}Record | undefined>;`
+      : "",
     `  update(input: { id: string; organizationId: string; data: Update${context.pascalName}Input }): Promise<${context.pascalName}Record | undefined>;`,
     "}"
   ]
@@ -549,6 +581,9 @@ function renderApiService(context: ReturnType<typeof createTemplateContext>) {
     "",
     `export function create${context.pascalName}Service(repo: ${context.pascalName}Repo) {`,
     "  return {",
+    isArchiveEnabled(context)
+      ? "    async archive(input: { id: string; organizationId: string }) {\n      return repo.archive(input);\n    },"
+      : "",
     "    async create(input: { data: Create" + context.pascalName + "Input; organizationId: string }) {",
     "      return repo.create({",
     "        data: create" + context.pascalName + "InputSchema.parse(input.data),",
@@ -561,9 +596,10 @@ function renderApiService(context: ReturnType<typeof createTemplateContext>) {
     "    async get(input: { id: string; organizationId: string }) {",
     "      return repo.findById(input);",
     "    },",
-    "    async list(input: { organizationId: string; query?: string; limit?: number; cursor?: string }) {",
+    `    async list(input: { ${isArchiveEnabled(context) ? 'archived?: "exclude" | "include" | "only"; ' : ""}organizationId: string; query?: string; limit?: number; cursor?: string }) {`,
     "      return repo.list({",
     "        filters: list" + context.pluralPascalName + "InputSchema.parse({",
+    isArchiveEnabled(context) ? '          archived: input.archived,' : "",
     "          cursor: input.cursor,",
     "          limit: input.limit,",
     "          query: input.query",
@@ -571,6 +607,9 @@ function renderApiService(context: ReturnType<typeof createTemplateContext>) {
     "        organizationId: input.organizationId",
     "      });",
     "    },",
+    isArchiveEnabled(context)
+      ? "    async unarchive(input: { id: string; organizationId: string }) {\n      return repo.unarchive(input);\n    },"
+      : "",
     "    async update(input: { data: Update" + context.pascalName + "Input; id: string; organizationId: string }) {",
     "      return repo.update({",
     "        data: update" + context.pascalName + "InputSchema.parse(input.data),",
@@ -611,13 +650,31 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
   return [
     `import type { ${context.pascalName}Record } from "@auditrail/domain/generated/${context.resourcePath}";`,
     `import { ${context.resource.resource}Table } from "@auditrail/db/schema";`,
-    'import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";',
+    'import { and, desc, eq, ilike, isNotNull, isNull, lt, or, sql } from "drizzle-orm";',
     "",
     `import type { AppDatabase } from "../../../plugins/database.js";`,
     `import type { ${context.pascalName}Repo } from "./repo.js";`,
     "",
     `export function createPostgres${context.pascalName}Repo(db: AppDatabase): ${context.pascalName}Repo {`,
     "  return {",
+    isArchiveEnabled(context)
+      ? [
+          "    async archive(input) {",
+          `      const [record] = await db.update(${context.resource.resource}Table).set({`,
+          `        ${getArchiveFieldName(context)}: new Date(),`,
+          "        updatedAt: new Date()",
+          "      }).where(",
+          "        and(",
+          `          eq(${context.resource.resource}Table.id, input.id),`,
+          `          eq(${context.resource.resource}Table.organizationId, input.organizationId),`,
+          `          isNull(${context.resource.resource}Table.${getArchiveFieldName(context)})`,
+          "        )",
+          "      ).returning();",
+          "",
+          `      return record ? to${context.pascalName}Record(record) : undefined;`,
+          "    },"
+        ].join("\n")
+      : "",
     "    async create(input) {",
     `      const [record] = await db.insert(${context.resource.resource}Table).values({`,
     "        organizationId: input.organizationId,",
@@ -653,6 +710,9 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     "    async list(input) {",
     "      const limit = Math.min(input.filters.limit ?? 50, 100);",
     "      const pattern = input.filters.query ? `%${input.filters.query}%` : undefined;",
+    isArchiveEnabled(context)
+      ? '      const archived = input.filters.archived ?? "exclude";'
+      : "",
     `      const [cursorRecord] = input.filters.cursor ? await db.select({`,
     `        createdAt: ${context.resource.resource}Table.createdAt,`,
     `        id: ${context.resource.resource}Table.id`,
@@ -665,6 +725,15 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     `      const records = await db.select().from(${context.resource.resource}Table).where(`,
     "        and(",
     `          eq(${context.resource.resource}Table.organizationId, input.organizationId),`,
+    isArchiveEnabled(context)
+      ? [
+          '          archived === "only"',
+          `            ? isNotNull(${context.resource.resource}Table.${getArchiveFieldName(context)})`,
+          '            : archived === "include"',
+          "              ? undefined",
+          `              : isNull(${context.resource.resource}Table.${getArchiveFieldName(context)}),`
+        ].join("\n")
+      : "",
     searchClauseLines.length > 0
       ? [
           "          pattern",
@@ -690,6 +759,24 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     "",
     `      return records.map(to${context.pascalName}Record);`,
     "    },",
+    isArchiveEnabled(context)
+      ? [
+          "    async unarchive(input) {",
+          `      const [record] = await db.update(${context.resource.resource}Table).set({`,
+          `        ${getArchiveFieldName(context)}: null,`,
+          "        updatedAt: new Date()",
+          "      }).where(",
+          "        and(",
+          `          eq(${context.resource.resource}Table.id, input.id),`,
+          `          eq(${context.resource.resource}Table.organizationId, input.organizationId),`,
+          `          isNotNull(${context.resource.resource}Table.${getArchiveFieldName(context)})`,
+          "        )",
+          "      ).returning();",
+          "",
+          `      return record ? to${context.pascalName}Record(record) : undefined;`,
+          "    },"
+        ].join("\n")
+      : "",
     "    async update(input) {",
     `      const [record] = await db.update(${context.resource.resource}Table).set({`,
     ...updateAssignmentLines,
@@ -713,6 +800,9 @@ function renderApiPostgresRepo(context: ReturnType<typeof createTemplateContext>
     "    id: record.id,",
     "    organizationId: record.organizationId,",
     ...recordShapeLines,
+    isArchiveEnabled(context)
+      ? `    ${getArchiveFieldName(context)}: record.${getArchiveFieldName(context)}?.toISOString(),`
+      : "",
     "    createdAt: record.createdAt.toISOString(),",
     "    updatedAt: record.updatedAt.toISOString()",
     "  };",
@@ -735,6 +825,14 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     "  organizationId: z.string().uuid()",
     "});",
     "",
+    isArchiveEnabled(context)
+      ? [
+          "const listQuerySchema = z.object({",
+          '  archived: z.enum(["exclude", "include", "only"]).optional()',
+          "});",
+          ""
+        ].join("\n")
+      : "",
     "const resourceIdParamsSchema = z.object({",
     "  id: z.string().uuid(),",
     "  organizationId: z.string().uuid()",
@@ -760,12 +858,15 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     `  app.get("${listPath}", async (request, reply) => {`,
     "    const user = request.sessionUser;",
     "    const params = organizationParamsSchema.safeParse(request.params);",
+    isArchiveEnabled(context)
+      ? "    const query = listQuerySchema.safeParse(request.query);"
+      : "",
     "",
     "    if (!user) {",
     '      return reply.code(401).send({ error: "missing_session" });',
     "    }",
     "",
-    "    if (!params.success) {",
+    `    if (!params.success${isArchiveEnabled(context) ? " || !query.success" : ""}) {`,
     '      return reply.code(400).send({ error: "invalid_request" });',
     "    }",
     "",
@@ -778,6 +879,7 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     "",
     "      return {",
     "        items: await options.service.list({",
+    isArchiveEnabled(context) ? "          archived: query.data.archived," : "",
     "          cursor: undefined,",
     "          limit: undefined,",
     "          organizationId: params.data.organizationId,",
@@ -887,6 +989,78 @@ function renderApiRoutes(context: ReturnType<typeof createTemplateContext>) {
     "      return mapGeneratedResourceAccessError(reply, error);",
     "    }",
     "  });",
+    isArchiveEnabled(context)
+      ? [
+          "",
+          `  app.post("${listPath}/:id/archive", async (request, reply) => {`,
+          "    const user = request.sessionUser;",
+          "    const params = resourceIdParamsSchema.safeParse(request.params);",
+          "",
+          "    if (!user) {",
+          '      return reply.code(401).send({ error: "missing_session" });',
+          "    }",
+          "",
+          "    if (!params.success) {",
+          '      return reply.code(400).send({ error: "invalid_request" });',
+          "    }",
+          "",
+          "    try {",
+          "      await options.access.assertOrganizationAccess({",
+          '        allowedRoles: ["owner", "admin", "member"],',
+          "        organizationId: params.data.organizationId,",
+          "        userId: user.id",
+          "      });",
+          "",
+          "      const resource = await options.service.archive({",
+          "        id: params.data.id,",
+          "        organizationId: params.data.organizationId",
+          "      });",
+          "",
+          "      if (!resource) {",
+          '        return reply.code(404).send({ error: "not_found" });',
+          "      }",
+          "",
+          "      return resource;",
+          "    } catch (error) {",
+          "      return mapGeneratedResourceAccessError(reply, error);",
+          "    }",
+          "  });",
+          "",
+          `  app.post("${listPath}/:id/unarchive", async (request, reply) => {`,
+          "    const user = request.sessionUser;",
+          "    const params = resourceIdParamsSchema.safeParse(request.params);",
+          "",
+          "    if (!user) {",
+          '      return reply.code(401).send({ error: "missing_session" });',
+          "    }",
+          "",
+          "    if (!params.success) {",
+          '      return reply.code(400).send({ error: "invalid_request" });',
+          "    }",
+          "",
+          "    try {",
+          "      await options.access.assertOrganizationAccess({",
+          '        allowedRoles: ["owner", "admin", "member"],',
+          "        organizationId: params.data.organizationId,",
+          "        userId: user.id",
+          "      });",
+          "",
+          "      const resource = await options.service.unarchive({",
+          "        id: params.data.id,",
+          "        organizationId: params.data.organizationId",
+          "      });",
+          "",
+          "      if (!resource) {",
+          '        return reply.code(404).send({ error: "not_found" });',
+          "      }",
+          "",
+          "      return resource;",
+          "    } catch (error) {",
+          "      return mapGeneratedResourceAccessError(reply, error);",
+          "    }",
+          "  });"
+        ].join("\n")
+      : "",
     context.resource.crud.delete
       ? [
           "",
@@ -957,7 +1131,7 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    const app = buildTestApp({}, { session: false });",
     "",
     "    const response = await app.inject({",
-    `      url: "${listPath}"`,
+    `      url: "${listPath}${isArchiveEnabled(context) ? '?archived=only' : ""}"`,
     "    });",
     "",
     "    expect(response.statusCode).toBe(401);",
@@ -968,6 +1142,7 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    const app = buildTestApp({",
     "      async list(input) {",
     "        expect(input).toEqual({",
+    isArchiveEnabled(context) ? '          archived: "only",' : "",
     "          cursor: undefined,",
     "          limit: undefined,",
     '          organizationId: "11111111-1111-4111-8111-111111111111",',
@@ -987,7 +1162,7 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    });",
     "",
     "    const response = await app.inject({",
-    `      url: "${listPath}"`,
+    `      url: "${listPath}${isArchiveEnabled(context) ? '?archived=only' : ""}"`,
     "    });",
     "",
     "    expect(response.statusCode).toBe(200);",
@@ -1044,6 +1219,66 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
           "  });"
         ].join("\n")
       : "",
+    isArchiveEnabled(context)
+      ? [
+          "",
+          `  it("archives ${context.label.toLowerCase()} records for authorized organization members", async () => {`,
+          "    const app = buildTestApp({",
+          "      async archive(input) {",
+          "        expect(input).toEqual({",
+          '          id: "22222222-2222-4222-8222-222222222222",',
+          '          organizationId: "11111111-1111-4111-8111-111111111111"',
+          "        });",
+          "",
+          "        return {",
+          '          createdAt: "2026-06-29T00:00:00.000Z",',
+          renderExpectedFieldObject(context.resource.fields),
+          `          ${getArchiveFieldName(context)}: "2026-07-01T00:00:00.000Z",`,
+          '          id: "22222222-2222-4222-8222-222222222222",',
+          '          organizationId: "11111111-1111-4111-8111-111111111111",',
+          '          updatedAt: "2026-07-01T00:00:00.000Z"',
+          "        };",
+          "      }",
+          "    });",
+          "",
+          "    const response = await app.inject({",
+          '      method: "POST",',
+          `      url: "${listPath}/22222222-2222-4222-8222-222222222222/archive"`,
+          "    });",
+          "",
+          "    expect(response.statusCode).toBe(200);",
+          `    expect(response.json()).toMatchObject({ ${getArchiveFieldName(context)}: "2026-07-01T00:00:00.000Z" });`,
+          "  });",
+          "",
+          `  it("unarchives ${context.label.toLowerCase()} records for authorized organization members", async () => {`,
+          "    const app = buildTestApp({",
+          "      async unarchive(input) {",
+          "        expect(input).toEqual({",
+          '          id: "22222222-2222-4222-8222-222222222222",',
+          '          organizationId: "11111111-1111-4111-8111-111111111111"',
+          "        });",
+          "",
+          "        return {",
+          '          createdAt: "2026-06-29T00:00:00.000Z",',
+          renderExpectedFieldObject(context.resource.fields),
+          `          ${getArchiveFieldName(context)}: undefined,`,
+          '          id: "22222222-2222-4222-8222-222222222222",',
+          '          organizationId: "11111111-1111-4111-8111-111111111111",',
+          '          updatedAt: "2026-07-01T00:00:00.000Z"',
+          "        };",
+          "      }",
+          "    });",
+          "",
+          "    const response = await app.inject({",
+          '      method: "POST",',
+          `      url: "${listPath}/22222222-2222-4222-8222-222222222222/unarchive"`,
+          "    });",
+          "",
+          "    expect(response.statusCode).toBe(200);",
+          `    expect(response.json()).not.toHaveProperty(${JSON.stringify(getArchiveFieldName(context))});`,
+          "  });"
+        ].join("\n")
+      : "",
     "});",
     "",
     "function buildTestApp(",
@@ -1084,6 +1319,13 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     `  overrides: Partial<ReturnType<typeof create${context.pascalName}Service>>`,
     ") {",
     "  return {",
+    isArchiveEnabled(context)
+      ? [
+          "    async archive() {",
+          '      throw new Error("not implemented");',
+          "    },"
+        ].join("\n")
+      : "",
     "    async create() {",
     '      throw new Error("not implemented");',
     "    },",
@@ -1100,6 +1342,13 @@ function renderApiRoutesTest(context: ReturnType<typeof createTemplateContext>) 
     "    async list() {",
     "      return [];",
     "    },",
+    isArchiveEnabled(context)
+      ? [
+          "    async unarchive() {",
+          '      throw new Error("not implemented");',
+          "    },"
+        ].join("\n")
+      : "",
     "    async update() {",
     '      throw new Error("not implemented");',
     "    },",
@@ -1260,6 +1509,88 @@ function renderApiRoutesIntegrationTest(
     "      id: createdId,",
     "      organizationId: session.organizationId",
     "    });",
+    isArchiveEnabled(context)
+      ? [
+          "",
+          "    const archiveResponse = await app.inject({",
+          '      method: "POST",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}/${"${createdId}"}/archive\``,
+          "    });",
+          "",
+          "    expect(archiveResponse.statusCode).toBe(200);",
+          `    expect(archiveResponse.json()).toMatchObject({ ${getArchiveFieldName(context)}: expect.any(String) });`,
+          "",
+          "    const archivedListResponse = await app.inject({",
+          '      method: "GET",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}\``,
+          "    });",
+          "",
+          "    expect(archivedListResponse.statusCode).toBe(200);",
+          "    expect(archivedListResponse.json()).toEqual({",
+          "      items: []",
+          "    });",
+          "",
+          "    const archivedOnlyResponse = await app.inject({",
+          '      method: "GET",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}?archived=only\``,
+          "    });",
+          "",
+          "    expect(archivedOnlyResponse.statusCode).toBe(200);",
+          "    expect(archivedOnlyResponse.json()).toEqual({",
+          "      items: [",
+          "        {",
+          '          createdAt: expect.any(String),',
+          updatedExpectedFields,
+          `          ${getArchiveFieldName(context)}: expect.any(String),`,
+          "          id: createdId,",
+          "          organizationId: session.organizationId,",
+          '          updatedAt: expect.any(String)',
+          "        }",
+          "      ]",
+          "    });",
+          "",
+          "    const unarchiveResponse = await app.inject({",
+          '      method: "POST",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}/${"${createdId}"}/unarchive\``,
+          "    });",
+          "",
+          "    expect(unarchiveResponse.statusCode).toBe(200);",
+          `    expect(unarchiveResponse.json()).not.toHaveProperty(${JSON.stringify(getArchiveFieldName(context))});`,
+          "",
+          "    const unarchivedListResponse = await app.inject({",
+          '      method: "GET",',
+          "      headers: {",
+          "        cookie: session.cookie",
+          "      },",
+          `      url: \`${"${API_VERSION_PREFIX}"}/organizations/${"${session.organizationId}"}/${tableName}\``,
+          "    });",
+          "",
+          "    expect(unarchivedListResponse.statusCode).toBe(200);",
+          "    expect(unarchivedListResponse.json()).toEqual({",
+          "      items: [",
+          "        {",
+          '          createdAt: expect.any(String),',
+          updatedExpectedFields,
+          "          id: createdId,",
+          "          organizationId: session.organizationId,",
+          '          updatedAt: expect.any(String)',
+          "        }",
+          "      ]",
+          "    });"
+        ].join("\n")
+      : "",
     context.resource.crud.delete
       ? [
           "",
@@ -1387,6 +1718,13 @@ function renderApiServiceTest(context: ReturnType<typeof createTemplateContext>)
     `describe("create${context.pascalName}Service", () => {`,
     `  it("validates create input before writing ${context.label.toLowerCase()} records", async () => {`,
     `    const service = create${context.pascalName}Service({`,
+    isArchiveEnabled(context)
+      ? [
+          "      async archive() {",
+          "        return undefined;",
+          "      },"
+        ].join("\n")
+      : "",
     "      async create(input) {",
     "        return {",
     "          id: \"00000000-0000-0000-0000-000000000001\",",
@@ -1409,6 +1747,13 @@ function renderApiServiceTest(context: ReturnType<typeof createTemplateContext>)
     "      async list() {",
     "        return [];",
     "      },",
+    isArchiveEnabled(context)
+      ? [
+          "      async unarchive() {",
+          "        return undefined;",
+          "      },"
+        ].join("\n")
+      : "",
     "      async update() {",
     "        return undefined;",
     "      }",
@@ -1475,10 +1820,12 @@ function renderWebApiClient(context: ReturnType<typeof createTemplateContext>) {
     "        })",
     "      );",
     "    },",
-    "    async list(organizationId: string) {",
+    `    async list(organizationId: string${isArchiveEnabled(context) ? ', options?: { archived?: "exclude" | "include" | "only" }' : ""}) {`,
     `      return ${context.resource.resource}ListResponseSchema.parse(`,
     "        await apiClient.request({",
-    `          path: \`${organizationPath}\` as never`,
+    isArchiveEnabled(context)
+      ? `          path: \`${organizationPath}\${buildArchiveQuery(options?.archived)}\` as never`
+      : `          path: \`${organizationPath}\` as never`,
     "        })",
     "      );",
     "    },",
@@ -1502,8 +1849,41 @@ function renderWebApiClient(context: ReturnType<typeof createTemplateContext>) {
         ].join("\n")
       : ""
     ,
+    isArchiveEnabled(context)
+      ? [
+          "    async archive(organizationId: string, id: string) {",
+          `      return ${context.resource.resource}RecordSchema.parse(`,
+          "        await apiClient.request({",
+          '          method: "POST",',
+          `          path: \`${organizationPath}/${"${id}"}/archive\` as never`,
+          "        })",
+          "      );",
+          "    },",
+          "    async unarchive(organizationId: string, id: string) {",
+          `      return ${context.resource.resource}RecordSchema.parse(`,
+          "        await apiClient.request({",
+          '          method: "POST",',
+          `          path: \`${organizationPath}/${"${id}"}/unarchive\` as never`,
+          "        })",
+          "      );",
+          "    }"
+        ].join("\n")
+      : ""
+    ,
     "  };",
-    "}"
+    "}",
+    isArchiveEnabled(context)
+      ? [
+          "",
+          'function buildArchiveQuery(archived?: "exclude" | "include" | "only") {',
+          "  if (!archived) {",
+          '    return "";',
+          "  }",
+          "",
+          "  return `?${new URLSearchParams({ archived }).toString()}`;",
+          "}"
+        ].join("\n")
+      : ""
   ]
     .filter(Boolean)
     .join("\n");
@@ -1521,6 +1901,9 @@ function renderWebDomainSchemas(context: ReturnType<typeof createTemplateContext
     '  id: z.string().uuid(),',
     '  organizationId: z.string().uuid(),',
     `${fieldLines},`,
+    isArchiveEnabled(context)
+      ? `  ${getArchiveFieldName(context)}: z.string().datetime().optional(),`
+      : "",
     '  createdAt: z.string().datetime(),',
     '  updatedAt: z.string().datetime()',
     "});",
@@ -1992,6 +2375,14 @@ function countFilesByGroup(files: readonly ResourceGeneratorFile[]) {
     domain: files.filter((file) => file.group === "domain").length,
     web: files.filter((file) => file.group === "web").length
   } as const;
+}
+
+function isArchiveEnabled(context: ReturnType<typeof createTemplateContext>) {
+  return context.resource.archive.enabled;
+}
+
+function getArchiveFieldName(context: ReturnType<typeof createTemplateContext>) {
+  return context.resource.archive.field ?? "archivedAt";
 }
 
 function getPluralPath(resource: FrameworkResourceSpec) {

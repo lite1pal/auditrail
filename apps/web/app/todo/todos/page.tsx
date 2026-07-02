@@ -25,6 +25,21 @@ export default async function ResourcePage({ searchParams }: ResourcePageProps) 
     installedProducts: data.workspace.activeOrganizationInstalledProducts,
     preferredProductId: "todo"
   });
+  const activeHref = "/todo/todos" + buildWorkspaceSuffix(
+    data.workspace.activeOrganizationId ?? "",
+    data.workspace.activeProjectId ?? undefined,
+    "exclude"
+  );
+  const archivedHref = "/todo/todos" + buildWorkspaceSuffix(
+    data.workspace.activeOrganizationId ?? "",
+    data.workspace.activeProjectId ?? undefined,
+    "only"
+  );
+  const allHref = "/todo/todos" + buildWorkspaceSuffix(
+    data.workspace.activeOrganizationId ?? "",
+    data.workspace.activeProjectId ?? undefined,
+    "include"
+  );
 
   return (
     <AppShell
@@ -44,10 +59,17 @@ export default async function ResourcePage({ searchParams }: ResourcePageProps) 
         <TodoForm action={createTodoWorkspaceAction} defaultValues={data.draftValues} submitLabel="Create Todo">
           <input name="organizationId" type="hidden" value={data.workspace.activeOrganizationId ?? ""} />
           <input name="projectId" type="hidden" value={data.workspace.activeProjectId ?? ""} />
+          <input name="archived" type="hidden" value={data.archivedFilter} />
           {data.feedback ? (
             <p className="rounded-md border border-[var(--border)] bg-[var(--panel-muted)] px-3 py-2 text-sm text-[var(--foreground)]">{data.feedback}</p>
           ) : null}
         </TodoForm>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <a className="rounded-md border border-[var(--border)] px-3 py-2" href={activeHref}>Active</a>
+          <a className="rounded-md border border-[var(--border)] px-3 py-2" href={archivedHref}>Archived</a>
+          <a className="rounded-md border border-[var(--border)] px-3 py-2" href={allHref}>All</a>
+          <span className="self-center text-[var(--muted)]">Viewing: {data.archivedFilter}</span>
+        </div>
         <TodoScreen
           items={data.items}
           organizationId={data.workspace.activeOrganizationId ?? undefined}
@@ -58,4 +80,22 @@ export default async function ResourcePage({ searchParams }: ResourcePageProps) 
       </div>
     </AppShell>
   );
+}
+
+function buildWorkspaceSuffix(
+  organizationId: string,
+  projectId?: string,
+  archived?: "exclude" | "include" | "only"
+) {
+  const query = new URLSearchParams({ organizationId });
+
+  if (projectId) {
+    query.set("projectId", projectId);
+  }
+
+  if (archived) {
+    query.set("archived", archived);
+  }
+
+  return `?${query.toString()}`;
 }

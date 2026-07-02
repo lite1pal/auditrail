@@ -4,37 +4,6 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
-- [ ] T-118 Add archive and soft-delete generation for product-owned resources
-  status: ready
-  priority: high
-  owner: codex
-  branch:
-  pr:
-  last_updated: 2026-07-02
-  completed:
-  blocked_reason:
-  notes:
-    - 2026-07-02: generated resources now support hard delete, but production CRM and PM entities usually need archive semantics and recoverable records
-    - 2026-07-02: this task should stay generator-owned and make archive behavior configurable without forcing custom runtime code per product
-  files:
-    - tools/saas/*
-    - apps/api/src/modules/generated/*
-    - apps/web/app/*
-    - apps/web/src/features/*
-    - packages/domain/src/generated/*
-    - packages/db/src/schema/*
-    - README.md
-    - docs/02-architecture.md
-    - docs/03-api.md
-    - docs/04-quality-gates.md
-    - docs/05-next-steps.md
-    - docs/07-change-log.md
-    - tasks/workflow.txt
-  acceptance:
-    - Generated resources can opt into archive semantics and receive generator-owned DB, API, client, and product-page support
-    - Generated lists exclude archived records by default while supporting an explicit archived view or filter
-    - The committed generated proof path covers archive and unarchive behavior through generated routes and UI
-
 - [ ] T-119 Add product-level authorization and policy hooks for generated products
   status: ready
   priority: high
@@ -343,6 +312,40 @@ This file tracks task-system and agent-workflow work items.
     - The first proof product can render a real workspace page for a generated todo resource instead of placeholder-only UI
 
 ## Done
+
+- [x] T-118 Add archive and soft-delete generation for product-owned resources
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed: 2026-07-02
+  blocked_reason:
+  notes:
+    - 2026-07-02: generated resources now support hard delete, but production CRM and PM entities usually need archive semantics and recoverable records
+    - 2026-07-02: this task should stay generator-owned and make archive behavior configurable without forcing custom runtime code per product
+    - 2026-07-02: resource specs now support generator-owned archive metadata, generated API and web clients now expose archive or unarchive plus archived list filters, and the committed todo proof now exercises archive -> archived-only list -> restore through generated routes and UI
+    - 2026-07-02: the committed Postgres proof also now includes `0014_todo_archive.sql`, so the archive seam is validated against the real test database instead of remaining schema-only
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - packages/db/src/schema/*
+    - packages/db/src/migrations/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated resources can opt into archive semantics and receive generator-owned DB, API, client, and product-page support
+    - Generated lists exclude archived records by default while supporting an explicit archived view or filter
+    - The committed generated proof path covers archive and unarchive behavior through generated routes and UI
 
 - [x] T-117 Add a CLI-owned CRM product template
   status: done

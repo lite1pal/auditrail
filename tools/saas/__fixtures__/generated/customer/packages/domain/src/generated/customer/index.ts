@@ -18,6 +18,7 @@ export const customerRecordSchema = z.object({
   status: z.enum(["active", "inactive"]),
   externalId: z.string().uuid().optional(),
   lastContactedAt: z.string().datetime().optional(),
+
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
@@ -41,6 +42,7 @@ export const updateCustomerInputSchema = z.object({
 });
 
 export const listCustomersInputSchema = z.object({
+
   cursor: z.string().uuid().optional(),
   limit: z.number().int().positive().max(100).optional(),
   query: z.string().trim().min(1).optional()

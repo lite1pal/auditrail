@@ -22,10 +22,10 @@ export function createResourceClient(apiClient: ApiClient) {
         })
       );
     },
-    async list(organizationId: string) {
+    async list(organizationId: string, options?: { archived?: "exclude" | "include" | "only" }) {
       return todoListResponseSchema.parse(
         await apiClient.request({
-          path: `/api/v1/organizations/${organizationId}/todos` as never
+          path: `/api/v1/organizations/${organizationId}/todos${buildArchiveQuery(options?.archived)}` as never
         })
       );
     },
@@ -38,11 +38,29 @@ export function createResourceClient(apiClient: ApiClient) {
         })
       );
     },
-    async delete(organizationId: string, id: string) {
-      await apiClient.request({
-        method: "DELETE",
-        path: `/api/v1/organizations/${organizationId}/todos/${id}` as never
-      });
+    async archive(organizationId: string, id: string) {
+      return todoRecordSchema.parse(
+        await apiClient.request({
+          method: "POST",
+          path: `/api/v1/organizations/${organizationId}/todos/${id}/archive` as never
+        })
+      );
+    },
+    async unarchive(organizationId: string, id: string) {
+      return todoRecordSchema.parse(
+        await apiClient.request({
+          method: "POST",
+          path: `/api/v1/organizations/${organizationId}/todos/${id}/unarchive` as never
+        })
+      );
     }
   };
+}
+
+function buildArchiveQuery(archived?: "exclude" | "include" | "only") {
+  if (!archived) {
+    return "";
+  }
+
+  return `?${new URLSearchParams({ archived }).toString()}`;
 }

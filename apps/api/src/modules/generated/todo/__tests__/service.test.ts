@@ -3,6 +3,9 @@ import { createTodoService } from "../service.js";
 describe("createTodoService", () => {
   it("validates create input before writing todo records", async () => {
     const service = createTodoService({
+      async archive() {
+        return undefined;
+      },
       async create(input) {
         return {
           id: "00000000-0000-0000-0000-000000000001",
@@ -15,14 +18,14 @@ describe("createTodoService", () => {
           updatedAt: "2026-06-29T00:00:00.000Z"
         };
       },
-      async delete() {
-        return true;
-      },
       async findById() {
         return undefined;
       },
       async list() {
         return [];
+      },
+      async unarchive() {
+        return undefined;
       },
       async update() {
         return undefined;

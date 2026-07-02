@@ -1,6 +1,6 @@
 import type { TaskRecord } from "@auditrail/domain/generated/task";
 import { taskTable } from "@auditrail/db/schema";
-import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { TaskRepo } from "./repo.js";
 export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
