@@ -53,7 +53,6 @@ export default async function ProductPage({ searchParams }: ProductPageProps) {
     </AppShell>
   );
 }
-
 function buildWorkspaceSuffix(
   organizationId?: string,
   projectId?: string

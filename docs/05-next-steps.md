@@ -4,14 +4,15 @@ The immediate Elioric framework roadmap is now:
 
 1. T-104: prove the smallest serious PM product slice on top of the generated
    resource and multi-product seams: workspace, project, task, comment
-1. relation-aware product generation for second-product resources so a PM slice
+1. finish and broaden relation-aware product generation for second-product resources so a PM slice
    can compose task -> project and comment -> task without manual page logic
 1. generated product UI depth beyond the current create/list/detail/edit/delete
    slice: archive flows, richer field widgets, and workspace summaries
 1. generated-resource web UI depth for standalone resource routes, which are
    still intentionally weaker than the new product-owned route generation
 1. richer generated-resource authorization patterns beyond organization-role CRUD
-1. broader relation support only after the current bounded belongs-to slice is
+1. broader relation support only after the current bounded belongs-to plus
+   bounded relation-presentation slice is
    proven through a real second product
 
 T-110 is now complete: the CLI can create and install a simple todo product

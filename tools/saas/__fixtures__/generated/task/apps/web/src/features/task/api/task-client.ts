@@ -1,11 +1,9 @@
 import type { ApiClient } from "@/src/lib/api/api-client";
 import { taskRecordSchema } from "@/src/features/task/domain/schemas";
 import { z } from "zod";
-
 const taskListResponseSchema = z.object({
   items: z.array(taskRecordSchema)
 });
-
 export function createResourceClient(apiClient: ApiClient) {
   return {
     async create(organizationId: string, body: Record<string, unknown>) {
@@ -39,6 +37,6 @@ export function createResourceClient(apiClient: ApiClient) {
           path: `/api/v1/organizations/${organizationId}/tasks/${id}` as never
         })
       );
-    }
+    },
   };
 }

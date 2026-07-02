@@ -225,7 +225,11 @@ The current relation slice is intentionally narrow:
 - relation fields normalize to UUID foreign keys such as `projectId`
 - supported platform targets are `organization`, `project`, and `user`
 - generated-to-generated relations require the target resource to already be installed
-- generated routes still return scalar IDs only; nested relation loading stays manual
+- generated routes still return scalar IDs only
+- generated product-owned pages can resolve bounded relation presentation for
+  product-local generated targets and `platform:project` targets
+- `platform:user` lookups, nested relation reads, and broader graph traversal
+  still remain manual
 
 Health and tooling checks:
 

@@ -59,6 +59,10 @@ same lane so `pnpm saas plan product ...` is exercised before install mutates
 shared runtime files. The committed todo web proof now covers validation
 feedback -> create -> detail -> edit -> delete -> empty list through generated
 product-owned pages and server actions instead of stopping at list-plus-create.
+Relation-aware generation now also requires golden-fixture and install coverage
+for bounded relation presentation so generated products can render resolved
+labels or links for supported relation targets without changing generated API
+record contracts.
 
 ## Hosted Runtime Release Gate
 

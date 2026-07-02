@@ -720,7 +720,7 @@ function collectAssumptions(resource: FrameworkResourceSpec) {
 
   if (resource.relations.length > 0) {
     assumptions.push(
-      "Belongs-to relations currently generate UUID foreign-key fields and database references only; nested reads, join expansion, and graph traversal remain manual product work."
+      "Belongs-to relations always generate UUID foreign-key fields and database references. Generated product pages can now resolve bounded relation presentation for product-local generated targets and platform project targets, but nested reads, user-directory lookups, join expansion, and graph traversal remain manual work."
     );
   }
 

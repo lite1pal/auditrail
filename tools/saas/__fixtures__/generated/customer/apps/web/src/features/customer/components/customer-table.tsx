@@ -1,9 +1,20 @@
 import type { CustomerRecord } from "../domain/schemas.js";
 
+type CustomerRelationPresentation = {
+  href?: string;
+  label: string;
+};
+
+type CustomerRelationPresentations = Record<
+  string,
+  Partial<Record<string, CustomerRelationPresentation>>
+>;
+
 export function CustomerTable(input: {
   items: readonly CustomerRecord[];
   organizationId?: string;
   projectId?: string;
+  relationPresentations?: CustomerRelationPresentations;
   resourceBasePath?: string;
 }) {
   const showActions = Boolean(input.organizationId && input.resourceBasePath);
@@ -45,6 +56,25 @@ export function CustomerTable(input: {
   );
 }
 
+function renderRelationAwareValue(
+  recordId: string,
+  fieldName: string,
+  value: unknown,
+  relationPresentations?: CustomerRelationPresentations
+) {
+  const relation = relationPresentations?.[recordId]?.[fieldName];
+
+  if (relation?.href) {
+    return <a href={relation.href}>{relation.label}</a>;
+  }
+
+  if (relation) {
+    return relation.label;
+  }
+
+  return value?.toString() ?? "";
+}
+
 function buildResourceHref(
   input: Pick<CustomerTableParameters, "organizationId" | "projectId" | "resourceBasePath">,
   id: string
@@ -79,5 +109,6 @@ interface CustomerTableParameters {
   items: readonly CustomerRecord[];
   organizationId?: string;
   projectId?: string;
+  relationPresentations?: CustomerRelationPresentations;
   resourceBasePath?: string;
 }

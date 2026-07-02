@@ -52,6 +52,7 @@ export default async function ResourcePage({ searchParams }: ResourcePageProps) 
           items={data.items}
           organizationId={data.workspace.activeOrganizationId ?? undefined}
           projectId={data.workspace.activeProjectId ?? undefined}
+          relationPresentations={data.relationPresentations}
           resourceBasePath="/todo/todos"
         />
       </div>

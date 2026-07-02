@@ -1064,6 +1064,8 @@ Current contract:
 - `DELETE /todos/:id` returns `204` on success
 - the todo product-owned web proof route `/todo/todos` loads that same
   installed API contract through generated server clients and server actions
+- generated product pages may resolve bounded relation labels and links on the
+  web side, but the API contract still returns scalar relation IDs
 - `GET /:id`, `PATCH /:id`, and `DELETE /:id` return `404 not_found` when the
   record is absent
 - generated belongs-to relations remain scalar UUID fields in request and

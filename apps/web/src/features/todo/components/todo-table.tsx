@@ -1,9 +1,20 @@
 import type { TodoRecord } from "../domain/schemas.js";
 
+type TodoRelationPresentation = {
+  href?: string;
+  label: string;
+};
+
+type TodoRelationPresentations = Record<
+  string,
+  Partial<Record<string, TodoRelationPresentation>>
+>;
+
 export function TodoTable(input: {
   items: readonly TodoRecord[];
   organizationId?: string;
   projectId?: string;
+  relationPresentations?: TodoRelationPresentations;
   resourceBasePath?: string;
 }) {
   const showActions = Boolean(input.organizationId && input.resourceBasePath);
@@ -41,6 +52,25 @@ export function TodoTable(input: {
   );
 }
 
+function renderRelationAwareValue(
+  recordId: string,
+  fieldName: string,
+  value: unknown,
+  relationPresentations?: TodoRelationPresentations
+) {
+  const relation = relationPresentations?.[recordId]?.[fieldName];
+
+  if (relation?.href) {
+    return <a href={relation.href}>{relation.label}</a>;
+  }
+
+  if (relation) {
+    return relation.label;
+  }
+
+  return value?.toString() ?? "";
+}
+
 function buildResourceHref(
   input: Pick<TodoTableParameters, "organizationId" | "projectId" | "resourceBasePath">,
   id: string
@@ -75,5 +105,6 @@ interface TodoTableParameters {
   items: readonly TodoRecord[];
   organizationId?: string;
   projectId?: string;
+  relationPresentations?: TodoRelationPresentations;
   resourceBasePath?: string;
 }

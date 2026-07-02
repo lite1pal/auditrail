@@ -1,10 +1,8 @@
 import type { TaskRecord } from "@auditrail/domain/generated/task";
 import { taskTable } from "@auditrail/db/schema";
 import { and, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
-
 import type { AppDatabase } from "../../../plugins/database.js";
 import type { TaskRepo } from "./repo.js";
-
 export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
   return {
     async create(input) {
@@ -16,7 +14,6 @@ export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
         projectId: input.data.projectId,
         assigneeId: input.data.assigneeId,
       }).returning();
-
       return toTaskRecord(record);
     },
     async findById(input) {
@@ -26,7 +23,6 @@ export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
           eq(taskTable.organizationId, input.organizationId)
         )
       ).limit(1);
-
       return record ? toTaskRecord(record) : undefined;
     },
     async list(input) {
@@ -60,7 +56,6 @@ export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
             : undefined
         )
       ).orderBy(desc(taskTable.createdAt), desc(taskTable.id)).limit(limit);
-
       return records.map(toTaskRecord);
     },
     async update(input) {
@@ -77,12 +72,10 @@ export function createPostgresTaskRepo(db: AppDatabase): TaskRepo {
           eq(taskTable.organizationId, input.organizationId)
         )
       ).returning();
-
       return record ? toTaskRecord(record) : undefined;
     }
   };
 }
-
 function toTaskRecord(
   record: typeof taskTable.$inferSelect
 ): TaskRecord {

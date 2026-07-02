@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createTodoInputSchema, updateTodoInputSchema } from "@auditrail/domain/generated/todo";
 import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";
+import type { TodoRecord } from "@/src/features/todo/domain/schemas";
 import { createServerApiClient } from "@/src/lib/api/server-api-client";
 import { resolveWorkspaceContext } from "@/src/features/organizations/domain/workspace";
 import { createResourceClient } from "@/src/features/todo/api/todo-client";
@@ -28,10 +29,12 @@ export async function loadTodoWorkspacePage(
         workspace.activeOrganizationId
       )).items
     : [];
+  const relationPresentations = {};
   return {
     draftValues: readDraftValues(searchParams),
     feedback: readFeedback(searchParams),
     items,
+    relationPresentations,
     workspace
   };
 }
@@ -60,10 +63,12 @@ export async function loadTodoWorkspaceDetailPage(
         input.todoId
       )
     : null;
+  const relationPresentations = {};
   return {
     draftValues: readDraftValues(input.searchParams),
     feedback: readFeedback(input.searchParams),
     item,
+    relationPresentations,
     workspace
   };
 }
@@ -149,6 +154,41 @@ export async function deleteTodoWorkspaceAction(formData: FormData) {
       }) as never
     );
   }
+}
+type TodoRelationPresentation = {
+  href?: string;
+  label: string;
+};
+type TodoRelationPresentations = Record<
+  string,
+  Partial<Record<string, TodoRelationPresentation>>
+>;
+async function resolveTodoRelationPresentations(input: {
+  items: readonly TodoRecord[];
+  organizationId?: string;
+  projectId?: string;
+  workspace: ReturnType<typeof resolveWorkspaceContext>;
+}): Promise<TodoRelationPresentations> {
+  const presentations: TodoRelationPresentations = {};
+  if (input.items.length === 0) {
+    return presentations;
+  }
+  for (const item of input.items) {
+    presentations[item.id] = {};
+  }
+  return compactRelationPresentations(presentations);
+}
+function compactRelationPresentations(
+  presentations: TodoRelationPresentations
+): TodoRelationPresentations {
+  return Object.fromEntries(
+    Object.entries(presentations).map(([recordId, value]) => [
+      recordId,
+      Object.fromEntries(
+        Object.entries(value).filter(([, relation]) => relation !== undefined)
+      )
+    ])
+  ) as TodoRelationPresentations;
 }
 function buildWorkspaceSuffix(
   organizationId: string,

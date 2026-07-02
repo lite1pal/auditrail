@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-
 import { createTaskService } from "../service.js";
-
 describe("createTaskService", () => {
   it("validates create input before writing task records", async () => {
     const service = createTaskService({
@@ -28,7 +26,6 @@ describe("createTaskService", () => {
         return undefined;
       }
     });
-
     await expect(
       service.create({
         data: {

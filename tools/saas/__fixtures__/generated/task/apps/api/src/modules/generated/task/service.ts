@@ -1,7 +1,5 @@
 import { createTaskInputSchema, listTasksInputSchema, updateTaskInputSchema, type CreateTaskInput, type UpdateTaskInput } from "@auditrail/domain/generated/task";
-
 import type { TaskRepo } from "./repo.js";
-
 export function createTaskService(repo: TaskRepo) {
   return {
     async create(input: { data: CreateTaskInput; organizationId: string }) {

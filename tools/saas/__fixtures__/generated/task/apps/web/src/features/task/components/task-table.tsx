@@ -1,8 +1,24 @@
 import type { TaskRecord } from "../domain/schemas.js";
 
+type TaskRelationPresentation = {
+  href?: string;
+  label: string;
+};
+
+type TaskRelationPresentations = Record<
+  string,
+  Partial<Record<string, TaskRelationPresentation>>
+>;
+
 export function TaskTable(input: {
   items: readonly TaskRecord[];
+  organizationId?: string;
+  projectId?: string;
+  relationPresentations?: TaskRelationPresentations;
+  resourceBasePath?: string;
 }) {
+  const showActions = Boolean(input.organizationId && input.resourceBasePath);
+
   return (
     <table>
       <thead>
@@ -12,6 +28,7 @@ export function TaskTable(input: {
           <th>Due At</th>
           <th>Project Id</th>
           <th>Assignee Id</th>
+          {showActions ? <th>Actions</th> : null}
         </tr>
       </thead>
       <tbody>
@@ -20,11 +37,76 @@ export function TaskTable(input: {
             <td>{item.title?.toString()}</td>
             <td>{item.status?.toString()}</td>
             <td>{item.dueAt?.toString()}</td>
-            <td>{item.projectId?.toString()}</td>
-            <td>{item.assigneeId?.toString()}</td>
+            <td>{renderRelationAwareValue(item.id, "projectId", item.projectId, input.relationPresentations)}</td>
+            <td>{renderRelationAwareValue(item.id, "assigneeId", item.assigneeId, input.relationPresentations)}</td>
+            {showActions ? (
+              <td>
+                <div className="flex gap-3">
+                  <a href={buildResourceHref(input, item.id)}>View</a>
+                  <a href={buildEditHref(input, item.id)}>Edit</a>
+                </div>
+              </td>
+            ) : null}
           </tr>
         ))}
       </tbody>
     </table>
   );
+}
+
+function renderRelationAwareValue(
+  recordId: string,
+  fieldName: string,
+  value: unknown,
+  relationPresentations?: TaskRelationPresentations
+) {
+  const relation = relationPresentations?.[recordId]?.[fieldName];
+
+  if (relation?.href) {
+    return <a href={relation.href}>{relation.label}</a>;
+  }
+
+  if (relation) {
+    return relation.label;
+  }
+
+  return value?.toString() ?? "";
+}
+
+function buildResourceHref(
+  input: Pick<TaskTableParameters, "organizationId" | "projectId" | "resourceBasePath">,
+  id: string
+) {
+  const query = new URLSearchParams({
+    organizationId: input.organizationId ?? ""
+  });
+
+  if (input.projectId) {
+    query.set("projectId", input.projectId);
+  }
+
+  return `${input.resourceBasePath}/${id}?${query.toString()}`;
+}
+
+function buildEditHref(
+  input: Pick<TaskTableParameters, "organizationId" | "projectId" | "resourceBasePath">,
+  id: string
+) {
+  const query = new URLSearchParams({
+    organizationId: input.organizationId ?? ""
+  });
+
+  if (input.projectId) {
+    query.set("projectId", input.projectId);
+  }
+
+  return `${input.resourceBasePath}/${id}/edit?${query.toString()}`;
+}
+
+interface TaskTableParameters {
+  items: readonly TaskRecord[];
+  organizationId?: string;
+  projectId?: string;
+  relationPresentations?: TaskRelationPresentations;
+  resourceBasePath?: string;
 }

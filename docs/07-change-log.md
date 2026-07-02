@@ -1,5 +1,14 @@
 # Change Log
 
+## 2026-07-02
+
+- Completed T-116 by adding the first bounded relation-aware product-generation
+  seam. Generated web tables can now accept relation presentations, generated
+  product server loaders can resolve labels and links for product-local
+  generated targets plus `platform:project` targets, and the task and
+  customer generator fixtures now participate in the golden-fixture gate so
+  relation-aware output is checked alongside the existing CRUD templates.
+
 ## 2026-07-01
 
 - Completed T-115 by promoting generated delete plus user-facing validation

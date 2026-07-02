@@ -1536,10 +1536,21 @@ function renderWebScreen(context: ReturnType<typeof createTemplateContext>) {
     `import { ${context.pascalName}EmptyState } from "./${context.resourcePath}-empty-state.js";`,
     `import { ${context.pascalName}Table } from "./${context.resourcePath}-table.js";`,
     "",
+    `type ${context.pascalName}RelationPresentation = {`,
+    "  href?: string;",
+    "  label: string;",
+    "};",
+    "",
+    `type ${context.pascalName}RelationPresentations = Record<`,
+    "  string,",
+    `  Partial<Record<string, ${context.pascalName}RelationPresentation>>`,
+    ">;",
+    "",
     `export function ${context.pascalName}Screen(input: {`,
     `  items: readonly ${context.pascalName}Record[];`,
     "  organizationId?: string;",
     "  projectId?: string;",
+    `  relationPresentations?: ${context.pascalName}RelationPresentations;`,
     "  resourceBasePath?: string;",
     "}) {",
     "  if (input.items.length === 0) {",
@@ -1551,6 +1562,7 @@ function renderWebScreen(context: ReturnType<typeof createTemplateContext>) {
     "      items={input.items}",
     "      organizationId={input.organizationId}",
     "      projectId={input.projectId}",
+    "      relationPresentations={input.relationPresentations}",
     "      resourceBasePath={input.resourceBasePath}",
     "    />",
     "  );",
@@ -1669,16 +1681,31 @@ function renderWebTable(context: ReturnType<typeof createTemplateContext>) {
     .map((field) => `          <th>${field.label ?? toLabel(field.name)}</th>`)
     .join("\n");
   const cells = context.resource.fields
-    .map((field) => `            <td>{item.${field.name}?.toString()}</td>`)
+    .map((field) =>
+      context.relationByField.get(field.name)
+        ? `            <td>{renderRelationAwareValue(item.id, ${JSON.stringify(field.name)}, item.${field.name}, input.relationPresentations)}</td>`
+        : `            <td>{item.${field.name}?.toString()}</td>`
+    )
     .join("\n");
 
   return [
     `import type { ${context.pascalName}Record } from "../domain/schemas.js";`,
     "",
+    `type ${context.pascalName}RelationPresentation = {`,
+    "  href?: string;",
+    "  label: string;",
+    "};",
+    "",
+    `type ${context.pascalName}RelationPresentations = Record<`,
+    "  string,",
+    `  Partial<Record<string, ${context.pascalName}RelationPresentation>>`,
+    ">;",
+    "",
     `export function ${context.pascalName}Table(input: {`,
     `  items: readonly ${context.pascalName}Record[];`,
     "  organizationId?: string;",
     "  projectId?: string;",
+    `  relationPresentations?: ${context.pascalName}RelationPresentations;`,
     "  resourceBasePath?: string;",
     "}) {",
     "  const showActions = Boolean(input.organizationId && input.resourceBasePath);",
@@ -1708,6 +1735,25 @@ function renderWebTable(context: ReturnType<typeof createTemplateContext>) {
     "      </tbody>",
     "    </table>",
     "  );",
+    "}",
+    "",
+    "function renderRelationAwareValue(",
+    "  recordId: string,",
+    "  fieldName: string,",
+    "  value: unknown,",
+    `  relationPresentations?: ${context.pascalName}RelationPresentations`,
+    ") {",
+    "  const relation = relationPresentations?.[recordId]?.[fieldName];",
+    "",
+    "  if (relation?.href) {",
+    "    return <a href={relation.href}>{relation.label}</a>;",
+    "  }",
+    "",
+    "  if (relation) {",
+    "    return relation.label;",
+    "  }",
+    "",
+    "  return value?.toString() ?? \"\";",
     "}",
     "",
     `function buildResourceHref(`,
@@ -1744,6 +1790,7 @@ function renderWebTable(context: ReturnType<typeof createTemplateContext>) {
     `  items: readonly ${context.pascalName}Record[];`,
     "  organizationId?: string;",
     "  projectId?: string;",
+    `  relationPresentations?: ${context.pascalName}RelationPresentations;`,
     "  resourceBasePath?: string;",
     "}"
   ].join("\n");

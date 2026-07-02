@@ -65,19 +65,19 @@ export default async function ResourceDetailPage({
           <section className="grid gap-4 rounded-xl border border-[var(--border)] bg-[var(--panel)] px-4 py-4">
             <div className="grid gap-1">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Title</p>
-              <p>{data.item?.title?.toString() ?? "Not set"}</p>
+              <p>{data.item ? renderRelationAwareDetailValue(data.item.id, "title", data.item.title, data.relationPresentations) : "Not set"}</p>
             </div>
             <div className="grid gap-1">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Details</p>
-              <p>{data.item?.details?.toString() ?? "Not set"}</p>
+              <p>{data.item ? renderRelationAwareDetailValue(data.item.id, "details", data.item.details, data.relationPresentations) : "Not set"}</p>
             </div>
             <div className="grid gap-1">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Status</p>
-              <p>{data.item?.status?.toString() ?? "Not set"}</p>
+              <p>{data.item ? renderRelationAwareDetailValue(data.item.id, "status", data.item.status, data.relationPresentations) : "Not set"}</p>
             </div>
             <div className="grid gap-1">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Due At</p>
-              <p>{data.item?.dueAt?.toString() ?? "Not set"}</p>
+              <p>{data.item ? renderRelationAwareDetailValue(data.item.id, "dueAt", data.item.dueAt, data.relationPresentations) : "Not set"}</p>
             </div>
             <form action={deleteTodoWorkspaceAction} className="pt-2">
               <input name="todoId" type="hidden" value={data.item.id} />
@@ -94,6 +94,35 @@ export default async function ResourceDetailPage({
       </div>
     </AppShell>
   );
+}
+
+type TodoRelationPresentation = {
+  href?: string;
+  label: string;
+};
+
+type TodoRelationPresentations = Record<
+  string,
+  Partial<Record<string, TodoRelationPresentation>>
+>;
+
+function renderRelationAwareDetailValue(
+  recordId: string,
+  fieldName: string,
+  value: unknown,
+  relationPresentations: TodoRelationPresentations
+) {
+  const relation = relationPresentations[recordId]?.[fieldName];
+
+  if (relation?.href) {
+    return <a href={relation.href}>{relation.label}</a>;
+  }
+
+  if (relation) {
+    return relation.label;
+  }
+
+  return value?.toString() ?? "Not set";
 }
 
 function buildWorkspaceSuffix(

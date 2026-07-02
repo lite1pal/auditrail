@@ -131,7 +131,12 @@ That proof slice establishes the current supported contract:
   UUID foreign-key fields plus DB references
 - supported platform relation targets are `organization`, `project`, and `user`
 - generated relation targets must already exist in repo-owned domain and DB
-  seams before install; nested reads and join expansion are intentionally out of scope
+  seams before install
+- generated product-owned pages can resolve bounded relation presentation for
+  product-local generated targets and `platform:project` targets without
+  changing API response contracts
+- nested reads, user-directory expansion, and broader join traversal remain
+  intentionally out of scope
 
 On top of that resource seam, the CLI now supports one product-generation slice
 for simple resource-backed products:
@@ -154,7 +159,7 @@ for simple resource-backed products:
 Current product-generation limits are explicit:
 
 - no custom product API route generation yet
-- no arbitrary product-specific runtime logic or relation-aware dashboards yet
+- no arbitrary product-specific runtime logic or full relation-aware dashboards yet
 - the first supported proof is a simple workspace product with generated
   CRUD pages for organization-owned resources, but archive flows and richer
   product-specific policies remain manual

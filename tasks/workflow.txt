@@ -4,6 +4,292 @@ This file tracks task-system and agent-workflow work items.
 
 ## Queue
 
+- [ ] T-117 Add a CLI-owned CRM product template
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: `init product` currently only supports the todo template, which keeps PM or CRM generation as manual spec assembly work
+    - 2026-07-02: this task should add a first-class CRM template with coherent embedded resources and product navigation so the CLI can generate a believable second business product family
+  files:
+    - tools/saas/*
+    - specs/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - `pnpm saas init product crm --template crm` produces a deterministic multi-resource product spec
+    - The generated CRM spec includes a bounded but believable default model such as company, contact, deal, and note
+    - Planning and install tests cover the CRM template without manual runtime edits
+
+- [ ] T-118 Add archive and soft-delete generation for product-owned resources
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: generated resources now support hard delete, but production CRM and PM entities usually need archive semantics and recoverable records
+    - 2026-07-02: this task should stay generator-owned and make archive behavior configurable without forcing custom runtime code per product
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - packages/db/src/schema/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated resources can opt into archive semantics and receive generator-owned DB, API, client, and product-page support
+    - Generated lists exclude archived records by default while supporting an explicit archived view or filter
+    - The committed generated proof path covers archive and unarchive behavior through generated routes and UI
+
+- [ ] T-119 Add product-level authorization and policy hooks for generated products
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: generated products currently rely on organization-role CRUD rules, which is too weak for CRM and PM ownership or transition rules
+    - 2026-07-02: this task should create one supported seam for product-specific policy decisions instead of forcing hand-edited route logic
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/src/features/*
+    - packages/domain/src/product/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated products can declare supported policy hooks for read, write, archive, and workflow actions
+    - The default generated policy remains organization-role based, but products can opt into stricter generated ownership-aware rules
+    - Focused tests prove the policy seam without introducing product-to-platform boundary leaks
+
+- [ ] T-120 Add generated workflow and state-transition support
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: PM and CRM resources such as tasks or deals need more than free-form enum updates; they need bounded state transitions
+    - 2026-07-02: this task should keep the transition model declarative in specs and generate validation, actions, and user feedback from that source
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Resource or product specs can declare supported workflow states and transitions for the bounded generated slice
+    - Generated API and product pages enforce transitions instead of treating all status changes as arbitrary patch operations
+    - One generated proof resource exercises allowed and rejected transitions with user-facing feedback
+
+- [ ] T-121 Add generated filter, sort, and pagination primitives for product resources
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: current metadata includes searchable and sortable fields, but there is no stronger generated product UX for CRM or PM list exploration
+    - 2026-07-02: this task should turn field metadata into reusable query and UI primitives instead of per-product table plumbing
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated resources expose a supported filter, sort, and pagination contract through API and web clients
+    - Generated product pages can render and preserve query state for the supported filters without custom per-product page logic
+    - Focused tests prove the query contract for both generator fixtures and one installed proof resource
+
+- [ ] T-122 Add richer generated form widgets and field-level validation UX
+  status: ready
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: generated forms are now functional, but CRM-grade products still need better widget defaults and clearer field-level feedback
+    - 2026-07-02: this task should improve generated ergonomics without introducing hand-built product forms as the default path
+  files:
+    - tools/saas/*
+    - apps/web/src/features/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated forms render relation and enum fields with stronger widgets than plain text fallbacks
+    - Generated validation feedback can surface field-level guidance in addition to the current inline message path
+    - The committed proof product shows the improved form behavior without manual component edits
+
+- [ ] T-123 Add generated related-record sections for product detail pages
+  status: ready
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: CRM and PM detail pages need more than one record card; they need surrounding context such as notes, contacts, deals, or comments
+    - 2026-07-02: this task depends on richer relation support and should render bounded related panels through generator-owned seams
+  files:
+    - tools/saas/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - apps/api/src/modules/generated/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated detail pages can show supported related-record panels for declared relations
+    - Related panels reuse generated API and client seams instead of hand-built product fetch logic
+    - One installed proof product exercises at least one parent-child detail composition path
+
+- [ ] T-124 Add generated workflow-oriented views for multi-resource products
+  status: ready
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: list, detail, edit, and delete are not enough for a believable CRM or PM product
+    - 2026-07-02: this task should add one bounded set of workflow-oriented generated views such as a deal pipeline or task board, not a generic UI free-for-all
+  files:
+    - tools/saas/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/domain/src/product/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Product specs can opt into one bounded generated workflow view for supported resource shapes
+    - The generated workflow view reuses generated query and transition seams instead of custom product code
+    - One installed proof product demonstrates the workflow view end to end
+
+- [ ] T-125 Prove a CLI-generated CRM product end to end
+  status: ready
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: the framework needs one serious second product proof after todo so CRM claims are backed by committed runtime verification
+    - 2026-07-02: this task should use only supported CLI and generator seams, not hand-built runtime stitching
+  files:
+    - specs/*
+    - apps/api/src/modules/generated/*
+    - apps/web/app/*
+    - apps/web/src/features/*
+    - packages/db/src/schema/*
+    - packages/db/src/migrations/*
+    - packages/domain/src/*
+    - tools/saas/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - The CLI can initialize, plan, install, and backfill a bounded CRM product without manual runtime edits
+    - The committed proof covers a believable path such as create company -> create contact -> create deal -> update stage -> archive or close record
+    - Docs explicitly describe what is now generated versus what still remains manual for broader CRM reuse
+
+- [ ] T-126 Prove generator-safe reinstall and upgrade semantics for multi-resource products
+  status: ready
+  priority: medium
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed:
+  blocked_reason:
+  notes:
+    - 2026-07-02: product generation is only trustworthy for broader product families if reruns and upgrades remain safe
+    - 2026-07-02: this task should harden `install product --force` for multi-resource products and document the supported drift story
+  files:
+    - tools/saas/*
+    - README.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Reinstalling a generated multi-resource product with `--force` is deterministic and covered by focused tests
+    - The planner or installer reports supported upgrade and drift assumptions explicitly
+    - The committed proof product can be regenerated without hand-fixing shared runtime seams
+
 - [ ] T-042 Remove tracked `.github` and `.vscode` files from the repo index
   status: blocked
   priority: medium
@@ -83,6 +369,38 @@ This file tracks task-system and agent-workflow work items.
     - The first proof product can render a real workspace page for a generated todo resource instead of placeholder-only UI
 
 ## Done
+
+- [x] T-116 Add relation-aware product generation for generated resources
+  status: done
+  priority: high
+  owner: codex
+  branch:
+  pr:
+  last_updated: 2026-07-02
+  completed: 2026-07-02
+  blocked_reason:
+  notes:
+    - 2026-07-02: current relation support is bounded to belongs-to foreign keys plus scalar IDs, which is not enough for believable PM or CRM products
+    - 2026-07-02: this task should deepen the generator-owned seam so installed products can load and filter related records without hand-written join or graph code in product pages
+    - 2026-07-02: generated product server loaders now resolve bounded relation presentation for product-local generated targets plus `platform:project`, and generated tables or detail pages can render those labels or links without changing generated API record contracts
+    - 2026-07-02: the generator golden-fixture gate now includes both `customer` and `task`, and product-install coverage now proves a multi-resource CRM-style install path can emit relation-aware product pages without hand edits
+  files:
+    - tools/saas/*
+    - apps/api/src/modules/generated/*
+    - apps/web/src/features/*
+    - packages/domain/src/generated/*
+    - packages/db/src/schema/*
+    - README.md
+    - docs/02-architecture.md
+    - docs/03-api.md
+    - docs/04-quality-gates.md
+    - docs/05-next-steps.md
+    - docs/07-change-log.md
+    - tasks/workflow.txt
+  acceptance:
+    - Generated resources can declare supported relations and receive generator-owned API and web seams for loading related labels or linked records without manual per-product runtime edits
+    - Generated product pages can render relation-aware list and detail views for the supported slice instead of only scalar UUID fields
+    - Focused tests prove the relation-aware output through generator fixtures and one installed proof resource path
 
 - [x] T-115 Add generated delete flows and validation feedback for product-owned resources
   status: done

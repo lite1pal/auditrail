@@ -612,7 +612,6 @@ function renderProductHomePage(product: GeneratedProductSpec) {
     "    </AppShell>",
     "  );",
     "}",
-    "",
     "function buildWorkspaceSuffix(",
     "  organizationId?: string,",
     "  projectId?: string",
@@ -646,6 +645,15 @@ function renderProductResourceServerFile(
   const detailFunction = `${pascalResource}WorkspaceDetailPage`;
   const paramName = getProductResourceParamName(resourceEntry);
   const detailPath = resourceEntry.listPath;
+  const generatedRelationTargets = getResolvableGeneratedRelationTargets(
+    product,
+    resourceEntry
+  );
+  const hasRelationPresentations =
+    resourceEntry.resource.relations.some(
+      (relation) =>
+        relation.targetScope === "platform" && relation.target === "project"
+    ) || generatedRelationTargets.length > 0;
 
   return [
     'import "server-only";',
@@ -657,11 +665,13 @@ function renderProductResourceServerFile(
     `import { create${pascalResource}InputSchema, update${pascalResource}InputSchema } from "@auditrail/domain/generated/${toKebabCase(resourceId)}";`,
     "",
     'import type { CurrentUserResponse } from "@/src/features/auth/domain/schemas";',
+    `import type { ${pascalResource}Record } from "@/src/features/${toKebabCase(resourceId)}/domain/schemas";`,
     'import { createServerApiClient } from "@/src/lib/api/server-api-client";',
     'import { resolveWorkspaceContext } from "@/src/features/organizations/domain/workspace";',
     `import { createResourceClient } from "@/src/features/${toKebabCase(resourceId)}/api/${toKebabCase(
       resourceId
     )}-client";`,
+    ...renderProductRelationClientImports(generatedRelationTargets),
     "",
     `export async function load${workspaceFunction}(`,
     "  searchParams: Record<string, string | string[] | undefined>,",
@@ -684,11 +694,22 @@ function renderProductResourceServerFile(
     "        workspace.activeOrganizationId",
     "      )).items",
     "    : [];",
+    hasRelationPresentations
+      ? [
+          `  const relationPresentations = await resolve${pascalResource}RelationPresentations({`,
+          "    items,",
+          "    organizationId: workspace.activeOrganizationId,",
+          "    projectId: workspace.activeProjectId,",
+          "    workspace",
+          "  });"
+        ].join("\n")
+      : `  const relationPresentations = {};`,
     "",
     "  return {",
     "    draftValues: readDraftValues(searchParams),",
     "    feedback: readFeedback(searchParams),",
     "    items,",
+    "    relationPresentations,",
     "    workspace",
     "  };",
     "}",
@@ -718,11 +739,24 @@ function renderProductResourceServerFile(
     `        input.${paramName}`,
     "      )",
     "    : null;",
+    hasRelationPresentations
+      ? [
+          `  const relationPresentations = item`,
+          `    ? await resolve${pascalResource}RelationPresentations({`,
+          "        items: [item],",
+          "        organizationId: workspace.activeOrganizationId,",
+          "        projectId: workspace.activeProjectId,",
+          "        workspace",
+          "      })",
+          "    : {};"
+        ].join("\n")
+      : `  const relationPresentations = {};`,
     "",
     "  return {",
     "    draftValues: readDraftValues(input.searchParams),",
     "    feedback: readFeedback(input.searchParams),",
     "    item,",
+    "    relationPresentations,",
     "    workspace",
     "  };",
     "}",
@@ -821,6 +855,52 @@ function renderProductResourceServerFile(
           "}"
         ].join("\n")
       : "",
+    "",
+    `type ${pascalResource}RelationPresentation = {`,
+    "  href?: string;",
+    "  label: string;",
+    "};",
+    "",
+    `type ${pascalResource}RelationPresentations = Record<`,
+    "  string,",
+    `  Partial<Record<string, ${pascalResource}RelationPresentation>>`,
+    ">;",
+    "",
+    `async function resolve${pascalResource}RelationPresentations(input: {`,
+    `  items: readonly ${pascalResource}Record[];`,
+    "  organizationId?: string;",
+    "  projectId?: string;",
+    "  workspace: ReturnType<typeof resolveWorkspaceContext>;",
+    `}): Promise<${pascalResource}RelationPresentations> {`,
+    `  const presentations: ${pascalResource}RelationPresentations = {};`,
+    "",
+    "  if (input.items.length === 0) {",
+    "    return presentations;",
+    "  }",
+    "",
+    "  for (const item of input.items) {",
+    "    presentations[item.id] = {};",
+    "  }",
+    "",
+    ...renderRelationPresentationResolverLines(product, resourceEntry).map(
+      (line) => `  ${line}`
+    ),
+    "",
+    "  return compactRelationPresentations(presentations);",
+    "}",
+    "",
+    `function compactRelationPresentations(`,
+    `  presentations: ${pascalResource}RelationPresentations`,
+    `): ${pascalResource}RelationPresentations {`,
+    "  return Object.fromEntries(",
+    "    Object.entries(presentations).map(([recordId, value]) => [",
+    "      recordId,",
+    "      Object.fromEntries(",
+    "        Object.entries(value).filter(([, relation]) => relation !== undefined)",
+    "      )",
+    "    ])",
+    `  ) as ${pascalResource}RelationPresentations;`,
+    "}",
     "",
     "function buildWorkspaceSuffix(",
     "  organizationId: string,",
@@ -1005,6 +1085,7 @@ function renderProductResourceListPage(
     "          items={data.items}",
     "          organizationId={data.workspace.activeOrganizationId ?? undefined}",
     "          projectId={data.workspace.activeProjectId ?? undefined}",
+    "          relationPresentations={data.relationPresentations}",
     `          resourceBasePath=${JSON.stringify(resourceEntry.listPath)}`,
     "        />",
     "      </div>",
@@ -1115,6 +1196,35 @@ function renderProductResourceDetailPage(
     "      </div>",
     "    </AppShell>",
     "  );",
+    "}",
+    "",
+    `type ${pascalResource}RelationPresentation = {`,
+    "  href?: string;",
+    "  label: string;",
+    "};",
+    "",
+    `type ${pascalResource}RelationPresentations = Record<`,
+    "  string,",
+    `  Partial<Record<string, ${pascalResource}RelationPresentation>>`,
+    ">;",
+    "",
+    "function renderRelationAwareDetailValue(",
+    "  recordId: string,",
+    "  fieldName: string,",
+    "  value: unknown,",
+    `  relationPresentations: ${pascalResource}RelationPresentations`,
+    ") {",
+    "  const relation = relationPresentations[recordId]?.[fieldName];",
+    "",
+    "  if (relation?.href) {",
+    "    return <a href={relation.href}>{relation.label}</a>;",
+    "  }",
+    "",
+    "  if (relation) {",
+    "    return relation.label;",
+    "  }",
+    "",
+    "  return value?.toString() ?? \"Not set\";",
     "}",
     "",
     "function buildWorkspaceSuffix(",
@@ -1317,10 +1427,124 @@ function renderProductResourceDetailFields(
       return [
         '            <div className="grid gap-1">',
         `              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">${label}</p>`,
-        `              <p>{data.item?.${field.name}?.toString() ?? "Not set"}</p>`,
+        `              <p>{data.item ? renderRelationAwareDetailValue(data.item.id, ${JSON.stringify(
+          field.name
+        )}, data.item.${field.name}, data.relationPresentations) : "Not set"}</p>`,
         "            </div>"
       ].join("\n");
     });
+}
+
+function getResolvableGeneratedRelationTargets(
+  product: GeneratedProductSpec,
+  resourceEntry: GeneratedProductResource
+) {
+  return resourceEntry.resource.relations
+    .filter((relation) => relation.targetScope === "generated")
+    .map((relation) => ({
+      relation,
+      targetResource: product.resources.find(
+        (candidate) => candidate.resource.resource === relation.target
+      )
+    }))
+    .filter(
+      (
+        entry
+      ): entry is {
+        relation: GeneratedProductResource["resource"]["relations"][number];
+        targetResource: GeneratedProductResource;
+      } => entry.targetResource !== undefined
+    );
+}
+
+function renderProductRelationClientImports(
+  targets: ReturnType<typeof getResolvableGeneratedRelationTargets>
+) {
+  return targets.map(
+    ({ targetResource }) =>
+      `import { createResourceClient as create${toPascalCase(
+        targetResource.resource.resource
+      )}ResourceClient } from "@/src/features/${toKebabCase(
+        targetResource.resource.resource
+      )}/api/${toKebabCase(targetResource.resource.resource)}-client";`
+  );
+}
+
+function renderRelationPresentationResolverLines(
+  product: GeneratedProductSpec,
+  resourceEntry: GeneratedProductResource
+) {
+  const lines: string[] = [];
+  const projectRelations = resourceEntry.resource.relations.filter(
+    (relation) => relation.targetScope === "platform" && relation.target === "project"
+  );
+
+  if (projectRelations.length > 0) {
+    lines.push(
+      "const projectById = new Map(input.workspace.projects.map((project) => [project.id, project] as const));",
+      "",
+      "for (const item of input.items) {"
+    );
+
+    for (const relation of projectRelations) {
+      lines.push(
+        `  if (item.${relation.field}) {`,
+        `    presentations[item.id].${relation.field} = {`,
+        `      label: projectById.get(item.${relation.field})?.name ?? item.${relation.field}`,
+        "    };",
+        "  }"
+      );
+    }
+
+    lines.push("}", "");
+  }
+
+  for (const { relation, targetResource } of getResolvableGeneratedRelationTargets(
+    product,
+    resourceEntry
+  )) {
+    const targetPascal = toPascalCase(targetResource.resource.resource);
+    const labelField = getProductResourceDisplayField(targetResource);
+    const targetListPath = JSON.stringify(targetResource.listPath);
+
+    lines.push(
+      "if (input.organizationId) {",
+      `  const ${relation.field}Client = create${targetPascal}ResourceClient(createServerApiClient());`,
+      `  const ${relation.field}Ids = Array.from(`,
+      "    new Set(",
+      `      input.items`,
+      `        .map((item) => item.${relation.field})`,
+      `        .filter((value): value is string => typeof value === "string" && value.length > 0)`,
+      "    )",
+      "  );",
+      `  const ${relation.field}Presentations = new Map<string, { href?: string; label: string }>();`,
+      "",
+      `  await Promise.all(`,
+      `    ${relation.field}Ids.map(async (id) => {`,
+      "      try {",
+      `        const record = await ${relation.field}Client.get(input.organizationId, id);`,
+      `        ${relation.field}Presentations.set(id, {`,
+      `          href: buildResourcePath(${targetListPath}, record.id, input.organizationId, input.projectId),`,
+      `          label: record.${labelField}?.toString() ?? record.id`,
+      "        });",
+      "      } catch {",
+      `        ${relation.field}Presentations.set(id, { label: id });`,
+      "      }",
+      "    })",
+      "  );",
+      "",
+      "  for (const item of input.items) {",
+      `    if (item.${relation.field}) {`,
+      `      presentations[item.id].${relation.field} =`,
+      `        ${relation.field}Presentations.get(item.${relation.field}) ?? { label: item.${relation.field} };`,
+      "    }",
+      "  }",
+      "}",
+      ""
+    );
+  }
+
+  return lines;
 }
 
 function patchDomainPackageExports(contents: string, productId: string) {

@@ -1,14 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import pg from "pg";
 import { z } from "zod";
-
 import { API_VERSION_PREFIX } from "../../../../api-version.js";
 import { buildApp } from "../../../../app.js";
 import { loadConfig } from "../../../../config.js";
 import { loadEnvFiles } from "../../../../env-files.js";
 import { hashToken } from "../../../auth/tokens.js";
 import { seedDemoProject } from "../../../../../../../packages/db/src/seed.js";
-
 const config = loadConfig(loadEnvFiles());
 const integrationEnv = z
   .object({
@@ -17,7 +15,6 @@ const integrationEnv = z
   .parse(loadEnvFiles());
 const databaseUrl = integrationEnv.TEST_DATABASE_URL;
 const authTokenSecret = config.AUTH_TOKEN_SECRET!;
-
 describe("task generated resource integration", () => {
   const pool = new pg.Pool({
     connectionString: databaseUrl
@@ -29,7 +26,6 @@ describe("task generated resource integration", () => {
     useInfrastructure: true,
     useRateLimit: false
   });
-
   beforeEach(async () => {
     try {
       await truncateAll();
@@ -43,17 +39,14 @@ describe("task generated resource integration", () => {
           "TEST_DATABASE_URL database does not exist. Run `pnpm db:create:test && pnpm db:migrate:test` first."
         );
       }
-
       throw error;
     }
   });
-
   afterAll(async () => {
     await app.close();
     await pool.end();
   });
-
-  it("creates, lists, reads, and updates tasks through the installed API routes", async () => {
+  it("creates, lists, reads, updates, and deletes tasks through the installed API routes", async () => {
     const session = await createSessionMember();
     const createResponse = await app.inject({
       method: "POST",
@@ -69,7 +62,6 @@ describe("task generated resource integration", () => {
       },
       url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/tasks`
     });
-
     expect(createResponse.statusCode).toBe(201);
     expect(createResponse.json()).toMatchObject({
       createdAt: expect.any(String),
@@ -82,9 +74,7 @@ describe("task generated resource integration", () => {
       organizationId: session.organizationId,
       updatedAt: expect.any(String)
     });
-
     const createdId = createResponse.json().id as string;
-
     const listResponse = await app.inject({
       method: "GET",
       headers: {
@@ -92,7 +82,6 @@ describe("task generated resource integration", () => {
       },
       url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/tasks`
     });
-
     expect(listResponse.statusCode).toBe(200);
     expect(listResponse.json()).toEqual({
       items: [
@@ -109,7 +98,6 @@ describe("task generated resource integration", () => {
         }
       ]
     });
-
     const getResponse = await app.inject({
       method: "GET",
       headers: {
@@ -117,7 +105,6 @@ describe("task generated resource integration", () => {
       },
       url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/tasks/${createdId}`
     });
-
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.json()).toMatchObject({
       title: "title value",
@@ -128,7 +115,6 @@ describe("task generated resource integration", () => {
       id: createdId,
       organizationId: session.organizationId
     });
-
     const updateResponse = await app.inject({
       method: "PATCH",
       headers: {
@@ -139,7 +125,6 @@ describe("task generated resource integration", () => {
       },
       url: `${API_VERSION_PREFIX}/organizations/${session.organizationId}/tasks/${createdId}`
     });
-
     expect(updateResponse.statusCode).toBe(200);
     expect(updateResponse.json()).toMatchObject({
       title: "updated title value",
@@ -151,11 +136,9 @@ describe("task generated resource integration", () => {
       organizationId: session.organizationId
     });
   });
-
   it("does not expose tasks across organizations", async () => {
     const session = await createSessionMember();
     const otherOrganization = await createOrganization("OtherCo");
-
     const response = await app.inject({
       method: "GET",
       headers: {
@@ -163,11 +146,9 @@ describe("task generated resource integration", () => {
       },
       url: `${API_VERSION_PREFIX}/organizations/${otherOrganization.id}/tasks`
     });
-
     expect(response.statusCode).toBe(403);
     expect(response.json()).toEqual({ error: "forbidden" });
   });
-
   async function truncateAll() {
     await pool.query(`
       TRUNCATE TABLE
@@ -189,7 +170,6 @@ describe("task generated resource integration", () => {
       RESTART IDENTITY CASCADE
     `);
   }
-
   async function createSessionMember() {
     const seeded = await seedDemoProject({
       databaseUrl
@@ -201,28 +181,23 @@ describe("task generated resource integration", () => {
       ["integration-owner@example.com"]
     );
     const userId = user.rows[0]!.id;
-
     await pool.query(
       `insert into "organization_memberships" ("organization_id", "user_id", "role")
        values ($1, $2, 'owner')`,
       [seeded.organizationId, userId]
     );
-
     const sessionToken = "integration-session-token";
-
     await pool.query(
       `insert into "auth_sessions" ("user_id", "token_hash", "expires_at")
        values ($1, $2, now() + interval '30 day')`,
       [userId, hashToken(sessionToken, { secret: authTokenSecret })]
     );
-
     return {
       cookie: `${config.AUTH_SESSION_COOKIE_NAME}=${sessionToken}`,
       organizationId: seeded.organizationId,
       userId
     };
   }
-
   async function createOrganization(name: string) {
     const result = await pool.query<{ id: string }>(
       `insert into "organizations" ("name")
@@ -230,7 +205,6 @@ describe("task generated resource integration", () => {
        returning "id"`,
       [name]
     );
-
     return {
       id: result.rows[0]!.id
     };

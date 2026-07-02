@@ -50,6 +50,11 @@ export const generatorGoldenFixtures: readonly GeneratorGoldenFixture[] = [
     fixturePath: "tools/saas/__fixtures__/generated/customer",
     id: "customer",
     specPath: "tools/saas/__fixtures__/resources/customer.json"
+  },
+  {
+    fixturePath: "tools/saas/__fixtures__/generated/task",
+    id: "task",
+    specPath: "tools/saas/__fixtures__/resources/task.json"
   }
 ] as const;
 

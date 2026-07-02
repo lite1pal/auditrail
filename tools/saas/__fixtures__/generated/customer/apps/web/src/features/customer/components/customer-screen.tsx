@@ -3,10 +3,21 @@ import type { CustomerRecord } from "../domain/schemas.js";
 import { CustomerEmptyState } from "./customer-empty-state.js";
 import { CustomerTable } from "./customer-table.js";
 
+type CustomerRelationPresentation = {
+  href?: string;
+  label: string;
+};
+
+type CustomerRelationPresentations = Record<
+  string,
+  Partial<Record<string, CustomerRelationPresentation>>
+>;
+
 export function CustomerScreen(input: {
   items: readonly CustomerRecord[];
   organizationId?: string;
   projectId?: string;
+  relationPresentations?: CustomerRelationPresentations;
   resourceBasePath?: string;
 }) {
   if (input.items.length === 0) {
@@ -18,6 +29,7 @@ export function CustomerScreen(input: {
       items={input.items}
       organizationId={input.organizationId}
       projectId={input.projectId}
+      relationPresentations={input.relationPresentations}
       resourceBasePath={input.resourceBasePath}
     />
   );
